@@ -20,4 +20,4 @@ Look on my code, ye Mighty, and despair!
 1. who maintains and contributes to the project. Min-Yang
 
 # License file
-See here for the [license file] (https://github.com/minyanglee/READ-SSB-Lee-BLAST/blob/main/license.md)
+See here for the [license file](https://github.com/minyanglee/READ-SSB-Lee-BLAST/blob/main/license.md)
