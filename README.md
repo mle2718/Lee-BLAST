@@ -1,9 +1,15 @@
 # BLAST
 Bioeconomic something something something Toolbox
 
+This repository will contain the code used in support of recreational fisheries management for GARFO using the BLAST model.
+
 # Introduction
 Look on my code, ye Mighty, and despair!
 
+# Organization
+Each year is organized into it's own subfolder.  Inside each subfolder, there should be folders for source data, working data, and code. 
+
+I should also include code to extract and reprocess the MRIP data, but I haven't done that yet.
 
 
 
