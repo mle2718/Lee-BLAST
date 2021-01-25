@@ -10,7 +10,7 @@ Dependencies: codmin, codmax, haddmin, haddmax globals, rec_cal_start $rec_cal_e
 
 /* COD  Historical selectivity  */
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/source_data/$cod_historical_sizeclass", clear
+use "$cod_historical_sizeclass", clear
 rename count count
 rename lngcat lngcat
 /* ensure rec counts by waves are "full" */
@@ -44,13 +44,13 @@ foreach var of varlist count*{
 replace lngcat=$codmin if lngcat<=$codmin
 replace lngcat=$codmax if lngcat>=$codmax
 collapse (sum) count*, by(lngcat)
+save "${working_data}/cod_length_by_wave.dta", replace
 
-save "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/cod_length_by_wave.dta", replace
 
 
 
 /*get the age structure for the corresponding time period.  Convert it to an age structure.  Put it into mata. */
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/source_data/cod agepro/$cod_naa", clear
+use "$cod_naa", clear
 keep if year>=$rec_cal_start & year<=$rec_cal_end
 
 collapse (sum) age1-age9
@@ -59,7 +59,7 @@ reshape long age, i(id) j(ageclass)
 rename age stock_numbers
 rename ageclass age
 drop id
-merge 1:1 age using "cod_smooth_age_length.dta"
+merge 1:1 age using "${working_data}/cod_smooth_age_length.dta"
 drop _merge
 drop if stock_numbers==.
 foreach var of varlist length*{
@@ -86,7 +86,7 @@ sort lngcat
 tempfile mytemp
 save "`mytemp'"
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/cod_length_by_wave.dta", clear
+use "${working_data}/cod_length_by_wave.dta", clear
 sort lngcat
 
 
@@ -114,8 +114,7 @@ forvalues j=1/6 {
 
 
 keep lngcat nFc*
-
-save "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/cod_selectivity_by_wave.dta", replace
+save  "${working_data}/cod_selectivity_by_wave.dta", replace
 putmata cod_selectivity_by_wave=(lngcat nFc*), replace
 
 /* THIS IS THE END OF COD */
@@ -125,7 +124,7 @@ putmata cod_selectivity_by_wave=(lngcat nFc*), replace
 
 /* THIS IS THE BEGINNING OF HADDOCK*/
 /* Haddock Historical selectivity  */
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/source_data/$haddock_historical_sizeclass", clear
+use "$haddock_historical_sizeclass", clear
 rename count count
 rename lngcat lngcat
 /* ensure rec counts by waves are "full" */
@@ -160,10 +159,11 @@ replace lngcat=$haddmin if lngcat<=$haddmin
 replace lngcat=$haddmax if lngcat>=$haddmax
 collapse (sum) count*, by(lngcat)
 
-save "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/hadd_length_by_wave.dta", replace
+save  "${working_data}/hadd_length_by_wave.dta", replace
+
 /*get the age structure for the corresponding time period.  Convert it to an age structure.  Put it into mata. */
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/source_data/haddock agepro/$hadd_naa", clear
+use "${hadd_naa}", clear
 keep if year>=$rec_cal_start & year<=$rec_cal_end
 collapse (sum) age1-age9
 gen id=1
@@ -172,7 +172,7 @@ rename age stock_numbers
 rename ageclass age
 drop id
 
-merge 1:1 age using "haddock_smooth_age_length.dta"
+merge 1:1 age using "${working_data}/haddock_smooth_age_length.dta"
 drop _merge
 drop if stock_numbers==.
 foreach var of varlist length*{
@@ -198,8 +198,8 @@ sort lngcat
 
 tempfile mytemp
 save "`mytemp'"
+use "${working_data}/hadd_length_by_wave.dta", clear
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/hadd_length_by_wave.dta", clear
 sort lngcat
 
 
@@ -238,9 +238,9 @@ keep lngcat nFh*
 
 
 
+save  "${working_data}/hadd_selectivity_by_wave.dta", replace
 
 
-save "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2017/hadd_selectivity_by_wave.dta", replace
 putmata hadd_selectivity_by_wave=(lngcat nFh*), replace
 
 /* THIS IS THE END OF HADDOCK */

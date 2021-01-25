@@ -447,7 +447,7 @@ notes: this contains the numbers at age of haddock for the current replicate
 keep  age**/
 
 /*  OPTION 3: Use the median numbers at age from the the AGEPRO output.  This is very useful to calibrate*/
-use $hadd_naa_start, clear
+use "$hadd_naa_start", clear
 keep if inlist(year,2016, 2017, 2018)
 collapse (median) age1-age9
 scalar hreplicate=1
@@ -484,7 +484,7 @@ keep age**/
 
 /*  OPTION 3: Use the median numbers at age from the AGEPRO output*/
 
-use $cod_naa_start, clear
+use "$cod_naa_start", clear
 keep if inlist(year,2016, 2017, 2018)
 collapse (median) age1-age9
 scalar creplicate=[1]
