@@ -153,11 +153,6 @@ global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
 
-/*
-global my_wd "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_fy2019"
-
-*/
-
 cd $project_dir
 local poststub "2019_committeeB_test"
 
@@ -197,14 +192,12 @@ global cod_upper_bound 55
 global haddock_upper_bound 55
 global cmax_age 9
 global hmax_age 9
-
 /* waves=number of periods per year. These are now monthly, so they don't correspond exactly to MRIP/MRFSS */
 
 global months=12
 global periods_per_year=$months
 global total_reps=100
 global total_reps=3
-
 global total_years_sim=1
 
 local max_months=($months*$total_years_sim) + 4
@@ -340,11 +333,9 @@ Right now this distribution is hard coded -- one day it should be set up to look
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4,0.005 \ 5, 0.106 \ 6, 0.266 \ 7 ,0.254 \ 8, .259 \ 9 , .052  \10, .0 \ 11, .00 \ 12,0.00)   
-
  recreational_effort_waves = J(10,1,recreational_effort_waves)
  recreational_effort_monthly = J(10,1,recreational_effort_months) 
 end
-
 /* END of Global macros */
 /**************************************************************/
 /**************************************************************/
@@ -392,7 +383,6 @@ season March 1 to April 14), */
 
 
 global cod_naa_sort $cod_naa_sort_bad
-pause
  mata:
 haddock_min_vec=J(1,length(haddock_min_vec),16)
 haddock_min_vec[3]=99
@@ -413,7 +403,6 @@ recreational_effort_monthly = J(10,1,recreational_effort_months)
  cod_bag_back=cod_bag_vec
 
 end
-pause
 
 /*These are months, denoted in months since Jan 1 of 2019. */
 local mys `""committeeB""'
@@ -575,7 +564,7 @@ putmata cod_initial_counts=(age*), replace
 clear
 
 
-quietly forvalues this_month=1/`max_months'{
+qui forvalues this_month=1/`max_months'{
 
 /*Send/Extract the commercial fishing and recreational effort to scalars
 The mata: .... end command doesn't play nicely with a forvalues loop.
@@ -870,14 +859,14 @@ do "$code_dir/sim/new_bio_out_v4.do"
 di "checkpoint B"
 /*New bio out leaves behind datsets of length and ages for each species. It will be useful to append these together and save them. */
  preserve
-use "$working_data/haddock_length_out", clear
+use "${working_data}/haddock_length_out", clear
 gen month=`this_month'
 gen replicate=`replicate'
 gen str20 scenario="`scenario_num'"
 append using `hla'
 save `hla', replace
 
-use "$working_data/cod_length_out", clear
+use "${working_data}/cod_length_out", clear
 gen month=`this_month'
 gen replicate=`replicate'
 gen str20 scenario="`scenario_num'"

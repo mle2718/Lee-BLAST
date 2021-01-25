@@ -184,7 +184,6 @@ global cod_upper_bound 55
 global haddock_upper_bound 55
 global cmax_age 9
 global hmax_age 9
- 
 /* waves=number of periods per year. These are now monthly, so they don't correspond exactly to MRIP/MRFSS */
 
 global months=12
@@ -280,11 +279,11 @@ pause
 /* set up the name of the postfiles.  These names are use by the postfile command*/
 tempname species1 species2 species1b species2b economic rec_catch
 
-postfile `economic' str4(scenario) month total_trips WTP CV_A CV_E replicate cbag hbag cmin hmin cmax hmax codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `econ_out', replace
-postfile `rec_catch' str4(scenario)  month total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt replicate  cbag hbag cmin hmin cmax hmax crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `rec_out', replace
+postfile `economic' str20(scenario) month total_trips WTP CV_A CV_E replicate cbag hbag cmin hmin cmax hmax codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `econ_out', replace
+postfile `rec_catch' str20(scenario)  month total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt replicate  cbag hbag cmin hmin cmax hmax crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `rec_out', replace
 
-postfile `species1' str4(scenario)  month commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp1_out', replace
-postfile `species2' str4(scenario)  month commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp2_out', replace
+postfile `species1' str20(scenario)  month commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp1_out', replace
+postfile `species2' str20(scenario)  month commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp2_out', replace
 
 /*
 postfile `species1b' wave age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate cbag hbag cmin hmin cmax hmax using "cod_beginning_of_wave.dta", replace
@@ -415,7 +414,7 @@ Compute historical recreational selectivity and send to mata
 
 /*THIS IS THE ENCOUNTERS-PER-TRIP SECTION*/
 *do "setup_encounters_per_trip.do"
- do "${code_dir}/sim/setup_monthly_encounters_per_trip.do"
+do "${code_dir}/sim/setup_monthly_encounters_per_trip.do"
 
 
 
@@ -502,7 +501,7 @@ putmata cod_initial_counts=(age*), replace
 clear
 
 
-forvalues this_month=1/`max_months'{
+qui forvalues this_month=1/`max_months'{
 
 /*Send/Extract the commercial fishing and recreational effort to scalars
 The mata: .... end command doesn't play nicely with a forvalues loop.
@@ -718,7 +717,7 @@ keep prob cod_catch
 collapse (sum) prob, by(cod_catch)
 	tempfile csave
 	local csaver `"`csaver'"`csave'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
         gen month=`this_month'
 
@@ -730,7 +729,7 @@ keep prob ckeep
 collapse (sum) prob, by(ckeep)
 	tempfile cland
 	local clander `"`clander'"`cland'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
         gen month=`this_month'
 
@@ -743,7 +742,7 @@ keep prob haddock_catch
 collapse (sum) prob, by(haddock_catch)
 	tempfile hsave
 	local hsaver `"`hsaver'"`hsave'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
 	gen month=`this_month'
 
@@ -755,7 +754,7 @@ keep prob hkeep
 collapse (sum) prob, by(hkeep)
 	tempfile hland
 	local hlander `"`hlander'"`hland'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
         gen month=`this_month'
 
@@ -797,14 +796,14 @@ do "$code_dir/sim/new_bio_out_v4.do"
 use "${working_data}/haddock_length_out", clear
 gen month=`this_month'
 gen replicate=`replicate'
-gen scenario=`scenario_num'
+gen str20 scenario="`scenario_num'"
 append using `hla'
 save `hla', replace
 
 use "${working_data}/cod_length_out", clear
 gen month=`this_month'
 gen replicate=`replicate'
-gen scenario=`scenario_num'
+gen str20 scenario="`scenario_num'"
 append using `cla'
 save `cla', replace
 
@@ -954,8 +953,8 @@ putmata rec_dead_haddock=(age1-age9), replace
 
 
 /* FIX THIS LATER: What do I need to save? */
-post `economic' (`scenario_num') (`this_month') (scalar(tripcount)) (scalar(total_WTP)) (scalar(total_UA)) (scalar(total_UE))  (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
-post `rec_catch' (`scenario_num') (`this_month') (scalar(tripcount)) (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased)) (scalar(cod_kept_mt)) (scalar(cod_released_mt)) (scalar(cod_released_dead_mt)) (scalar(hadd_kept_mt)) (scalar(hadd_released_mt)) (scalar(hadd_released_dead_mt))     (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) (scalar(creplicate)) (scalar(hreplicate)) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
+post `economic' ("`scenario_num'") (`this_month') (scalar(tripcount)) (scalar(total_WTP)) (scalar(total_UA)) (scalar(total_UE))  (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
+post `rec_catch' ("`scenario_num'") (`this_month') (scalar(tripcount)) (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased))  (scalar(cod_kept_mt)) (scalar(cod_released_mt)) (scalar(cod_released_dead_mt)) (scalar(hadd_kept_mt)) (scalar(hadd_released_mt)) (scalar(hadd_released_dead_mt))     (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) (scalar(creplicate)) (scalar(hreplicate)) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
 	disp "checkpoint2"
 *  haddock_discard_dead_weight cod_discarded_dead_weight
 
@@ -968,19 +967,19 @@ cod_discard_dead_num
 /* Post the end of wave counts */
 clear
 getmata (age*)=cod_end_of_wave_counts$current_wave
-post `species1'  (`scenario_num') (`this_month') (scalar(cod_commercial_landings)) (scalar(cod_commercial_discards)) (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate')  ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
+post `species1'  ("`scenario_num'") (`this_month') (scalar(cod_commercial_landings)) (scalar(cod_commercial_discards)) (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate')  ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
 clear
 getmata (age*)=haddock_end_of_wave_counts$current_wave
 	disp "checkpoint3"
 
-post `species2'  (`scenario_num') (`this_month') (scalar(haddock_commercial_landings)) (scalar(haddock_commercial_discards))  (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
+post `species2'  ("`scenario_num'") (`this_month') (scalar(haddock_commercial_landings)) (scalar(haddock_commercial_discards))  (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
 	disp "checkpoint4. Finished loop `this_month'"  
 
 /*THIS IS the end of code checking */ 
 /* This is the end of the "wave loop*/
 		}
+	}
 
-}
 
 dsconcat `hsaver'
 rename prob trips
