@@ -381,7 +381,7 @@ end
 timer on 90
 nois _dots 0, title(Loop running) reps($total_reps)
 
-forvalues replicate=1/$total_reps{	
+quietly forvalues replicate=1/$total_reps{	
 	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
