@@ -344,7 +344,6 @@ This is useful for troubleshooting and debugging  */
 
 
 
-/* updated to here */
 
 
 
@@ -418,7 +417,6 @@ do "${code_dir}/sim/setup_monthly_encounters_per_trip.do"
 
 
 
-/* verified to here */
 
 
 /***************************** ******************************/
