@@ -4,6 +4,8 @@
 .Ruserdata
 *.dta
 *~
-*/source_data/*
 *.smcl
 */working_data/*
+*/source_data/*
+!*findme.txt
+!*placeholder.txt
