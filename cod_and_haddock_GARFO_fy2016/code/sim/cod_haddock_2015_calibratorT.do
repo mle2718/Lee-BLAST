@@ -205,15 +205,14 @@ local max_waves=($waves*$total_years_sim) + 2
 global year_junk=2011 /* don't change this.  You are using this to store the older commercial catch and rec regulations */ 
 global rec_junk=2015
 
-/* To calibrate the model to 2013 fishing i need 385000 trips  */
+/* To calibrate the model to 2015 fishing i need 188000 trips (I might need 187,000 trips). */
 
-global numtrips 187000
+global numtrips 188000
 global which_year=2015
 global comm_wave_starter=6*($which_year-$year_junk)+1
 global rec_wave_starter=6*($which_year-$rec_junk)+1
 
 
-global which_year=2015
 
 /*NOTE, I need to set the calibration year to 2015.  Before I can do that, I need to get the 2015 age structures from AGEPRO. These are actually the BSNs corresponding to the projection models.
 global calibration_start 2011*/
@@ -309,16 +308,6 @@ do "${code_dir}/sim/historical_rec_regulations.do"
 
 
 
-
-
-
-/* min and max sizes of cod and haddock in inches */
-global codmin=4
-global codmax=47
-global haddmin=4
-global haddmax=28
-
-
 /* END of Global macros */
 /**************************************************************/
 /**************************************************************/
@@ -331,51 +320,6 @@ This is useful for troubleshooting and debugging  */
 /* END:section of temporary macro adjustment */
 
 /*************************************************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*****************************Initial Conditions ******************************/
-/* This section of code ensures some replicability in the draws of intial conditions.  Every 'replicate' will have the same initial stock size. 
-THIS IS USEFUL FOR OPTION 2 in which I draw from variable starting conditions*/
-/* Set up initial conditions data  */
-
-use "${cod_naa_start}", clear
-cap drop id
-keep if year==2015
-gen u1=runiform()
-gen u2=runiform()
-sort u2 u1
-gen id=_n
-order id
-drop u1 u2
-save  "${cod_naa_start}", replace
-
-
-
-use "${hadd_naa_start}", clear
-cap drop id
-
-keep if year==2015
-gen u1=runiform()
-gen u2=runiform()
-sort u2 u1
-gen id=_n
-order id
-drop u1 u2
-save  "${hadd_naa_start}", replace
-
 
 
 
@@ -418,15 +362,11 @@ mata:  hmin_cy17[2]=99
 
 
 
-
 /*This assembles the bag and size limits*/
 mata:haddock_bag_vec=(hbag_cy15,hbag_cy16, hbag_cy17)
-
 mata:cod_bag_vec=(cbag_cy15,cbag_cy16,cbag_cy17)
 mata: haddock_min_vec=(hmin_cy15,hmin_cy16,hmin_cy17)
-
 mata: haddock_max_vec=J(1,length(haddock_min_vec),100)
-
 mata: cod_min_vec=(cmin_cy15,cmin_cy16, cmin_cy17)
 mata: cod_max_vec=J(1,length(cod_min_vec),100)
 mata: haddock_bag_vec=haddock_bag_vec[|$rec_wave_starter \.|]
@@ -440,7 +380,7 @@ mata: cod_max_vec=cod_max_vec[|$rec_wave_starter \.|]
 
 
 timer on 90
- forvalues replicate=1/$total_reps{	
+quietly forvalues replicate=1/$total_reps{	
 
 
 	nois _dots `replicate' 0     
@@ -475,7 +415,6 @@ Compute historical recreational selectivity and send to mata
 do "${code_dir}/sim/setup_encounters_per_trip.do"
 
 
-
 /***************************** ******************************/
 /***************************** ******************************/
 /* SET UP INITIAL NUMBERS AT LENGTH for each of the two stocks*/
@@ -492,7 +431,7 @@ These are used to set up the number of fish in the first year of fishing
 
 
 /* This section of code reads in an observation, performs the age--> length transformation and saves it to an auxilliary dta (haddock_length_count.dta)*/
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
+/* OPTION 2a:  Draw from the AGEPRO output, but ensure that the initial conditions are constant across replicates
 
 use "$hadd_naa_sort", clear
 keep if id==`replicate'
@@ -500,7 +439,7 @@ scalar hreplicate=replicate[1]
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*
 
-save "haddock_age_count.dta", replace
+save "${working_data}/haddock_age_count.dta", replace
 */
 
 
@@ -514,13 +453,14 @@ keep if year==$which_year
 collapse (median) age1-age9
 scalar hreplicate=1
 
+save "${working_data}/haddock_age_count.dta", replace
 */
 
 
-/*  OPTION 3A: Use the numbers at age from the the 2013 Assessment/Assessment Update This is very useful to calibrate 
+/*  OPTION 3A: Use the numbers at age from the the Assessment/Assessment Update This is very useful to calibrate 
 
 use "$hadd_naa_start", clear
-keep if year==2013
+keep if year==$which_year
 scalar hreplicate=1
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*
@@ -529,7 +469,6 @@ foreach var of varlist age*{
 }*/
 
 save "${working_data}/haddock_age_count.dta", replace
-
 
 
 
@@ -548,13 +487,14 @@ There are a few "options here"  PAY CLOSE ATTENTION.
 /* This section of code reads in an observation, "stacks" it, performs the age--> length transformation and saves it to an auxilliary dta (cod_length_count.dta)*/
 
 
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
+/* OPTION 2a:  Draw from the AGEPRO output, but ensure that the initial conditions are constant across replicates
 
 use "$cod_naa_sort", clear
 keep if year==$which_year
 keep if id==`replicate'
 scalar creplicate=replicate[1]
 notes: this contains the numbers at age of cod for the current replicate
+save "${working_data}/cod_age_count.dta", replace
 keep age*
 */
 
@@ -564,9 +504,9 @@ use "$cod_naa_start", clear
 keep if year==$which_year
 collapse (median) age1-age9
 scalar creplicate=[1]
+save "${working_data}/cod_age_count.dta", replace
 
-
-/*  OPTION 3A: Use the numbers at age from the the 2013 Assessment/Assessment Update This is very useful to calibrate 
+/*  OPTION 3A: Use the numbers at age from the the Assessment/Assessment Update This is very useful to calibrate 
 
 use "$cod_naa_start", clear
 keep if year==$which_year
@@ -585,13 +525,9 @@ save "${working_data}/cod_age_count.dta", replace
 
 putmata cod_initial_counts=(age*), replace
 clear
-
-/* what is this? */
-
 do "${code_dir}/sim/updated_recreational_effort_helper15.do"
 
 mata: recreational_effort_waves = (recreational_effort_waves \ recreational_effort_waves\ recreational_effort_waves \ recreational_effort_waves \ recreational_effort_waves\recreational_effort_waves)
-
 /* Extract the proportion of commercial fishing mortality and recreational fishing effort for the appropriate wave */
 
 
@@ -1045,7 +981,6 @@ putmata rec_dead_haddock=(age1-age9), replace
 post `economic' ("`scenario_num'") (`this_wave') (scalar(tripcount)) (scalar(total_WTP)) (scalar(total_UA)) (scalar(total_UE))  (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) ($pcbag_comply)  ($cod_sublegal_keep)   ($mortality_release) ($haddock_mortality_release)
 post `rec_catch' ("`scenario_num'") (`this_wave') (scalar(tripcount)) (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased))  (scalar(cod_kept_mt)) (scalar(cod_released_mt)) (scalar(cod_released_dead_mt)) (scalar(hadd_kept_mt)) (scalar(hadd_released_mt)) (scalar(hadd_released_dead_mt))     (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) (scalar(creplicate)) (scalar(hreplicate)) ($pcbag_comply)   ($mortality_release) ($haddock_mortality_release)
 	disp "checkpoint2"
-*  haddock_discard_dead_weight cod_discarded_dead_weight
 
 
 
