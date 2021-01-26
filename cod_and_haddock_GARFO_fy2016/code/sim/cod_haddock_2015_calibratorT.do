@@ -150,7 +150,7 @@ global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
 
 cd $project_dir
-local poststub "2015_calibratedT_test1"
+local poststub "2016_calibratorT"
 
 log using "${output_dir}/cod_and_haddock_`poststub'.smcl", replace
 
@@ -434,12 +434,13 @@ These are used to set up the number of fish in the first year of fishing
 /* OPTION 2a:  Draw from the AGEPRO output, but ensure that the initial conditions are constant across replicates
 
 use "$hadd_naa_sort", clear
+keep if year==$which_year
 keep if id==`replicate'
 scalar hreplicate=replicate[1]
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*
 
-save "${working_data}/haddock_age_count.dta", replace
+save ${working_data}/haddock_age_count.dta", replace
 */
 
 
@@ -460,7 +461,7 @@ save "${working_data}/haddock_age_count.dta", replace
 /*  OPTION 3A: Use the numbers at age from the the Assessment/Assessment Update This is very useful to calibrate 
 
 use "$hadd_naa_start", clear
-keep if year==$which_year
+keep if year==2015
 scalar hreplicate=1
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*

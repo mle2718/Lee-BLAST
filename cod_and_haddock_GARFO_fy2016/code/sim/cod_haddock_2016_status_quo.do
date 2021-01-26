@@ -4,9 +4,8 @@
 
 /*
 This .do file was written by Min-Yang.Lee@noaa.gov 
-Version 2.6
-October 8, 2015
-
+Version ?
+Jan 25, 2021
 TABLE OF CONTENTS
 0.  File description, Meta Data, changegoals, and changelog
 1.  Global, scalar, and other setup (parameterization)
@@ -15,10 +14,18 @@ TABLE OF CONTENTS
 4.  Loop?
 */
 
+
+/* changes
+A. Deal with folders a little more intelligently
+	Folders for source data
+	
+
+ */
+
 /* BEGIN Section 0: FILE DESCRIPTION */
 
 /* This is a wrapper for my simulation. 
-0.  I set up a bunch of parameters in the begining. 
+0.  I set up a bunch of parameters in the begining. These have been moved into helper files that just contain "data"
 1. Read in cod and haddock stock sizes for a particular year
 2. Perform the projection as defined by the nice people in Population Dynamics with the following modifications:
 	a.  We have Quota (not F-based) catch.  
@@ -124,14 +131,30 @@ multiply by weight-at-maturity.
 *************************************************************/
 
 /* Preamble */
-cd "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016"
-log using "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/cod_haddock_2016sq.smcl", replace
-version 12
+
 clear
 mata:mata clear
 macro drop _all
 scalar drop _all
 matrix drop _all
+pause off
+/* linux */
+/*
+global project_dir "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016"
+*/
+/*windows */
+global project_dir "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_and_haddock_GARFO_fy2016"
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+cd $project_dir
+
+log using "${output_dir}/cod_and_haddock_`poststub'.smcl", replace
+
+version 12
+
 set more off
 set seed 8675
 timer clear
@@ -139,21 +162,28 @@ timer on 99
 pause off
 
 /* specify names of save files */
-local econ_out "economic_data2016sq.dta"
-local rec_out "recreational_catches2016sq.dta"
-local sp1_out "cod_end_of_wave2016sq.dta"
-local sp2_out "haddock_end_of_wave2016sq.dta"
+local econ_out "${output_dir}/economic_data`poststub'.dta"
+local rec_out  "${output_dir}/recreational_catches`poststub'.dta"
+local sp1_out  "${output_dir}/cod_end_of_wave`poststub'.dta"
+local sp2_out  "${output_dir}/haddock_end_of_wave`poststub'.dta"
+local cod_catch_class  "${output_dir}/cod_catch_class_dist`poststub'.dta"
+local haddock_catch_class  "${output_dir}/haddock_catch_class`poststub'.dta"
+
+local cod_land_class  "${output_dir}/cod_land_class_dist`poststub'.dta"
+local haddock_land_class  "${output_dir}/haddock_land_class`poststub'.dta"
 
 
-local cod_catch_class "cod_catch_class_dist_sq.dta"
-local haddock_catch_class "haddock_catch_class_dist_sq.dta"
-/*
-shell chmod 660 `rec_out'
-shell chmod 660 `sp1_out'
-shell chmod 660 `sp2_out'
-shell chmod 660 `econ_out'
-*/
+local hla  "${output_dir}/haddock_length_class`poststub'.dta"
+local cla  "${output_dir}/cod_length_class`poststub'.dta"
 
+/* setup storage for length structures of simulated kept and released */
+preserve
+clear
+set obs 1
+gen dum=0
+save `hla', replace
+save `cla', replace
+restore
 global cod_upper_bound 40
 global haddock_upper_bound 35
 global cmax_age 9
@@ -163,6 +193,8 @@ global hmax_age 9
 
 global waves=6
 global total_reps=200
+global periods_per_year=$waves
+global total_reps=3
 global total_years_sim=1
 local max_waves=($waves*$total_years_sim) + 2
 
@@ -178,11 +210,6 @@ global which_year=2016
 global comm_wave_starter=6*($which_year-$year_junk)+1
 global rec_wave_starter=6*($which_year-$rec_junk)+1
 
-
-global FMax 25
-global maxfiter 30
-global cod_comm_discard_mortality 1
-global haddock_comm_discard_mortality 1
 
 
 /*NOTE, I need to set the calibration year to 2015.  Before I can do that, I need to get the 2015 age structures from AGEPRO. These are actually the BSNs corresponding to the projection models.
@@ -212,125 +239,40 @@ The commercial is helper is set up to extract the 2014 FISHING YEAR
  global commercial_grab_end=$this_year
 
  
- /*ALL OF THESE NEED TO BE SET 
  
- these are set to the "old" years right now and will run. You'll need to use the proper wave
- 20145-20154  (WAVE 5 of 2014 through WAVE 4 of 2015)
- */
+  
+/* Here are some parameters */
+global mt_to_kilo=1000
+global kilo_to_lbs=2.20462262
+global cm_to_inch=0.39370787
+
+/* read in biological data, economic data, and backround data on catch from the commercial fishery*/
+do "${code_dir}/presim/cod_hadd_bio_params.do"
+do "${code_dir}/presim/economic_parameters.do"
+do "${code_dir}/presim/commercial_quotas.do"
  
- /*global for the cod and haddock catch-at-length distributions 
- global cod_historical_sizeclass cod_size_class_fy$calibration_end.dta  /* this is old */
- global haddock_historical_sizeclass haddock_size_class_fy$calibration_end.dta  /* this is old */
-*/
- global cod_historical_sizeclass cod_size_class20145_20154.dta  /* this is old */
- global haddock_historical_sizeclass haddock_size_class20145_20154.dta  /* this is old */
 
 
-
- /*global for the cod and haddock age structures
-  global cod_naa cod_naa_2015updatemramp.dta 
-
- */
- global cod_naa cod_naa_2015updatem2.dta 
- global hadd_naa haddock_naa_2015update.dta
-
-
- /*global for the cod and haddock initial NAA
-
-YOU MIGHT NEED TO CHANGE THESE TO 
- global cod_naa_start 2015_COD_GM_MOD_ASAP_MRAMP_MCMC.dta
-global cod_naa_start 2015_COD_GM_MOD_ASAP_M02_MCMC.dta
-
- global hadd_naa_start 2015_HAD_GM_MOD_ASAP_CONSTRAIN_TERMINAL_R_MCMC.dta
- */
-
-global hadd_naa_start 2016_HAD_GM_NAA.dta
-  global cod_naa_start 2016_COD_BOTH_NAA.dta
-
-
-/*global for the cod and haddock catch-class distributions
-global cod_catch_class cod_catch_class_fy$calibration_end.dta /* this is old */
-global haddock_catch_class haddock_catch_class_fy$calibration_end.dta /* this is old */
-*/
-
-
-global cod_catch_class cod_catch_class20145_20154.dta /* this is new */
-global haddock_catch_class haddock_catch_class20145_20154.dta /* this is new*/
-
-/*END ALL OF THESE NEED TO BE SET */
-
+/* These globals contain the locations of the cod age-length key raw data */
+global codalkey "${source_data}/cod_al_key.dta"
+global haddalkey "${source_data}/haddock_al_key9max.dta"
  
  
 /* Mortality rate of the released fish (UNIT FREE) */
 global mortality_release=0.15
 global haddock_mortality_release=0.50
-
-/* Retention of sub-legal fish */
-/* cod_relax: window below the minimum size that anglers might retain sublegal fish */
-/* cod_sublegal_keep: probability that an angler will retain a sublegal cod in that size window*/
-
-
-/* Retention of sub-legal fish */
-/* This is coded in 2 parts -- We assume that fish that are "close" to the minimum size have a higher probability of being retained */
-/* cod_relax: This defines "small" and "tiny" (along with the minimium size) */
-/* cod_sublegal_keep: probability that an angler will retain a sublegal cod that is "small"*/
-/* cod_sublegal_keep2: probability that an angler will retain a sublegal cod that is "tiny" */
-
-/* Cod sub-legals in waves 1,2 */
-global cod_relax0=0
-/* Cod sub-legals after wave 2 */
-
-global cod_relax_main=3
-global cod_sublegal_keep=.015
-global cod_sublegal_keep2=.015
-
-
-
-/* hadd_relax: This defines "small" and "tiny" (along with the minimium size) */
-/* haddock_sublegal_keep: probability that an angler will retain a sublegal haddock that is "small"*/
-/* haddock_sublegal_keep: probability that an angler will retain a sublegal haddock that is "tiny"*/
-
-/* haddock sub-legals in waves 1,2 */
-
-global hadd_relax0=0
-/* haddock sub-legals after wave 2 */
-global hadd_relax_main=1
-
-global haddock_sublegal_keep=0.30
-global haddock_sublegal_keep2=0.01
-
-
-
-/* discard of legal sized fish */
-global dl_cod=0
-global dl_hadd=0
-
-
-/* Ignoring the Possession Limit */
-/* For GOM Cod, approximately 1.5% of trips which kept cod kept more than the 10 fish possession limit */
-/* These 11th and higher fish caught on these trips were responsible for 5.5% of all kept cod (by numbers).*/
-/* In order to address this, i'll set 2 globals which are the probability which an angler will `comply with the bag limit'  */
-
-global pcbag_comply=1
-global phbag_comply=.65
-
-
-global pcbag_non=1-$pcbag_comply
-global phbag_non=1-$phbag_comply
-
 disp "Are you calibrating or running the model?  Be sure that the Initial stock conditions are properly set at bookmarks 1 and 2."
 pause
 
 /* set up the name of the postfiles.  These names are use by the postfile command*/
 tempname species1 species2 species1b species2b economic rec_catch
 
+postfile `economic'  str20(scenario) wave total_trips WTP CV_A CV_E replicate cbag hbag cmin hmin cmax hmax codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `econ_out', replace
 
+postfile `rec_catch' str20(scenario)  wave total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt replicate  cbag hbag cmin hmin cmax hmax crep hrep codbag_comply cod_release_mort hadd_release_mort using `rec_out', replace
 
-postfile `economic'  scenario wave total_trips WTP replicate cbag hbag cmin hmin cmax hmax codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `econ_out', replace
-postfile `rec_catch' scenario wave total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_weight_kept cod_weight_discard cod_discard_dead_weight haddock_weight_kept haddock_weight_discard haddock_discard_dead_weight replicate  cbag hbag cmin hmin cmax hmax crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `rec_out', replace
-
-postfile `species1' scenario wave commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp1_out', replace
-postfile `species2' scenario wave commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp2_out', replace
+postfile `species1' str20(scenario)  wave commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp1_out', replace
+postfile `species2' str20(scenario)  wave commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp2_out', replace
 
 /*
 postfile `species1b' wave age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate cbag hbag cmin hmin cmax hmax using "cod_beginning_of_wave.dta", replace
@@ -354,86 +296,15 @@ gen cod_max=.
 gen hadd_min=.
 gen hadd_max=.
 gen fishing_year=.
-save "cod_discard_saver.dta", replace
+save "${working_data}/cod_discard_saver.dta", replace
 restore
 
+do "${code_dir}/sim/historical_rec_regulations.do"
 
 
 
 
-/* These globals contain the locations of the cod age-length key raw data */
-global codalkey cod_al_key.dta
-global haddalkey haddock_al_key9max.dta
 
-/* extract and build age-length key */
-do "extract_length_age_data.do"
-
-/* Here are some parameters */
-global mt_to_kilo=1000
-global kilo_to_lbs=2.20462262
-global cm_to_inch=0.39370787
-
-
-
-
-/* l-W is updated to be consistent with PDB 
-These are the length-weight relationships for Cod and Haddock
-GOM Cod Formula:
-Wlive (kg) = 0.000005132·L(fork cm)3.1625 (p < 0.0001, n=4890)
-
-http://www.nefsc.noaa.gov/publications/crd/crd0903/
-Haddock Weight length formula 
-Annual: Wlive (kg) = 0.000009298·L(fork cm)3.0205 (p < 0.0001, n=4890)
-GROUNDFISH ASSESSMENT UPDATES 2012 page 181
-
-Fork length and total length are equivalentfor haddock and haddock*/
-
-
-global cod_lwa 0.000005132
-global cod_lwb 3.1625
-global had_lwa 0.000009298
-global had_lwe 3.0205
-global lngcat_offset_cod 0.5
-global lngcat_offset_haddock 0.5
-
-/* min and max sizes of cod and haddock in inches */
-global codmin=4
-global codmax=47
-global haddmin=4
-global haddmax=28
-
-
-
-/* These are some Economic parameters */
-/* We need to change these based on the Holzer and McConnell parameters */
-/* This is the Probability Mass Function of shore, boat, party/head, and charter  See section WTP */
-
-scalar shore=0.20
-scalar boat=0.20
-scalar party=0.20
-scalar charter=0.40
-
-/* This is the Probability Mass Function of Trip lengthSee section WTP */
-scalar hour4=0.5
-scalar hour8= 0.4
-scalar hour12=0.1
-
-/* These are scalars for the marginal and total costs of various types trips */
-/* TC is total cost per trip, c is "pseudo-"marginal cost of trip length */
-scalar c_chart=30
-scalar c_party=11
-scalar tc_boat=165
-scalar tc_shore=105
-
-/* logit coefficients
-Model 2 from Holzer and McConnell */
-global pi_cod_keep 0.3127457 
-global pi_cod_release 0
-global pi_hadd_keep 0.3653523 
-global pi_hadd_release 0 
-global pi_cost "-0.0015785"
-global pi_trip_length 0.0911496
-global pi_trip_length2 0
 
 /* END of Global macros */
 /**************************************************************/
@@ -448,280 +319,6 @@ This is useful for troubleshooting and debugging  */
 
 /*************************************************************/
 
-
-
-/* Specify commercial quotas --
-  */
-
-/*These globals contain the commercial sub-ACLs for appropriat FISHING year*/
-/* These need to be changed */
-
-
-/* Cod  caught, acl, pct
-2010    3843 /// ...   // 84.1
-2011    4461 /// 4825 //  92.5
-2012    2211 /// 3699 //  59.8
-2013	740.8 /// 830 //  89.3 
-2014    663.2.///830 //  79.9
-2015    XXX /// 207 
-2016    XXX /// XXXX 
-
-*/
-
-/* haddock caught, acl, pct
-2010    377.7 ///      // 45.8
-2011    485.6 /// 778  // 62.4
-2012    246   /// 653  // 37.7
-2013	171.3 /// 187  // 91.6
-2014	324.7 /// 436  // 74.5
-2015	XXX   /// 958
-
-*/
-
-
-global cod2011a=4462
-global cod2012a=2211
-global cod2013a=741
-global cod2014a=663
-global cod2015a=207*.85
-global cod2016a=317*.85
-
-/*global cod2015a=279 
-agepro suggests 279 for FY2015 total removals
-*/
-
-global cod2016a=$cod2015a /*change me*/ 
-
-
-global haddock2011a=485.6
-global haddock2012a=246
-global haddock2013a=171
-global haddock2014a=324
-
-
-global haddock2015a=958*.8
-/*global haddock2015a=885 
-agepro suggests 885 for FY2015 total removals
-*/
-global haddock2016a=2504*.8
-
-
-
-global haddock_quota1=$haddock2011a*$mt_to_kilo*$kilo_to_lbs
-global haddock_quota2=$haddock2012a*$mt_to_kilo*$kilo_to_lbs
-global haddock_quota3=$haddock2013a*$mt_to_kilo*$kilo_to_lbs
-global haddock_quota4=$haddock2014a*$mt_to_kilo*$kilo_to_lbs
-global haddock_quota5=$haddock2015a*$mt_to_kilo*$kilo_to_lbs 
-global haddock_quota6=$haddock2016a*$mt_to_kilo*$kilo_to_lbs 
-
-
-global cod_quota1=$cod2011a*$mt_to_kilo*$kilo_to_lbs
-global cod_quota2=$cod2012a*$mt_to_kilo*$kilo_to_lbs
-global cod_quota3=$cod2013a*$mt_to_kilo*$kilo_to_lbs
-global cod_quota4=$cod2014a*$mt_to_kilo*$kilo_to_lbs
-global cod_quota5=$cod2015a*$mt_to_kilo*$kilo_to_lbs
-global cod_quota6=$cod2016a*$mt_to_kilo*$kilo_to_lbs
-
-
-
-
-/* Hinge value for Cod recruitment (converted to pounds)*/
-global cod_SSBHinge=6300*$mt_to_kilo*$kilo_to_lbs
-
-
-global replicate =1
-/* Maximum iterations and maximum F for the commercial fishery (UNIT FREE)*/
-global maxiterations=30
-global maxfishingmortality=25
-
-
-
-
-
-
-
-
-
-/***************************BEGIN HADDOCK SETUP ******************************/
-/*****************************************************************************************/
-/* BIOLOGICAL PARAMETERS FOR Natural Mortality, fishing mortality, SELECTIVITY, WEIGHTS (kg) */
-/* These are from the 2015 Haddock Assessment Update */
-/* Time constant and no uncertainty about them */
-/*****************************************************************************************/
-/* Pre-spawn natural and fishing mortality 
-hMp1 == haddock Mortality part 1.  This is a feature present in AgePro 4, but not in AgePro 3
-hFp1 == haddock Fishing mortality part 1.  (UNIT FREE)  */
-/* total natural mortality */
-
-
-global hMp1=0.25 
-global hFp1=0.25 
-
-/* This implies that SSB should be computed after 3 months, or the midpoint between the end of wave 1 and wave 2*/
-global hssb_floor=floor(($hMp1*12)/2)
-global hssb_ceil=ceil(($hMp1*12)/2)
-
-
-global hMyr=.2
-global hM=$hMyr/$waves
-
-
-/* selectivity  -- at least one of the columns here must be 1*/
-mata:
-haddock_maturity=(0.042, 0.31, 0.82, 0.98, 1, 1,1,1,1)  
-haddock_age_selectivity=(0.005,	0.043,0.166,0.335,0.51,0.702,0.849,1,0.816)
-haddock_jan1_weights=(0.152,0.425,0.712,0.979,1.251,1.433,1.643,1.776,2.043)
-haddock_midyear_weights= (0.317,0.573,0.858,1.119,1.388,1.528,1.748,1.875,2.043)
-haddock_catch_weights= (0.302,0.578,0.877,1.153,1.426,1.561,1.762,1.898,2.049)
-haddock_ssb_weights=haddock_jan1_weights
-haddock_discard_weights=haddock_catch_weights
-haddock_discard_fraction=(0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-
-/* fraction discarded (hfdis) and maturity hmaturity are UNIT FREE*/
-
-/* Haddock (h) January weights(hj1w) , Catch weights (hcw), midyear weights (hmyw), and spawning weights (hssbw), discard weights (hdw) all of these weights are taken from AgePro/Pop Dynamics
-and are in kilograms*/
-
-/* this step converts Haddock (h) January weights(hj1w) , Catch weights (hcw), midyear weights (hmyw), and spawning weights (hssbw), discard weights (hdw) to lbs */
-haddock_jan1_weights=$kilo_to_lbs*haddock_jan1_weights
-haddock_catch_weights=$kilo_to_lbs*haddock_catch_weights
-haddock_midyear_weights=$kilo_to_lbs*haddock_midyear_weights
-haddock_ssb_weights=$kilo_to_lbs*haddock_ssb_weights
-haddock_discard_weights=$kilo_to_lbs*haddock_discard_weights
-end
-
-use "haddock_recruits_2015base.dta", clear 
-/* or use haddock_recruits_2015constrain.dta */
-
-/********************THIS BIT READS IN THE RECRUITMENT FILE, MAKES A CDF, and sets up a local for the `irecode' function which is used in the recruitment sections******************************/
-mkmat recruit cdf, matrix(hrecruit_cdf)
-scalar z1=rowsof(hrecruit_cdf)-1
-/* The scalar must be ''offset'' by 1 unit to account for the addition of the 0 recruit with probability 0 addition to the cdf*/
-
-levelsof cdf, local(locrecruit_cdf) separate(,)
-global hglobrecruit_cdf `locrecruit_cdf'
-/***************************END Haddock SETUP ******************************/
-/***************************** ******************************/
-
-
-
-
-/* CHANGE ME */
-
-/***************************BEGIN COD SETUP ******************************/
-/*****************************************************************************************/
-/* BIOLOGICAL PARAMETERS FOR Natural Mortality, fishing mortality, SELECTIVITY, WEIGHTS (kg) */
-/* Time constant and no uncertainty about them */
-/* THERE are 2 assessment models and three Projections for GOM COD */
-/* Model 1 : M=0.2.  This model has a retrospective pattern
-   Model 2: MRamp starts the beginning of the time series with M=0.2 and ends at M=0.4  This model has no retrospective pattern
-      This model has a different selectivity vector, a different natural mortality, and a different recruitment time series
-   
-   Projection 1 uses Model 1
-   Projection 2 uses Model 2 and assumes M=0.2
-   Projection 3 uses Model 2 and assumes M=0.4
-   
-   The NEFMC's SSC picked an average of all 3 to set the OFL/ABC/ACL for the 2016 fishing year
-*/
-
-/*****************************************************************************************/
-/* Pre-spawn natural and fishing mortality 
-cMp1 == cod Mortality part 1.  This is a feature present in AgePro 4, but not in AgePro 3
-cFp1 == cod Fishing mortality part 1.  This will probably not be used.   */
-global cMp1=0.25
-global cFp1=0.25
-/* This implies that SSB should be computed after 3 months, or the midpoint between the end of wave 1 and wave 2*/
-global cssb_floor=floor(($cMp1*12)/2)
-global cssb_ceil=ceil(($cMp1*12)/2)
-
-/* total natural mortality */
-global M4=0.4
-global M2=0.2
-
-global cMyr=$M2
-global cM=$cMyr/$waves
-
-mata:
-
-/* selectivity  -- at least one of these columns must be 1*/
-cod_age_selectivity_base=(0.007 , 0.041,  0.213,  0.628 , 0.913 , 0.985,  0.998,  1.000,  1.000) /*from 2015 OP UP */
-cod_age_selectivity_mramp=(0.005 , 0.032,  0.188,  0.615 , 0.917 , 0.987 , 0.998,  1.000,  1.000) /*from 2015 OP UP */
-
-cod_age_selectivity=(cod_age_selectivity_base+cod_age_selectivity_mramp)/2  /* you've set this to the average of the two */
-
-/* cod (c) January weights(cj1w) , Catch weights (ccw), midyear weights (cmyw), and spawning weights (cssbw), discard weights (cdw), and fraction discarded (cfdis)*/
-cod_jan1_weights=(0.104 , 0.522 , 1.079,  1.854,  2.547,  3.392,  4.307,  5.702,  9.866) /*from 2015 OP UP */
-cod_midyear_weights=(0.354,  0.814,  1.555,  2.120,  2.765,  3.638,  4.640,  6.280,  9.866) /*from 2015 OP UP */
-cod_catch_weights= (0.378 , 1.094 , 1.933,  2.479,  2.993 , 3.754 , 4.742 , 6.281,  9.866) /*from 2015 OP UP */
-cod_ssb_weights=cod_jan1_weights /*from 2015 OP UP */
-cod_discard_weights=cod_catch_weights /*from 2015 OP UP */
-cod_discard_fraction=(0, 0, 0, 0, 0, 0, 0, 0, 0) /*from 2015 OP UP */
-cod_maturity=(0.084,  0.292,  0.649,  0.893 , 0.974 , 0.994 , 0.999 , 1.000 , 1.000) /*from 2015 OP UP */
-
-
-/* this step converts Cod (c) January weights(cj1w) , Catch weights (ccw), midyear weights (cmyw), and spawning weights (cssbw), discard weights (cdw) to lbs */
-cod_jan1_weights=$kilo_to_lbs*cod_jan1_weights
-cod_catch_weights=$kilo_to_lbs*cod_catch_weights
-cod_midyear_weights=$kilo_to_lbs*cod_midyear_weights
-cod_ssb_weights=$kilo_to_lbs*cod_ssb_weights
-cod_discard_weights=$kilo_to_lbs*cod_discard_weights
-end
-
-use cod_recruits_2015average.dta
-/* or
-use "cod_recruits_2015base.dta", clear 
- 
-use cod_recruits_2015mramp.dta 
-or */
-
-/********************THIS BIT READS IN THE RECRUITMENT FILE, MAKES A CDF, and sets up a local for the `irecode' function which is used in the recruitment sections******************************/
-mkmat recruit cdf, matrix(crecruit_cdf)
-scalar c1=rowsof(crecruit_cdf)-1
-/* The scalar must be ''offset'' by 1 unit to account for the addition of the 0 recruit with probability 0 addition to the cdf*/
-
-levelsof cdf, local(locrecruit_cdf) separate(,)
-global cglobrecruit_cdf `locrecruit_cdf'
-/***************************END COD SETUP ******************************/
-
-
-
-
-/*****************************Initial Conditions ******************************/
-/* This section of code ensures some replicability in the draws of intial conditions.  Every 'replicate' will have the same initial stock size. 
-THIS IS USEFUL FOR OPTION 2 in which I draw from variable starting conditions*/
-/* Set up initial conditions data  */
-
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/cod agepro/$cod_naa_start", clear
-keep if year==2016
-gen u1=runiform()
-gen u2=runiform()
-sort u2 u1
-gen id=_n
-order id
-drop u1 u2
-save"/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/cod agepro/cod_beginning_sorted.dta", replace
-
-
-
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/haddock agepro/$hadd_naa_start", clear
-keep if year==2016
-gen u1=runiform()
-gen u2=runiform()
-sort u2 u1
-gen id=_n
-order id
-drop u1 u2
-save "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/haddock agepro/haddock_beginning_sorted.dta", replace
-
-
-
-/* Break the annual fishing into a proportion by waves 
-Compute the POUNDS caught by the commercial fishery in each wave */
-clear
-do "commercial_helper.do"
-
-
 /* EVERYTHING BEFORE THIS POINT IS SETUP */
 
 /* THIS IS WHERE THE MODEL BEGINS */
@@ -729,57 +326,7 @@ do "commercial_helper.do"
 
 
 
-/* I have collected the 2012-2015 fishing regulations into three vectors. These are based on calendar years.
-
-The only thing you need to do now is to assemble them into a vector of the appropriate length */
-mata:
-hbag_cy12=J(1,6,35)
-hbag_cy13=J(1,6,35)
-hbag_cy14=(35,35,3,3,3,3)
-hbag_cy15=(3,3,3,3,3,3)
-hbag_cy16=(3,3,3,3,3,3)
-hbag_cy17=(3,3,3,3,3,3)
-
-
-cbag_cy12=(10,10,9,9,9,9)
-cbag_cy13=J(1,6,9)
-cbag_cy14=(9,9,9,9,9,9)
-cbag_cy15=(9,9,9,9,9,9)
-cbag_cy16=(9,9,9,9,9,9)
-cbag_cy17=(9,9,9,9,9,9)
-
-hmin_cy12=J(1,6,18)
-hmin_cy13=(18,18,21,21,21,21)
-hmin_cy14=(21,21,21,21,21,21)
-hmin_cy15=(21,21,21,21,21,21)
-hmin_cy16=(21,21,21,21,21,21)
-hmin_cy17=(21,21,21,21,21,21)
-
-cmin_cy12=(24,24,19,19,19,19)
-cmin_cy13=(19,19,19,19,19,19)
-cmin_cy14=(19,19,21,21,21,21)
-cmin_cy15=(21,21,21,21,21,21)
-cmin_cy16=(21,21,21,21,21,21)
-cmin_cy17=(21,21,21,21,21,21)
-
-/* here is method 2 */
-cmin_cy14[5]=99
-cmin_cy14[6]=99
-
-cmin_cy15=J(1,6,99)
-cmin_cy16=J(1,6,99)
-cmin_cy17=J(1,6,99)
-
-
-
-
-end
-
-
-
-
-local scenario_num=0
-
+local scenario_num `""0""'
 local had_bag 3
 local had_min 17
 
@@ -824,22 +371,24 @@ mata: cod_max_vec=cod_max_vec[|$rec_wave_starter \.|]
 
 
 timer on 90
-quietly forvalues replicate=1/$total_reps{	
+forvalues replicate=1/$total_reps{	
 
 
+	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
 1.  reads in the Cod age-length key and cleans the age-length key
 2.   smooths the data
 3.  Computes the age--> length probability matrix */
 
-quietly do "cod_al_lowess.do"
+ do "${code_dir}/sim/cod_al_lowess.do"
 
 /*The File hadd_al_lowess.do:
 1.  reads in the haddock age-length key and cleans the age-length key
 2.   smooths the data
 3.  Computes the age--> length probability matrix*/
-quietly do "haddock_al_lowess.do"
+ do  "${code_dir}/sim/haddock_al_lowess.do"
+
 
 /*  
 Compute historical recreational selectivity and send to mata
@@ -851,10 +400,10 @@ Compute historical recreational selectivity and send to mata
 5.  Smooth and compute F_rec and smoothed, normalized F_rec.  
  */
  
- do "historical_normalized_fishing_helper.do"
+ do "${code_dir}/sim/historical_normalized_fishing_helper.do"
 
 /*THIS IS THE ENCOUNTERS-PER-TRIP SECTION*/
-do "setup_encounters_per_trip.do"
+do "${code_dir}/sim/setup_encounters_per_trip.do"
 
 
 
@@ -874,15 +423,16 @@ These are used to set up the number of fish in the first year of fishing
 
 
 /* This section of code reads in an observation, performs the age--> length transformation and saves it to an auxilliary dta (haddock_length_count.dta)*/
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*/
+/* OPTION 2a:  Draw from the AGEPRO output, but ensure that the initial conditions are constant across replicates*/
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/haddock agepro/haddock_beginning_sorted.dta", replace
+use "$hadd_naa_sort", clear
+keep if year==$which_year
 keep if id==`replicate'
 scalar hreplicate=replicate[1]
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*
 
-save "haddock_age_count.dta", replace
+save "${working_data}/haddock_age_count.dta", replace
 
 
 
@@ -891,19 +441,19 @@ save "haddock_age_count.dta", replace
 
 
 
-use"/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/haddock agepro/$hadd_naa_start", clear
-keep if year==2016
+use "$hadd_naa_start", clear
+keep if year==$which_year
 collapse (median) age1-age9
 scalar hreplicate=1
 
-save "haddock_age_count.dta", replace
+save "${working_data}/haddock_age_count.dta", replace
 */
 
 
-/*  OPTION 3A: Use the numbers at age from the the 2013 Assessment/Assessment Update This is very useful to calibrate 
+/*  OPTION 3A: Use the numbers at age from the the Assessment/Assessment Update This is very useful to calibrate 
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/haddock agepro/$hadd_naa", replace
-keep if year==2013
+use "$hadd_naa_start", clear
+keep if year==$which_year
 scalar hreplicate=1
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*
@@ -911,7 +461,7 @@ foreach var of varlist age*{
 	replace `var'=`var'*1000
 }*/
 
-save "haddock_age_count.dta", replace
+save "${working_data}/haddock_age_count.dta", replace
 
 
 
@@ -934,79 +484,46 @@ There are a few "options here"  PAY CLOSE ATTENTION.
 
 /* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*/
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/cod agepro/cod_beginning_sorted.dta", clear
+use "$cod_naa_sort", clear
+keep if year==$which_year
 keep if id==`replicate'
 scalar creplicate=replicate[1]
 notes: this contains the numbers at age of cod for the current replicate
-save "cod_age_count.dta", replace
+save "${working_data}/cod_age_count.dta", replace
 keep age*
 
 
 /*  OPTION 3: Use the median numbers at age from the AGEPRO output
 
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO_fy2016/source_data/cod agepro/$cod_naa_start", clear
-keep if year==2015
+use "$cod_naa_start", clear
+keep if year==$which_year
 collapse (median) age1-age9
 scalar creplicate=[1]*/
+save "${working_data}/cod_age_count.dta", replace
 
+/*  OPTION 3A: Use the numbers at age from the the Assessment/Assessment Update This is very useful to calibrate 
 
-/*  OPTION 3A: Use the numbers at age from the the 2013 Assessment/Assessment Update This is very useful to calibrate 
-
-use "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_GARFO/source_data/cod agepro/$cod_naa", replace
-keep if year==2013
+use "$cod_naa_start", clear
+keep if year==$which_year
 scalar creplicate=1
 notes: this contains the numbers at age of cod for the current replicate
 foreach var of varlist age*{
 	replace `var'=`var'*1000
 }
 keep  age*
+save "${working_data}/cod_age_count.dta", replace
+
 */
 
-save "cod_age_count.dta", replace
  
 
 /* pass the age structure to mata */
 
 putmata cod_initial_counts=(age*), replace
-
-
-/* SO THIS IS WHERE THE COMMERCIAL FISHING AND NATURAL MORTALITY MUST GO */
-/*The Initial stock sizes for cod and haddock have been read into stata(Jan 1 NAA) */
-
-/* THIS IS THE POPULATION BIOLOGY SECTION 
-	a.  Compute commercial removals.
-	b.  Compute natural mortality. */
-
-
-
-/* Compute the distribution of effort by the recreational fishery in each wave 
-Right now this distribution is hard coded -- one day it should be set up to look at the data*/
-/* Allocate the commercial cod and haddock mortality to each of the 6 waves.  Allocate the recreational effort to each of the waves*/
 clear
-do "updated_recreational_effort_helper15.do"
-/* these three lines are a little sloppy because they have 5 years of time hard-coded */
-/* You'll have to go back and fix them */
-/*FIX THIS UP, it works but very inelegant */
-
-
-/* I have concatenated catch from 2011 through 2016 (quota1 to quota6) for cod and haddock.  To get things synched up, I've padded the vectors with two zeros corresponding to the first 2 waves of 2011.  
-The commercial catch vectors start on Jan 1, 2011 and end on April 30, 2017 (end of FY2016)*/
-
-
-mata: cod_commercial_catch=(0 \ 0 \ $cod_quota1*cod_commercial_waves[.,2] \ $cod_quota2*cod_commercial_waves[.,2] \ $cod_quota3*cod_commercial_waves[.,2]\ $cod_quota4*cod_commercial_waves[.,2]\ $cod_quota5*cod_commercial_waves[.,2] \ $cod_quota6*cod_commercial_waves[.,2])
-mata: haddock_commercial_catch=(0 \ 0 \  $haddock_quota1*haddock_commercial_waves[.,2] \ $haddock_quota2*haddock_commercial_waves[.,2] \ $haddock_quota3*haddock_commercial_waves[.,2]\ $haddock_quota4*haddock_commercial_waves[.,2]\ $haddock_quota5*haddock_commercial_waves[.,2] \ $haddock_quota6*haddock_commercial_waves[.,2])
-
-mata: cod_commercial_catch=cod_commercial_catch[|$comm_wave_starter \.|] 
-mata: haddock_commercial_catch=haddock_commercial_catch[|$comm_wave_starter \.|]
-
-
-
-/* You'll have to go back and fix them */
-/*FIX THIS UP, it works but very inelegant */
-
+do "${code_dir}/sim/updated_recreational_effort_helper15.do"
 
 mata: recreational_effort_waves = (recreational_effort_waves \ recreational_effort_waves\ recreational_effort_waves \ recreational_effort_waves \ recreational_effort_waves\recreational_effort_waves)
-pause
 /* Extract the proportion of commercial fishing mortality and recreational fishing effort for the appropriate wave */
 
 
@@ -1096,8 +613,8 @@ scalars from mata and then sending them to globals. */
 /* This section applies the commercial (sub)-ACL to the fishery using the ``fishing mortality method.'' */
 /* Compute mid-wave stock structure*/
 
-	do "haddock_mortality_helper.do"
-	do "cod_mortality_helper.do"
+	do "$code_dir/sim/haddock_mortality_helper.do"
+	do "$code_dir/sim/cod_mortality_helper.do"
 		
 		/* If there are no recreational trips, then skip the recreational simulation, the "new_bio_out_v4" and go directly to the end of year cleanup.  
 			rec_dead gets set to zero
@@ -1108,6 +625,8 @@ scalars from mata and then sending them to globals. */
 	
 			scalar tripcount=0
 			scalar total_WTP=0
+			scalar total_UA=0
+			scalar total_UE=0
 			scalar ckept=0
 			scalar creleased=0
 			scalar hkept=0
@@ -1116,8 +635,8 @@ scalars from mata and then sending them to globals. */
 			scalar lbs_cod_released=0
 			scalar lbs_hadd_kept=0
 			scalar lbs_hadd_released=0 
-			scalar cod_discarded_dead_weight=0 
-			scalar haddock_discard_dead_weight=0
+			scalar lbs_cod_released_dead=0 
+			scalar lbs_hadd_releas_dead=0
 
 
 			mata: rec_dead_cod=J(1, length(cod_age_selectivity),0)
@@ -1148,7 +667,7 @@ order age pre_rec_count
 sort age
 
 
-merge m:1 age using "haddock_smooth_age_length.dta"
+merge m:1 age using "${working_data}/haddock_smooth_age_length.dta"
 foreach var of varlist length*{
 	replace `var'=`var'*pre_rec_count
 }
@@ -1164,7 +683,10 @@ notes drop _all
 notes: this contains the numbers at lengths of haddock for the current replicate
 timer off 89
 
-save "haddock_length_count.dta", replace
+save "${working_data}/haddock_length_count.dta", replace
+
+
+
 /* Convert cod end-of-commercial-and-natural mortality age structure to size structure */
 clear
 getmata age*=cod_end_of_cm, replace
@@ -1177,7 +699,7 @@ drop _varname
 order age pre_rec_count
 sort age
 
-merge 1:m age using "cod_smooth_age_length.dta"
+merge 1:m age using "${working_data}/cod_smooth_age_length.dta"
 foreach var of varlist length*{
 	replace `var'=`var'*pre_rec_count
 }
@@ -1190,11 +712,11 @@ label var length "length of cod in inches"
 drop myi
 notes drop _all
 notes: this contains the numbers at lengths of cod for the current replicate
-save "cod_length_count.dta", replace
+save "${working_data}/cod_length_count.dta", replace
 
 /* Recreational Fishing occurs in Feb */
-do "simulation_v41a.do"
-quietly do "aux_wtp.do"
+do "$code_dir/sim/simulation_v41a.do"
+quietly do "$code_dir/sim/aux_wtp.do"
 
 /* post the fishing statistics for wave 1
 quietly count if trip_occur==1
@@ -1209,11 +731,23 @@ keep prob cod_catch
 collapse (sum) prob, by(cod_catch)
 	tempfile csave
 	local csaver `"`csaver'"`csave'" "'  
-	gen scenario=`scenario_num'
+	gen str4 scenario=`scenario_num'
         gen replicate=`replicate'
         gen wave=`this_wave'
 
 	quietly save `csave'
+restore
+
+preserve
+keep prob ckeep
+collapse (sum) prob, by(ckeep)
+	tempfile cland
+	local clander `"`clander'"`cland'" "'  
+	gen str4 scenario=`scenario_num'
+        gen replicate=`replicate'
+        gen wave=`this_wave'
+
+	quietly save `cland'
 restore
 
 preserve
@@ -1222,12 +756,25 @@ keep prob haddock_catch
 collapse (sum) prob, by(haddock_catch)
 	tempfile hsave
 	local hsaver `"`hsaver'"`hsave'" "'  
-	gen scenario=`scenario_num'
+	gen str4 scenario=`scenario_num'
         gen replicate=`replicate'
 	gen wave=`this_wave'
 
 	quietly save `hsave'
 restore
+
+preserve
+keep prob hkeep
+collapse (sum) prob, by(hkeep)
+	tempfile hland
+	local hlander `"`hlander'"`hland'" "'  
+	gen str4 scenario=`scenario_num'
+        gen replicate=`replicate'
+        gen wave=`this_wave'
+
+	quietly save `hland'
+restore
+
 
 /* post the fishing statistics for wave 1 -- add up "prob" and "probability weighted WTP"*/
 
@@ -1239,13 +786,41 @@ gen `wt'=prob*WTP
 egen `wtp'=total(`wt')
 scalar total_WTP=floor(`wtp'[1])
  
+tempvar UA UE
+
+egen `UA'=total(utilActual)
+
+scalar total_UA=floor(`UA'[1])
+
+egen `UE'=total(utilExpected)
+
+scalar total_UE=floor(`UE'[1])
 /* BUILD THE ROLLING LENGTH--> AGE KEYS FOR COD AND HADDOCK */
-do "rolling_age_length_key.do"
+do "$code_dir/sim/rolling_age_length_key.do"
 
 /* The Bio-out helper file constructes the age structure of Kept and released fish and saves it to the species_ages_out.dta file.*/
-do "new_bio_out_v4.do"
+do "${code_dir}/sim/new_bio_out_v4.do"
 
 
+/*New bio out leaves behind datsets of length and ages for each species. It will be useful to append these together and save them. */
+ preserve
+use "${working_data}/haddock_length_out.dta", clear
+gen month=`this_wave'
+gen replicate=`replicate'
+gen str20 scenario=`scenario_num'
+append using `hla'
+save `hla', replace
+
+use "${working_data}/cod_length_out.dta", clear
+gen month=`this_wave'
+gen replicate=`replicate'
+gen str20 scenario=`scenario_num'
+append using `cla'
+save `cla', replace
+
+restore
+disp "checkpoint14"
+di "`this_wave'"
 /* Post the kept and released fish for each (and weights) from mata
 (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased)) (scalar(lbs_cod_kept)) (scalar(lbs_cod_released)) (scalar(lbs_hadd_kept)) (scalar(lbs_hadd_released)) 
 */
@@ -1256,13 +831,15 @@ mata: st_numscalar("hreleased", ahrel)
 
 mata: st_numscalar("lbs_cod_kept", aggregate_cod_kept_pounds)
 mata: st_numscalar("lbs_cod_released", aggregate_cod_released_pounds)
+mata: st_numscalar("lbs_cod_released_dead", cod_released_dead_pounds)
 
 mata: st_numscalar("lbs_hadd_kept", aggregate_haddock_kept_pounds)
 mata: st_numscalar("lbs_hadd_released", aggregate_haddock_rel_pounds)
 
+mata: st_numscalar("lbs_hadd_releas_dead", haddock_rel_dead_pounds)
 
 /* Compute dead by multiply the discards by discard mortality and the using collapse (sum) */
-use  "cod_ages_out.dta", clear
+use  "${working_data}/cod_ages_out.dta", clear
 foreach var of varlist age*{
 	replace `var'= `var'*$mortality_release if status==0
 }
@@ -1270,7 +847,7 @@ collapse (sum) age*
 /* send off to mata */
 putmata rec_dead_cod=(age1-age9), replace
 
-use  "haddock_ages_out.dta", clear
+use  "${working_data}/haddock_ages_out.dta", clear
 foreach var of varlist age*{
 	replace `var'= `var'*$haddock_mortality_release if status==0
 }
@@ -1283,8 +860,8 @@ putmata rec_dead_haddock=(age1-age9), replace
 	
 
 /* Compute end of period counts and store them in a vector.  These are equivalent to the initial counts for the beginning of the next period (except for wave 6)*/
-	do "haddock_end_of_wave_helper.do"
-	do "cod_end_of_wave_helper.do"
+	do "$code_dir/sim/haddock_end_of_wave_helper.do"
+	do "$code_dir/sim/cod_end_of_wave_helper.do"
 
 		
 	/* check that it's the end of the year (wave 6) */
@@ -1295,13 +872,13 @@ putmata rec_dead_haddock=(age1-age9), replace
 		We also check the "Hinge" if necessary.	
 		the "end_of_wave_counts" are overwritten*/
 		
-	if $wave_of_cy==6{
+	if $wave_of_cy==$periods_per_year{
 	/* Compute cod SSB, first in individuals, then in lbs (in lbs)
 	first compute the cssb_lookup, hssb_lookup globals.  This tells my code which "end_of_wave" to examine when computing SSB.	*/
-	global cssb_lookup_floor=($cal_year-1)*6+$cssb_floor
-	global cssb_lookup_ceil=($cal_year-1)*6+$cssb_ceil
-	global hssb_lookup_floor=($cal_year-1)*6+$hssb_floor
-	global hssb_lookup_ceil=($cal_year-1)*6+$hssb_ceil
+	global cssb_lookup_floor=($cal_year-1)*$periods_per_year+$cssb_floor
+	global cssb_lookup_ceil=($cal_year-1)*$periods_per_year+$cssb_ceil
+	global hssb_lookup_floor=($cal_year-1)*$periods_per_year+$hssb_floor
+	global hssb_lookup_ceil=($cal_year-1)*$periods_per_year+$hssb_ceil
 
 
 	mata: haddock_ssb=haddock_maturity:*(haddock_end_of_wave_counts$hssb_lookup_floor + haddock_end_of_wave_counts$hssb_lookup_ceil)/2
@@ -1381,25 +958,31 @@ putmata rec_dead_haddock=(age1-age9), replace
 	mata: cod_initial_counts=cod_end_of_wave_counts$current_wave  /*TAG2*/
 	mata: haddock_initial_counts=haddock_end_of_wave_counts$current_wave
 
+
+	scalar cod_kept_mt=lbs_cod_kept/($mt_to_kilo*$kilo_to_lbs)
+	scalar cod_released_mt=lbs_cod_released/($mt_to_kilo*$kilo_to_lbs)
+	scalar cod_released_dead_mt=lbs_cod_released_dead/($mt_to_kilo*$kilo_to_lbs)
+
+	scalar hadd_kept_mt=lbs_hadd_kept/($mt_to_kilo*$kilo_to_lbs)
+	scalar hadd_released_mt=lbs_hadd_released/($mt_to_kilo*$kilo_to_lbs)
+	scalar hadd_released_dead_mt=lbs_hadd_releas_dead/($mt_to_kilo*$kilo_to_lbs)
+
 /* FIX THIS LATER: What do I need to save? */
-post `economic' (`scenario_num') (`this_wave') (scalar(tripcount)) (scalar(total_WTP)) (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) ($pcbag_comply)  ($cod_sublegal_keep)  ($mortality_release) ($haddock_mortality_release)
-post `rec_catch' (`scenario_num') (`this_wave') (scalar(tripcount)) (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased)) (scalar(lbs_cod_kept)) (scalar(lbs_cod_released)) (scalar(cod_discarded_dead_weight)) (scalar(lbs_hadd_kept)) (scalar(lbs_hadd_released)) (scalar(haddock_discard_dead_weight)) (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) (scalar(creplicate)) (scalar(hreplicate)) ($pcbag_comply)  ($cod_sublegal_keep)  ($mortality_release) ($haddock_mortality_release)
+post `economic' ("`scenario_num'") (`this_wave') (scalar(tripcount)) (scalar(total_WTP)) (scalar(total_UA)) (scalar(total_UE))  (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) ($pcbag_comply)  ($cod_sublegal_keep)   ($mortality_release) ($haddock_mortality_release)
+post `rec_catch' ("`scenario_num'") (`this_wave') (scalar(tripcount)) (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased))  (scalar(cod_kept_mt)) (scalar(cod_released_mt)) (scalar(cod_released_dead_mt)) (scalar(hadd_kept_mt)) (scalar(hadd_released_mt)) (scalar(hadd_released_dead_mt))     (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) (scalar(creplicate)) (scalar(hreplicate)) ($pcbag_comply)   ($mortality_release) ($haddock_mortality_release)
 	disp "checkpoint2"
 
-
-/* These posts are not doing exactly I want them to do yet.
-*/
 
 
 /* Post the end of wave counts */
 clear
 getmata (age*)=cod_end_of_wave_counts$current_wave
-post `species1'  (`scenario_num') (`this_wave') (scalar(cod_commercial_landings)) (scalar(cod_commercial_discards)) (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate')  ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
+post `species1'  ("`scenario_num'") (`this_wave') (scalar(cod_commercial_landings)) (scalar(cod_commercial_discards)) (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate')  ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
 clear
 getmata (age*)=haddock_end_of_wave_counts$current_wave
 	disp "checkpoint3"
 
-post `species2'  (`scenario_num') (`this_wave') (scalar(haddock_commercial_landings)) (scalar(haddock_commercial_discards))  (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
+post `species2'  ("`scenario_num'") (`this_wave') (scalar(haddock_commercial_landings)) (scalar(haddock_commercial_discards))  (age1[1]) (age2[1]) (age3[1]) (age4[1]) (age5[1]) (age6[1]) (age7[1]) (age8[1]) (age9[1]) (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep)  ($mortality_release) ($haddock_mortality_release)
 	disp "checkpoint4"
 
 /*THIS IS the end of code checking */ 
@@ -1408,9 +991,24 @@ post `species2'  (`scenario_num') (`this_wave') (scalar(haddock_commercial_landi
 
 }
 
-dsconcat `hlholder'
-save haddock_length_holder
-dsconcat `clholder'
+dsconcat `hsaver'
+rename prob trips
+save `haddock_catch_class', replace
+
+clear
+dsconcat `csaver'
+rename prob trips
+save `cod_catch_class', replace
+
+dsconcat `hlander'
+rename prob trips
+save `haddock_land_class', replace
+
+clear
+dsconcat `clander'
+rename prob trips
+save `cod_land_class', replace
+
 
 
 timer off 90
