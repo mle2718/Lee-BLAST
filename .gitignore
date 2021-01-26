@@ -4,5 +4,6 @@
 .Ruserdata
 *.dta
 *~
-*/source_data/
+*/source_data/*
 *.smcl
+*/working_data/*
