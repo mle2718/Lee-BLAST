@@ -6,6 +6,11 @@ This repository will contain the code used in support of recreational fisheries 
 # Introduction
 Look on my code, ye Mighty, and despair!
 
+
+# Quick start
+1. Clone the repository
+2. Go to the 
+
 # Organization
 Each year is organized into it's own subfolder.  Inside each subfolder, there should be folders for source data, working data, and code. 
 
@@ -15,7 +20,7 @@ I should also include code to extract and reprocess the MRIP data, but I haven't
 Supplementary data can be found in /home2/mlee/BLAST. They are in zip files.
 
 # FY 2016
-This has been uploaded and tested as functional.  Right now, I have only tested the *cod_haddock_2015_calibrator_T.do* file.  The *T* indicates I'm testing it. The purpose of this file is to find the *num_trips* so the model outcomes match to the FY 2015 outcomes. I usually calibrate on trips-per-wave.  The code runs, but we should verify that it matches my previous calibration results.
+This has been uploaded and tested as functional.  Right now, I have only tested *cod_haddock_2015_calibrator_T.do* and *cod_haddock_2016_status_quo.do* file. The purpose of the calibrator is to find the *num_trips* so the model outcomes match to the FY 2015 outcomes. I usually calibrate on trips-per-wave.  The code runs, but we should verify that it matches my previous calibration results.  The *cod_haddock_2016_status_quo.do* should simulate status quo regulations in 2016 (same regs as 2015).
 
 ## notes about FY 2016
 1.  FY 2016 runs on waves.
