@@ -50,6 +50,13 @@ global cod_relax_main=2
 global cod_sublegal_keep=.30
 global cod_sublegal_keep2=.01
 
+/* SQ sims set this to. I may have used different values for the calibration and simulation
+global cod_relax_main=3
+global cod_sublegal_keep=.015
+global cod_sublegal_keep2=.015
+*/
+
+
 
 
 /* hadd_relax: This defines "small" and "tiny" (along with the minimium size) */
@@ -80,6 +87,12 @@ global dl_hadd=0
 
 global pcbag_comply=.60
 global phbag_comply=.60
+
+/* SQ sims set this to. I may have used different values for the calibration and simulation
+global pcbag_comply=1
+global phbag_comply=.65
+*/
+
 
 
 global pcbag_non=1-$pcbag_comply
