@@ -1,2 +1,2 @@
 
-You can find the data you need at home2/mlee/BLAST/source_data.zip
+You can find the data you need at home2/mlee/BLAST/cod_haddock_fy19/source_data.zip
