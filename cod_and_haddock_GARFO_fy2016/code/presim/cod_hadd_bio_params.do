@@ -39,7 +39,7 @@ global lngcat_offset_haddock 0.5
  
  
  global cod_historical_sizeclass "${source_data}/mrip/cod_size_class20145_20154.dta"  
- global haddock_historical_sizeclass "${source_data}/mrip/haddock_size_class20145_20154.dta" 
+ global haddock_historical_sizeclass "${source_data}/mrip/haddock_size_class20145_20154.dta"
 
 
 
@@ -49,7 +49,7 @@ global lngcat_offset_haddock 0.5
 
 /*global for the cod and haddock catch-class distributions (MRIP)*/
 global cod_catch_class "${source_data}/mrip/cod_catch_class20145_20154.dta" 
-global haddock_catch_class "${source_data}/mrip/haddock_catch_class20145_20154.dta" 
+global haddock_catch_class "${source_data}/mrip/haddock_catch_class20145_20154.dta"
 
  /*global for the cod and haddock historical age structures  */
 
@@ -59,15 +59,14 @@ global haddock_catch_class "${source_data}/mrip/haddock_catch_class20145_20154.d
   
 
   
+
+/*global for the cod and haddock initial NAA - PDB/AGEPRO, possibly projected 1 year forward.*/
  global cod_naa "${source_data}/cod agepro/cod_naa_2015updatem2.dta"
  global hadd_naa "${source_data}/haddock agepro/haddock_naa_2015update.dta"
 
- /*global for the cod and haddock initial NAA - PDB/AGEPRO, possibly projected 1 year forward.
-*/
- 
-global hadd_naa_start "${source_data}/haddock agepro/2015_HAD_GM_MOD_ASAP_BASE_MCMC.dta"
-global cod_naa_start "${source_data}/cod agepro/2015_COD_BOTH.dta "
 
+global hadd_naa_start "${source_data}/haddock agepro/2016_HAD_GM_NAA.dta"
+global cod_naa_start "${source_data}/cod agepro/2016_COD_BOTH_NAA.dta"
 
 global hadd_naa_sort "${working_data}/haddock_beginning_sorted2015.dta"
 global cod_naa_sort "${working_data}/cod_beginning_sorted2015.dta"
