@@ -20,7 +20,11 @@ I should also include code to extract and reprocess the MRIP data, but I haven't
 Supplementary data can be found in /home2/mlee/BLAST. They are in zip files.
 
 # FY 2016
-This has been uploaded and tested as functional.  Right now, I have only tested *cod_haddock_2015_calibrator_T.do* and *cod_haddock_2016_status_quo.do* file. The purpose of the calibrator is to find the *num_trips* so the model outcomes match to the FY 2015 outcomes. I usually calibrate on trips-per-wave.  The code runs, but we should verify that it matches my previous calibration results.  The *cod_haddock_2016_status_quo.do* should simulate status quo regulations in 2016 (same regs as 2015).
+This has been uploaded and tested as functional.  Right now, I have only tested:
+1. cod_haddock_2015_calibrator_T.do
+1. cod_haddock_2016_status_quo.do 
+
+The purpose of the calibrator is to find the *tot_trips* so the model outcomes match to the FY 2015 outcomes. I usually calibrate on trips-per-wave.  The code runs, but we should verify that it matches my previous calibration results.  The *cod_haddock_2016_status_quo.do* should simulate status quo regulations in 2016 (same regs as 2015).
 
 ## notes about FY 2016
 1.  FY 2016 runs on waves.
@@ -42,16 +46,33 @@ Not there yet.
 
 
 # FY 2018
-Not there yet.  
+This has been uploaded and tested as functional.  Right now, I have only tested:
+1. cod_haddock_2017_calibrator.do
+
 
 ## notes about FY 2018
+
+Looks like there are a few different versions of some files
+1. simulation_v41a
+1. simulation_v41_stop_fishing.do
+1. simulation_v41_stop_haddock.do
+1. simulation_v41a_always_on
+
+And different recreational effort helpers -- these correspond to FYs or perhaps adjusting waves
+
 
 
 ## Not tested
 post-sim files.
 
 # FY 2019
-This has been uploaded and tested as functional.  Right now, I have only tested the *cod_haddock_2018_calibrator_T.do* file.  The *T* indicates I'm testing it. The purpose of this file is to find the *num_trips* so the model outcomes match to the FY 2015 outcomes. I usually calibrate on trips-per-wave.  The code runs, but we should verify that it matches my previous calibration results.
+This has been uploaded and tested as functional.  Right now, I have only tested:
+1. cod_haddock_2018_calibrator_T.do
+1. cod_haddock_2019_alt_cmte.do
+1. cod_haddock_2018_recalibrate.do
+1. cod_haddock_2019_option1.do
+
+The code runs, but we should verify that it matches my previous calibration results.
 
 
 
