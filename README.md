@@ -11,6 +11,43 @@ Each year is organized into it's own subfolder.  Inside each subfolder, there sh
 
 I should also include code to extract and reprocess the MRIP data, but I haven't done that yet.
 
+# Supplementary data
+Supplementary data can be found in /home2/mlee/BLAST. They are in zip files.
+
+# FY 2016
+This has been uploaded and tested as functional.  Right now, I have only tested the *cod_haddock_2015_calibrator_T.do* file.  The *T* indicates I'm testing it. The purpose of this file is to find the *num_trips* so the model outcomes match to the FY 2015 outcomes. I usually calibrate on trips-per-wave.  The code runs, but we should verify that it matches my previous calibration results.
+
+## notes about FY 2016
+1.  FY 2016 runs on waves.
+1.  Not sure about haddock discard mortality.
+1.  Not sure of the final "sublegal" parameters.
+1.  There isn't a 'scale factor' here. So this will run slower than other models.
+
+## Not tested
+post-sim files.
+
+# FY 2017
+Not there yet.  
+
+
+## notes about FY 2017
+
+
+## Not tested
+
+
+# FY 2018
+Not there yet.  
+
+## notes about FY 2018
+
+
+## Not tested
+post-sim files.
+
+# FY 2019
+This has been uploaded and tested as functional.  Right now, I have only tested the *cod_haddock_2018_calibrator_T.do* file.  The *T* indicates I'm testing it. The purpose of this file is to find the *num_trips* so the model outcomes match to the FY 2015 outcomes. I usually calibrate on trips-per-wave.  The code runs, but we should verify that it matches my previous calibration results.
+
 
 
 # NOAA Requirements
