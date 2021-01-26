@@ -371,7 +371,7 @@ mata: cod_max_vec=cod_max_vec[|$rec_wave_starter \.|]
 
 
 timer on 90
-forvalues replicate=1/$total_reps{	
+quietly forvalues replicate=1/$total_reps{	
 
 
 	nois _dots `replicate' 0     
