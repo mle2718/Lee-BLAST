@@ -28,12 +28,12 @@ do "${code_dir}/sim/historical_rec_regulations.do"
 ```
 that reads in the recreational regulations. Right after that, you'll want to overwrite or replace some of those.  The simulation model starts on a calendar years (Jan 1).  
 
-So, if you want to change the haddock bag limit to 3 fish in  May and June , you will want to modify the simulation code to read:
+So, if you want to change the haddock bag limit to 3 fish in  May and June and your simulation is running on a monthly time step, you will want to modify the simulation code to read:
 ```
 do "${code_dir}/sim/historical_rec_regulations.do"
 
 mata: haddock_bag_vec[5]=3
-
+mata: haddock_bag_vec[6]=3
 
 ```
 
