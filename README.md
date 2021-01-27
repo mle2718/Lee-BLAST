@@ -1,10 +1,15 @@
 # BLAST
 Bioeconomic something something something Toolbox
 
-This repository will contain the code used in support of recreational fisheries management for GARFO using the BLAST model.
+This repository will contain the code used in support of recreational fisheries management for GARFO using the BLAST model. This repository will eventually store all the BLAST model code from 2016 to present.
+
+# Prelude
+Look on my code, ye Mighty, and despair!
 
 # Introduction
-Look on my code, ye Mighty, and despair!
+Every year, I archive the full set of code and data that was used to inform recreational fishing regulations.  Then I work on the next year's model. In addition to simple data updates, there are always small to medium changes that are made along the way to accomodate changes in circumstances. For example, the model initally simulated an entire year at a time. However, managers were interested in regulations that varied within the fishing year, so the model was adapted to run at wave- and then monthly- time steps. 
+
+
 
 
 # Quick start
@@ -16,8 +21,31 @@ Each year is organized into it's own subfolder.  Inside each subfolder, there sh
 
 I should also include code to extract and reprocess the MRIP data, but I haven't done that yet.
 
+# How to simulate different regulations
+The size and bag limits are stored in vectors.  There is always this line of code:
+```
+do "${code_dir}/sim/historical_rec_regulations.do"
+```
+that reads in the recreational regulations. Right after that, you'll want to overwrite or replace some of those.  The simulation model starts on a calendar years (Jan 1).  
+
+So, if you want to change the haddock bag limit to 3 fish in  May and June , you will want to modify the simulation code to read:
+```
+do "${code_dir}/sim/historical_rec_regulations.do"
+
+mata: haddock_bag_vec[5]=3
+
+
+```
+
+
+
 # Supplementary data
 Supplementary data can be found in /home2/mlee/BLAST. They are in zip files.
+
+
+# making changes
+The simulation files are always called cod_haddock_ZZZZ.  Most likely, you will want to 
+
 
 # FY 2016
 This has been uploaded and tested as functional.  Right now, I have only tested:
@@ -48,7 +76,10 @@ Not there yet.
 # FY 2018
 This has been uploaded and tested as functional.  Right now, I have only tested:
 1. cod_haddock_2017_calibrator.do
-
+1. cod_haddock_2018_status_quo.do
+1. cod_haddock_2018_status_quo_mod.do
+1. cod_haddock_2018_status_quoB.do
+1. cod_haddock_2018_status_quoB_mod.do
 
 ## notes about FY 2018
 
@@ -59,7 +90,7 @@ Looks like there are a few different versions of some files
 1. simulation_v41a_always_on
 
 And different recreational effort helpers -- these correspond to FYs or perhaps adjusting waves
-
+new_bio_out_v4.do is a bit different than previous versions.
 
 
 ## Not tested
@@ -73,7 +104,11 @@ This has been uploaded and tested as functional.  Right now, I have only tested:
 1. cod_haddock_2019_option1.do
 
 The code runs, but we should verify that it matches my previous calibration results.
+THe big change in 2019 was that I started sorting things into directories; this change has been rolled back to previous years.
 
+
+# FY 2020
+This has not been uploaded. There was a big change here is that instead of writing lots of different simulation files with few changes, I wrote the ability to pass in regulatory parameters that are stored in a csv or dta. I also wrote a little code to build those, since it's quite repetitive (one row per month).  Then you just pass in the location of those regulations.  
 
 
 # NOAA Requirements
