@@ -128,12 +128,25 @@ multiply by weight-at-maturity.
 
 clear
 mata:mata clear
-macro drop _all
+/* clean up macros we want to drop all locals and all globals except BLAST_root*/
+/* drop all locals, drop all globals EXCEPT the BLAST_root global and S_* system globals. */
+
+local globaldrop: all globals
+local keeper "BLAST_root"
+local S: all globals "S*"
+local F: all globals "F*"
+
+local globaldrop: list globaldrop - keeper
+local globaldrop: list globaldrop - S
+local globaldrop: list globaldrop - F
+
+mac drop `globaldrop' 
+macro drop _*
+
 scalar drop _all
 matrix drop _all
 pause off
-global project_dir "/home/mlee/Documents/Workspace/recreational_simulations/cod_haddock_fy2019"
-global project_dir "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2019"
+global project_dir "$BLAST_root/cod_haddock_fy2019"
 
 global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
