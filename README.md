@@ -14,7 +14,8 @@ Every year, I archive the full set of code and data that was used to inform recr
 
 # Quick start
 1. Clone the repository
-2. Go to the 
+2. Edit your profile.do so that stata always knows where the root BLAST folder is.  See [here](placeholder) for a sample profile.do.  
+3. Run a "cod_and_haddock_YYYY*.do file."
 
 # Organization
 Each year is organized into it's own subfolder.  Inside each subfolder, there should be folders for source data, working data, and code. 
