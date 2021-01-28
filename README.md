@@ -14,7 +14,8 @@ Every year, I archive the full set of code and data that was used to inform recr
 
 # Quick start
 1. Clone the repository
-2. Edit your profile.do so that stata always knows where the root BLAST folder is.  See [here](placeholder) for a sample profile.do.  
+2. Modify or create your profile.do file that stata automatically runs on startup so that stata always knows where the root BLAST folder is.   See [here](https://github.com/NEFSC/READ-SSB-Lee-BLAST/blob/main/project_logistics/sample_profile.do) for a sample profile.do.  
+
 3. Run a "cod_and_haddock_YYYY*.do file."
 
 # Organization
