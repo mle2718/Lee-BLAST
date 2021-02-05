@@ -230,6 +230,7 @@ global calibration_start 2011*/
 global calibration_end 2013
 
 global this_year=year(date("$S_DATE","DMY"))
+global this_year=2015
 
  
 /* Age-length key years*/
@@ -282,9 +283,7 @@ pause
 tempname species1 species2 species1b species2b economic rec_catch
 
 postfile `economic'  str20(scenario) wave total_trips WTP CV_A CV_E replicate cbag hbag cmin hmin cmax hmax codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `econ_out', replace
-
 postfile `rec_catch' str20(scenario)  wave total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt replicate  cbag hbag cmin hmin cmax hmax crep hrep codbag_comply cod_release_mort hadd_release_mort using `rec_out', replace
-
 postfile `species1' str20(scenario)  wave commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp1_out', replace
 postfile `species2' str20(scenario)  wave commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp2_out', replace
 
@@ -751,7 +750,7 @@ keep prob cod_catch
 collapse (sum) prob, by(cod_catch)
 	tempfile csave
 	local csaver `"`csaver'"`csave'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
         gen wave=`this_wave'
 
@@ -763,7 +762,7 @@ keep prob ckeep
 collapse (sum) prob, by(ckeep)
 	tempfile cland
 	local clander `"`clander'"`cland'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
         gen wave=`this_wave'
 
@@ -776,7 +775,7 @@ keep prob haddock_catch
 collapse (sum) prob, by(haddock_catch)
 	tempfile hsave
 	local hsaver `"`hsaver'"`hsave'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
 	gen wave=`this_wave'
 
@@ -788,7 +787,7 @@ keep prob hkeep
 collapse (sum) prob, by(hkeep)
 	tempfile hland
 	local hlander `"`hlander'"`hland'" "'  
-	gen str4 scenario=`scenario_num'
+	gen str20 scenario="`scenario_num'"
         gen replicate=`replicate'
         gen wave=`this_wave'
 
@@ -829,14 +828,14 @@ disp "checkpoint13"
 use "${working_data}/haddock_length_out.dta", clear
 gen month=`this_wave'
 gen replicate=`replicate'
-gen str20 scenario=`scenario_num'
+gen str20 scenario="`scenario_num'"
 append using `hla'
 save `hla', replace
 
 use "${working_data}/cod_length_out.dta", clear
 gen month=`this_wave'
 gen replicate=`replicate'
-gen str20 scenario=`scenario_num'
+gen str20 scenario="`scenario_num'"
 append using `cla'
 save `cla', replace
 

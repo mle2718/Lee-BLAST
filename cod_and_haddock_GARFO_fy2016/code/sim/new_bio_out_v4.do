@@ -96,17 +96,6 @@ getmata (length kept weight)=hkept_matrix
 merge 1:1 length using  "`mhtemp1'"
 drop _merge
 drop weight
-save "${working_data}\haddock_length_out.dta", replace
-
-note: this contains the catch and release of cod, by length in inces
-sort length
-count
-count if length==.
-summ length
-compress
-save "${working_data}\haddock_length_out.dta", replace
-
-
 note: this contains the catch and release of haddock , by length in inces
 sort length
 count
