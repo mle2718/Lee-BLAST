@@ -10,3 +10,10 @@
 !*findme.txt
 !*placeholder.txt
 *.zip
+BLAST.Rproj
+cod_and_haddock_GARFO_fy2017/code/postsim/scenario key.xlsx
+*/output/*
+/cod_haddock_fy2020/*
+*.xlsx
+*.odt
+*.stpr
