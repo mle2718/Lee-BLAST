@@ -11,11 +11,17 @@ global scenario_list=r(levels)
 
 
 save "${code_dir}/sim/regulations/$rec_management.dta", replace
+/**************** error checking *****************/
+tsset scenario simmonth
 
-/* error checking */
-collapse (min) mins=simmonth (max) maxs=simmonth, by(scenario)
+/*all scenarios have the same simmonths */
+assert "`r(balanced)'"=="strongly balanced"
+
+/*There are no gaps*/
+assert `r(gaps)'==0
+
 /* min(month) by scenario should be 1 */
-assert mins==1
+assert r(tmin)==1
 /* max(month)-4 should be divisible by 12 */
-replace maxs=maxs-4
-assert mod(maxs,12)==0
+assert mod((r(tmax)-4),12)==0
+

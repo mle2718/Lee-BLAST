@@ -1,0 +1,759 @@
+<!---I accidentally ran a set of models where the September regs held over from 2021 and the April regs changed. I didn't intend to do this, so I've deleted them and re-running the correct regs ---> 
+<!---A small document to read in and display some model results ---> 
+<!---Execute this with:
+
+
+/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  DONE   */
+/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
+	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
+	could be the fact that we're using annual data. 
+		Added in the graphs about the NAA and length structures
+
+	Slot limit of 23 to 28" for GB cod --
+		With open seasons that are the same for private and for-hire.
+	
+		How to test this out
+			Run the model with a 21 to 22" slot limit. Very few fish should be kept.
+			The model is coded for \geq the minimum and leq the maximum. So if I want a 23-28" slot, I need to enter the max as 27.9 
+
+
+ageclass lines for 2020 to 2022.  Take out the age 1's.
+				
+	*/
+
+
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+}
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+dyndoc "${code_dir}/postsim/main_summaries.txt", saving(${project_dir}/main_summaries.html) replace
+---> 
+<pre><code></code></pre>
+<h1><a href="#inputs-and-background" id="inputs-and-background">Inputs and Background</a></h1>
+<h2><a href="#fishing-year-2020-and-2021-regulations" id="fishing-year-2020-and-2021-regulations">Fishing Year 2020 and 2021 Regulations</a></h2>
+<p>The same regulations were in place for FY2020 and FY2021.</p>
+<p>Haddock:</p>
+<ul>
+<li>15 fish, 17&quot;</li>
+<li>Open May1-Feb 28 and April 1- April 30</li>
+<li>No Changes from 2019</li>
+</ul>
+<p>Cod:</p>
+<ul>
+<li>1 fish, 21&quot;</li>
+<li>Open Sept 15-Sept 30 and April 1-April 14 for private anglers</li>
+<li>Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers</li>
+</ul>
+<p>FY 2020 Regulations can be found <a href="https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020">here</a>.  Since there were no changes in FY2021, there is no federal register notice.</p>
+<p>The rec sub-ACL for cod was 193mt in 2020.</p>
+<h2><a href="#fishing-year-2022-regulations" id="fishing-year-2022-regulations">Fishing Year 2022 Regulations</a></h2>
+<p>The recreational sub-ACL for GoM cod is      192 mt for FY 2022. The recreational sub-ACL for GOM haddock is    3,634 mt.</p>
+<h2><a href="#data" id="data">Data</a></h2>
+<ol>
+<li><strong>Annual</strong> length-frequencies for cod and haddock</li>
+<li><strong>Monthly</strong> catch-per-trip for cod and haddock
+<ol>
+<li>The April 2021 catch-per-trip distribution for cod has 33.5% trips with 0 cod, 64.9% of trips with 1 cod, and <strong>1.5% of trips catching 2 or more cod</strong>.  This is really similar to March, 2021 and VERY different from May, 2021 .</li>
+<li>May 2021: 39% of trips with 0 cod, 23% with 1 cod, 10.7% with 2, 7% with 3 cod, 3% with 4 cod, and there&rsquo;s a smooth decline typical of a reasonably sampled dataset.</li>
+<li>March 2021: 40% of trips with 0 cod, 52.4% with 1 cod, 1.3% with 2, 2.7% with 3 cod, 3% with 10 cod.</li>
+</ol>
+</li>
+<li>2022 numbers at age for cod and haddock from the AGEPRO projections.</li>
+<li>Bottomtrawl survey data from 2017-2019 to form the age-length keys.</li>
+<li>Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)</li>
+</ol>
+<p>MRIP data uses &ldquo;trimmed landings&rdquo; estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions.</p>
+<h1><a href="#simulations" id="simulations">Simulations</a></h1>
+<!---
+1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100". This does the same thing. 
+1.  I'm ignoring the Oct1 to Oct 7 cod opening for the for-hire fleet. But I'm also ignoring the Sept 1 to Sept 7 cod closure for the for hire fleet. So, we should look at Sept and October together.
+SQ averages scenario numbers 1 and 3.   Scenario 1 is "April open for haddock, open for cod" and Scenario 3 is "April open for haddock, closed for cod."
+Whole month of April for Cod and closed for haddock (scenario 4).
+Whole month of April for both Cod and Haddock scenario 1.
+--->
+<h2><a href="#scenario-key-and-notes" id="scenario-key-and-notes">Scenario Key and Notes</a></h2>
+<table>
+<thead>
+<tr><th align="left"> Scenario number</th><th align="left"> Short Description </th><th align="left"> Long Description</th><th align="left"> Status</th></tr>
+</thead>
+<tbody>
+<tr><td align="left"> 0</td><td align="left"> Status Quo 2022       </td><td align="left"> Same regs from 2021.   </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 1</td><td align="left"> April Open        </td><td align="left"> Same regs from 2021, except April is open all month for both</td><td align="left"> Done</td></tr>
+<tr><td align="left"> 3</td><td align="left"> April Closed for Cod        </td><td align="left"> Same regs from 2021, except April is open all month for haddock and closed for cod </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 5</td><td align="left"> 1Cod_20        </td><td align="left">  April is open for both all month.1 cod at 20&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 7</td><td align="left"> 2Cod_21  </td><td align="left">  April is open for both all month. 2 cod at 21&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 9</td><td align="left"> 2Cod_20 </td><td align="left">   April is open for both all month. 2 cod at 20&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 11</td><td align="left"> 1Cod_19 </td><td align="left">   April is open for both all month. 1 cod at 19&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 12</td><td align="left"> 2Cod_19 </td><td align="left">   April is open for both all month. 2 cod at 19&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 13</td><td align="left"> Slot 21-23		</td><td align="left">  1 Cod slot at 21-23&quot; for testing  </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 14</td><td align="left"> Slot 22-28		</td><td align="left">  1 Cod slot at 22-28&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 15</td><td align="left"> 2Slot 22-28		</td><td align="left">  2 Cod slot at 22-28&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 16</td><td align="left"> Slot 22-28 Sept	</td><td align="left">  1 Cod slot at 22-28&quot; Sept open</td><td align="left"> Done</td></tr>
+<tr><td align="left"> 17</td><td align="left"> 2Slot 22-28 Sept  </td><td align="left">  2 Cod slot at 22-28&quot; Sept open</td><td align="left"> Done</td></tr>
+<tr><td align="left"> 21</td><td align="left"> April and Sept </td><td align="left"> April and sept open for everyone</td><td align="left"> Done</td></tr>
+<tr><td align="left"> 23</td><td align="left"> Sept    </td><td align="left"> April closed for cod, sept open for everyone</td><td align="left"> Done</td></tr>
+<tr><td align="left"> 25</td><td align="left"> April and Sept 20 </td><td align="left"> April and sept open for everyone. 1 cod at 20&quot; </td><td align="left"> Done</td></tr>
+</tbody>
+</table>
+<p>We are adding a sensitivity analysis for the model runs that open up september for private anglers. Since the total trips taken are 80% private and 20% for hire during this time, we increased the choice occasions by 80% when we open September to the private fleet.  This might be realistic, but it might be the case that there are more or fewer choice occasions.</p>
+<table>
+<thead>
+<tr><th align="left"> Scenario number</th><th align="left"> Short Description </th><th align="left"> Long Description</th><th align="left"> Status</th></tr>
+</thead>
+<tbody>
+<tr><td align="left"> 16</td><td align="left"> Slot 22-28 Sept	</td><td align="left">  1 Cod slot at 22-28&quot; Sept open</td><td align="left"> Done</td></tr>
+<tr><td align="left"> 161</td><td align="left"> Slot 22-28 Sept	</td><td align="left">  1 Cod slot at 22-28&quot; Sept open &ndash; increase of 100%.  </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 21</td><td align="left"> April and Sept </td><td align="left"> April and sept open for everyone</td><td align="left"> Done</td></tr>
+<tr><td align="left"> 211</td><td align="left"> Slot 22-28 Sept	</td><td align="left">  April and sept open for everyone &ndash; increase of 100%.  </td><td align="left"> Done</td></tr>
+</tbody>
+</table>
+<p>We are not running these scenarios anyore. They are either too complicated or they are too restrictive.</p>
+<table>
+<thead>
+<tr><th align="left"> Scenario number</th><th align="left"> Short Description </th><th align="left"> Long Description</th><th align="left"> Status</th></tr>
+</thead>
+<tbody>
+<tr><td align="left"> 2</td><td align="left"> April Closed        </td><td align="left"> Same regs from 2021, except April is closed all month for both</td><td align="left"> Not run</td></tr>
+<tr><td align="left"> 4</td><td align="left"> April Closed for Haddock        </td><td align="left">  Same regs from 2021, except April is open all month for cod and closed for haddock </td><td align="left">  Not run</td></tr>
+<tr><td align="left"> 6</td><td align="left"> 1Cod_20_HCA        </td><td align="left">  April open for 1 cod at 20&quot;. haddock is closed for the full month </td><td align="left"> Not run</td></tr>
+<tr><td align="left"> 8</td><td align="left"> 2Cod_21_HCA        </td><td align="left">  April open for 2 cod at 21&quot;. haddock is closed for the full month </td><td align="left"> Not run</td></tr>
+<tr><td align="left"> 10</td><td align="left"> 2Cod_20_HCA		</td><td align="left">  April open for 2 cod at 20&quot;. haddock is closed for the full month </td><td align="left"> Not run</td></tr>
+</tbody>
+</table>
+<p>Scenarios 0-4:</p>
+<ul>
+<li>Averaging scenarios 1 and 3 produces scenario 0.</li>
+<li>Scenario 1 should produce the highest mortality because it opens the entire month of April for both stocks.</li>
+<li>Scenario 2 should produce the lowest mortality because it closes April for both stocks.  It&rsquo;s not really under consideration though.</li>
+<li>Scenario 3 should produce higher haddock mortality and lower cod mortality.</li>
+<li>Scenario 4 should produce lower haddock mortality and higher cod mortality.  It&rsquo;s not really under consideration though.</li>
+</ul>
+<p>Scenarios 5-12:</p>
+<ul>
+<li>These scenarios all treat the private and for-hire fleet the same in April.  They all open cod for the entire month of April.</li>
+<li>A good comparison will be to scenarios 0 (SQ), 1 (April open for both with  1 cod at 21&quot;), and 4 (April open for cod at 21&quot; and closed for haddock)</li>
+<li>Scenario 5 is similar to scenario 1, except the cod size limit is reduced to 20&quot;.  We expect a few more trips and a bit more cod mortality compared to Scenario 1.</li>
+<li>Scenario 7 is similar to scenario 1, except the cod possession limit is increased to 2 fish.  We expect a few more trips and a bit more cod mortality compared to Scenario 1.</li>
+<li>Scenario 9 is similar to scenarios 5 and 7, 2 cod at 20&quot;.  We expect more trips and more cod mortality compared to Scenarios 5 and 7.</li>
+<li>Scenario 11 is similar to scenarios 1 and 5, except the size limit is reduced to 19&quot;.  We expect more trips and more cod mortality compared to Scenarios 1 and 5.</li>
+<li>Scenario 12 is similar to scenarios 7 and 9, 2 cod at 19&quot;.  We expect more trips and more cod mortality compared to Scenarios 7 and 9.</li>
+</ul>
+<p>Scenarios 14-17:</p>
+<ul>
+<li>Scenario 14 is a 1 fish slot limit at 22-28&quot;.</li>
+<li>Scenario 15 is a 2 fish slot limit.</li>
+<li>Scenario 16 is a 1 fish slot limit and the whole month of september is open to the private and for-hire fleets.</li>
+<li>Scenario 17 is a 2 fish slot limit and the whole month of september is open to the private and for-hire fleets.</li>
+<li>Scenarios 161 is  the same regulations as 16, but we allow for more choice occasions in Sept. It is a sensitivity analysis.</li>
+</ul>
+<p>Scenarios 21-25: These open up cod from Sept 8-October 7 to private and for-hire anglers.</p>
+<ul>
+<li>In order to run these scenarios, I have to make an educated guess about the number of additional choice occasions that the private fleet will have when September is opened up.  The private fleet accounts for about 80% of the trips in September.  So, to open up the private fleet for the entire month, I should have 1.8* the total number of trips.  This is a bit of guesswork, it might be the case that the private anglers will fish a little more or a little less during the first half of September if it were open.</li>
+<li>Scenario 21 opens all of april and September, at 1 cod and 21&quot;</li>
+<li>Scenario 23 opens only September at 1 cod and 21&quot;.  April is closed for cod.</li>
+<li>Scenario 25 opens all of april and September, at 1 cod and 21&quot;</li>
+<li>
+<p>Scenarios 211 is  the same regulations as 21, but we allow for more choice occasions in Sept. It is a sensitivity analysis.</p>
+</li>
+</ul>
+<!---
+
+Other Thoughts
+
+* We should set aside the scenarios where April is open for cod and closed for haddock. At these levels of fishing, they don't really impact cod mortality very much and limit rec opportunities on haddock.  The total catch of haddock declines moderately (see scenarios 5 and 6 or 1 and 4) and discards increases.  But there are only modest decreases in the number of cod kept. 
+--->
+<h1><a href="#annual-results" id="annual-results">Annual Results</a></h1>
+<p>Here are some results.  In this section, I first compute the annual totals for every replicate. Then I report out on the medians.</p>
+<pre><code></code></pre>
+<h2><a href="#cod-mortality-over-the-different-scenarios" id="cod-mortality-over-the-different-scenarios">Cod mortality over the different scenarios.</a></h2>
+<pre><code></code></pre>
+<p><img src="cod_annual_box.png" height="400" alt="Box Plot of cod mortality in each scenario" ></p>
+<p>The sensitivity scenarios don&rsquo;t actually increase median mortality that much, but they do shift the boxes (25th and 75th percentiles up a bit).</p>
+<h2><a href="#haddock-mortality-over-the-different-scenarios" id="haddock-mortality-over-the-different-scenarios">Haddock mortality over the different scenarios.</a></h2>
+<pre><code></code></pre>
+<p><img src="hadd_annual_box.png" height="400" alt="Box Plot of cod mortality in each scenario" ></p>
+<!---
+graph export "cod_box_plots.png", as(png) replace
+
+local graphopts  "over(scenario) yline($cod_recACL, lwidth(thick) lpattern(dash)) xlabel(,angle(45)) ytitle("Cod Mortality (mt)")"
+
+vioplot cod_mort_mt, `graphopts'
+graph export "cod_vio_plots.png", as(png) replace
+
+--->
+<pre><code></code></pre>
+<h2><a href="#summary-outputs" id="summary-outputs">Summary Outputs</a></h2>
+<p>These scenarios are under the cod ACL and haddock ACL. Apart from the status-quo scenario and 3 , they also are open for both stocks for the full month of April.</p>
+<pre><code>
+
+
+
+
+
+
+  +-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+  | option |             mode | cod_limit | cod_size |                                 cod_open_season | cod_mort_mt | hadd_limit | hadd_size |          had_open_season | hadd_mort_mt | total_trips | cod_ok | hadd_ok | scenario_num |
+  |--------+------------------+-----------+----------+-------------------------------------------------+-------------+------------+-----------+--------------------------+--------------+-------------+--------+---------+--------------|
+  |        | Private For-Hire |         1 |      21&quot; |  Sep 15-Sep 30, Apr 1-14   Sep8-Oct 7, Apr 1-14 |         116 |         15 |       17&quot; |  May-Feb28, Apr 15-Apr30 |          875 |     318,549 |     95 |     100 |            0 |
+  |        | Private For-Hire |         1 |      21&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         125 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          877 |     320,153 |     94 |     100 |            1 |
+  |        | Private For-Hire |         1 |      21&quot; |            Sep 15-Sep 30             Sep8-Oct 7 |         109 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          874 |     316,852 |     98 |     100 |            3 |
+  |        | Private For-Hire |         1 |      20&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         130 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          879 |     321,473 |     94 |     100 |            5 |
+  |        | Private For-Hire |         2 |      21&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         131 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          877 |     320,568 |     92 |     100 |            7 |
+  |        | Private For-Hire |         2 |      20&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         136 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          880 |     321,866 |     91 |     100 |            9 |
+  |        | Private For-Hire |         1 |      19&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         134 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          883 |     323,160 |     93 |     100 |           11 |
+  |        | Private For-Hire |         2 |      19&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         143 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          884 |     323,742 |     90 |     100 |           12 |
+  |        | Private For-Hire |         1 |   22-28&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         111 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          874 |     318,137 |     98 |     100 |           14 |
+  |        | Private For-Hire |         2 |   22-28&quot; |  Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30 |         113 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          874 |     318,332 |     97 |     100 |           15 |
+  |        |              All |         1 |   22-28&quot; |                          Sept 8 -Oct 7 Apr 1-30 |         129 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          953 |     344,709 |     95 |     100 |           16 |
+  |        |              All |         1 |      21&quot; |                          Sept 8 -Oct 7 Apr 1-30 |         151 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          960 |     347,744 |     83 |     100 |           21 |
+  |        |              All |         1 |      21&quot; |                                   Sept 8 -Oct 7 |         130 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          957 |     343,130 |     93 |     100 |           23 |
+  |        |              All |         1 |   22-28&quot; |                          Sept 8 -Oct 7 Apr 1-30 |         130 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          971 |     350,967 |     94 |     100 |          161 |
+  |        |              All |         1 |      21&quot; |                          Sept 8 -Oct 7 Apr 1-30 |         151 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          977 |     353,856 |     81 |     100 |          211 |
+  +-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<pre><code></code></pre>
+<!---
+
+
+## Trips, cod mortality, haddock mortality, and probability of being under the subACL
+~~~~
+
+
+
+
+  +-------------------------------------------------------------------------------------------------------------+
+  | scenario_num                         scenario   total_trips   cod_mort_mt   hadd_mort_mt   cod_ok   hadd_ok |
+  |-------------------------------------------------------------------------------------------------------------|
+  |            0                  Status Quo 2022       318,549           116            875       95       100 |
+  |            1                       April Open       320,153           125            877       94       100 |
+  |            3             April Closed for Cod       316,852           109            874       98       100 |
+  |            5                          1Cod 20       321,473           130            879       94       100 |
+  |            7                          2Cod 21       320,568           131            877       92       100 |
+  |-------------------------------------------------------------------------------------------------------------|
+  |            9                          2Cod 20       321,866           136            880       91       100 |
+  |           11                          1Cod 19       323,160           134            883       93       100 |
+  |           12                          2Cod 19       323,742           143            884       90       100 |
+  |           13                       Slot 21-23       316,416            97            871      100       100 |
+  |           14                       Slot 22-28       318,137           111            874       98       100 |
+  |-------------------------------------------------------------------------------------------------------------|
+  |           15                  2 at Slot 22-28       318,332           113            874       97       100 |
+  |           16              Slot 22-28 Sept All       344,709           129            953       95       100 |
+  |           17         2 at Slot 22-28 Sept All       345,101           133            955       92       100 |
+  |           21               April and Sept All       347,744           151            960       83       100 |
+  |           23   April closed for cod, Sept All       343,130           130            957       93       100 |
+  |-------------------------------------------------------------------------------------------------------------|
+  |           25     April and Sept All, 1 cod 20       349,153           156            962       79       100 |
+  |           27                       2Cod_21_OS       348,316           161            961       74       100 |
+  |          161          Slot 22-28 Sept All (S)       350,967           130            971       94       100 |
+  |          211           April and Sept All (S)       353,856           151            977       81       100 |
+  +-------------------------------------------------------------------------------------------------------------+
+
+~~~~
+--->
+<h2><a href="#trips-cod-catch-cod-landings-and-cod-discards" id="trips-cod-catch-cod-landings-and-cod-discards">Trips, cod catch, cod landings, and cod discards</a></h2>
+<pre><code>
+
+
+
+  +--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+  | scenario_num                         scenario   total_trips   cod_catch   cod_num_kept   cod_num_released   hadd_catch   haddock_num_kept   haddock_num_re~d |
+  |--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |            0                  Status Quo 2022       318,549     566,984         12,497            554,487    1,182,456            726,629            455,827 |
+  |            1                       April Open       320,153     568,245         16,359            551,887    1,184,213            727,409            456,804 |
+  |            3             April Closed for Cod       316,852     566,568          8,536            558,032    1,180,521            725,441            455,081 |
+  |            5                          1Cod 20       321,473     570,013         19,752            550,261    1,186,929            729,337            457,592 |
+  |            7                          2Cod 21       320,568     568,180         18,915            549,265    1,185,316            727,950            457,366 |
+  |--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |            9                          2Cod 20       321,866     570,190         23,175            547,015    1,188,240            730,025            458,216 |
+  |           11                          1Cod 19       323,160     571,128         24,054            547,074    1,190,172            731,660            458,512 |
+  |           12                          2Cod 19       323,742     571,544         28,345            543,198    1,191,771            732,537            459,233 |
+  |           13                       Slot 21-23       316,416     565,520          6,450            559,070    1,177,382            723,886            453,495 |
+  |           14                       Slot 22-28       318,137     565,858         10,852            555,006    1,180,848            725,759            455,089 |
+  |--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |           15                  2 at Slot 22-28       318,332     565,966         12,243            553,724    1,181,315            725,946            455,369 |
+  |           16              Slot 22-28 Sept All       344,709     614,933         15,877            599,056    1,271,314            783,985            487,329 |
+  |           17         2 at Slot 22-28 Sept All       345,101     614,423         17,854            596,569    1,272,119            784,613            487,506 |
+  |           21               April and Sept All       347,744     618,128         23,131            594,997    1,277,876            788,729            489,147 |
+  |           23   April closed for cod, Sept All       343,130     615,354         14,478            600,875    1,273,000            785,538            487,462 |
+  |--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |           25     April and Sept All, 1 cod 20       349,153     620,353         27,524            592,829    1,281,259            790,785            490,474 |
+  |           27                       2Cod_21_OS       348,316     618,955         28,005            590,950    1,279,792            790,141            489,651 |
+  |          161          Slot 22-28 Sept All (S)       350,967     625,135         16,820            608,315    1,291,670            799,176            492,494 |
+  |          211           April and Sept All (S)       353,856     628,145         24,739            603,406    1,298,955            804,151            494,803 |
+  +--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h1><a href="#monthly-detailed-results" id="monthly-detailed-results">Monthly Detailed results</a></h1>
+<p>The following tables summarize the results of some of the scenarios at the monthly level.  Looking changes within the fishing season may be informative.  In this section, I compute the median outcome in each month.  I have also presented the sum of the medians as a final row.  The sum row in the following tables will not match the annual results exactly. This is expected because the sum of the medians is not the identical to the median of the sums.</p>
+<h2><a href="#status-quo" id="status-quo">Status Quo</a></h2>
+<p>Monthly median outcomes for the &ldquo;Status Quo 2022&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             30             82,399          0.03             93.41         14.10 |
+  |     6        49,090             94            127,686          0.12            138.83         21.09 |
+  |     7        33,401              2             93,724          0.00            100.56         15.14 |
+  |     8        41,879             55             51,486          0.04             53.99          8.20 |
+  |     9        33,025          7,616             50,985         21.85             39.87         27.68 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,760          0.00             33.61          5.15 |
+  |    11        31,680             22             63,258          0.03             61.39          9.29 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,945          3,833             47,355          9.86             37.67         15.33 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       317,419         11,651            550,653         31.94            559.32        115.99 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#scenario-1-april-open-for-both" id="scenario-1-april-open-for-both">Scenario 1: April open for both</a></h2>
+<p>Monthly median outcomes for the &ldquo;Scenario 1&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             30             82,399          0.03             93.30         14.08 |
+  |     6        49,090             94            127,686          0.12            138.72         21.08 |
+  |     7        33,401              2             93,724          0.00            100.55         15.13 |
+  |     8        41,879             55             51,485          0.04             53.90          8.19 |
+  |     9        33,019          7,607             50,997         21.72             39.87         27.63 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,764          0.00             33.61          5.14 |
+  |    11        31,680             22             63,258          0.03             61.33          9.29 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        73,818          7,560             44,865         19.62             28.78         23.91 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       319,286         15,369            548,177         41.56            550.07        124.46 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<!---
+
+
+
+
+## Scenario 5: April open for both and 1 cod at 20"
+
+
+Monthly median outcomes for the "Scenario 5" simulation:
+~~~~
+
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             37             82,399          0.03             93.30         14.08 |
+  |     6        49,090            102            127,688          0.12            138.72         21.08 |
+  |     7        33,401              6             93,724          0.02            100.55         15.13 |
+  |     8        41,879             55             51,485          0.04             53.91          8.19 |
+  |     9        33,324          8,810             50,379         23.21             39.15         28.50 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,769          0.00             33.60          5.14 |
+  |    11        31,684             22             63,258          0.03             61.34          9.28 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        74,603          9,582             43,593         22.36             26.34         26.41 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       320,379         18,613            546,294         45.81            546.91        127.82 |
+  +-----------------------------------------------------------------------------------------------------+
+
+~~~~
+
+
+
+
+## Scenario 7:  April open for both and 2 cod at 21"
+
+Monthly median outcomes for the "Scenario 7" simulation:
+~~~~
+
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             30             82,399          0.03             93.30         14.08 |
+  |     6        49,090             94            127,686          0.12            138.72         21.08 |
+  |     7        33,401              2             93,724          0.00            100.55         15.13 |
+  |     8        41,879             55             51,485          0.04             53.90          8.19 |
+  |     9        33,268          9,946             48,939         28.04             33.31         32.85 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,764          0.00             33.61          5.14 |
+  |    11        31,680             22             63,258          0.03             61.31          9.27 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        73,838          7,706             44,765         20.02             28.36         24.17 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       319,555         17,854            546,020         48.28            543.07        129.92 |
+  +-----------------------------------------------------------------------------------------------------+
+
+~~~~
+
+
+
+
+## Scenario 9:  April open for both and 2 cod at 20"
+
+
+Monthly median outcomes for the "Scenario 9" simulation:
+~~~~
+
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             37             82,399          0.03             93.30         14.08 |
+  |     6        49,090            102            127,688          0.12            138.72         21.08 |
+  |     7        33,401              6             93,724          0.02            100.55         15.13 |
+  |     8        41,879             55             51,485          0.04             53.91          8.19 |
+  |     9        33,710         11,717             47,924         30.37             31.50         34.83 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,769          0.00             33.60          5.14 |
+  |    11        31,684             22             63,258          0.03             61.23          9.27 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        74,625          9,741             43,337         22.77             25.86         26.84 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       320,788         21,679            543,582         53.39            538.68        134.57 |
+  +-----------------------------------------------------------------------------------------------------+
+
+~~~~
+
+
+
+## Scenario 11:  April open for both and 1 cod at 19"
+
+
+Monthly median outcomes for the "Scenario 11" simulation:
+~~~~
+
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             37             82,399          0.03             93.29         14.09 |
+  |     6        49,090            103            127,688          0.13            138.72         21.08 |
+  |     7        33,401              6             93,724          0.02            100.55         15.13 |
+  |     8        41,879             69             51,472          0.04             53.90          8.20 |
+  |     9        33,633         10,218             49,881         23.88             38.83         29.44 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,769          0.00             33.58          5.14 |
+  |    11        31,684             22             63,258          0.03             61.34          9.28 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        75,672         12,520             41,661         25.81             23.76         29.46 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       321,758         22,975            543,850         49.95            543.97        131.83 |
+  +-----------------------------------------------------------------------------------------------------+
+
+~~~~
+
+
+## Scenario 12:  April open for both and 2 cod at 19"
+
+
+Monthly median outcomes for the "Scenario 9" simulation:
+~~~~
+
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             37             82,399          0.03             93.29         14.09 |
+  |     6        49,090            103            127,688          0.13            138.72         21.08 |
+  |     7        33,401              6             93,724          0.02            100.55         15.13 |
+  |     8        41,879             69             51,472          0.04             53.90          8.20 |
+  |     9        34,122         14,075             46,670         33.01             30.20         37.20 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,769          0.00             33.58          5.14 |
+  |    11        31,684             22             63,258          0.03             61.23          9.27 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        75,737         12,656             41,446         26.55             23.11         30.11 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       322,311         26,968            540,424         59.81            534.58        140.23 |
+  +-----------------------------------------------------------------------------------------------------+
+
+~~~~
+
+--->
+<h2><a href="#scenario-14-slot-at-22-28" id="scenario-14-slot-at-22-28">Scenario 14:  Slot at 22-28&quot;</a></h2>
+<p>Monthly median outcomes for the &ldquo;Scenario 14&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             25             82,399          0.03             93.51         14.12 |
+  |     6        49,090             94            127,678          0.12            138.94         21.10 |
+  |     7        33,401              0             93,724          0.00            100.56         15.15 |
+  |     8        41,879             51             51,477          0.03             54.07          8.21 |
+  |     9        32,180          5,302             52,178         13.25             46.95         19.84 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,760          0.00             33.70          5.17 |
+  |    11        31,680             17             63,258          0.02             61.46          9.31 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        72,512          4,757             46,811         11.71             36.20         16.69 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       317,141         10,246            551,284         25.16            565.38        109.58 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#scenario-16-slot-at-22-28-plus-september-open-for-all" id="scenario-16-slot-at-22-28-plus-september-open-for-all">Scenario 16:  Slot at 22-28&quot;, plus September open for all</a></h2>
+<p>Monthly median outcomes for the &ldquo;Scenario 16&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             61             82,507          0.04             91.95         13.87 |
+  |     6        49,163             94            127,938          0.15            140.13         21.20 |
+  |     7        33,158             38             93,625          0.06            100.88         15.17 |
+  |     8        41,881             54             51,538          0.04             54.15          8.17 |
+  |     9        58,473          9,276             94,631         22.92             81.86         35.23 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,964              0             33,609          0.00             33.39          5.12 |
+  |    11        31,705              0             63,332          0.00             61.07          9.16 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        72,777          4,966             46,677         12.07             37.02         17.62 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       343,568         14,491            593,856         35.27            600.44        125.54 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h3><a href="#sensitivity-analysis-scenario-161-slot-at-22-28-plus-september-open-for-all" id="sensitivity-analysis-scenario-161-slot-at-22-28-plus-september-open-for-all">Sensitivity Analysis Scenario 161:  Slot at 22-28&quot;, plus September open for all</a></h3>
+<p>Monthly median outcomes for the &ldquo;Scenario 161&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,505             30             83,065          0.03             94.44         14.32 |
+  |     6        48,943             90            128,501          0.11            135.75         20.75 |
+  |     7        33,203             20             94,082          0.02             98.94         15.01 |
+  |     8        41,795             29             50,926          0.03             54.01          8.22 |
+  |     9        64,533         10,783            106,255         27.16             91.92         40.98 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,885              0             34,034          0.00             33.89          5.22 |
+  |    11        31,705             29             62,447          0.02             61.64          9.40 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        72,700          5,200             47,186         12.48             36.54         17.97 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       349,268         16,180            606,495         39.85            607.13        131.86 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#scenario-21-april-and-september-open-for-all" id="scenario-21-april-and-september-open-for-all">Scenario 21:  April and September open for all</a></h2>
+<p>Monthly median outcomes for the &ldquo;Scenario 21&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             61             82,507          0.04             91.82         13.85 |
+  |     6        49,163            101            127,938          0.16            139.97         21.17 |
+  |     7        33,158             38             93,625          0.06            100.86         15.15 |
+  |     8        41,875             54             51,538          0.04             53.98          8.17 |
+  |     9        59,836         13,961             92,538         38.55             70.19         49.22 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,964              0             33,609          0.00             33.32          5.11 |
+  |    11        31,705              0             63,332          0.00             60.84          9.13 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        74,000          7,706             44,763         20.33             28.82         24.33 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       346,149         21,922            589,850         59.18            579.80        146.14 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h3><a href="#sensitivity-analysis-scenario-211-april-and-september-open-for-all" id="sensitivity-analysis-scenario-211-april-and-september-open-for-all">Sensitivity Analysis Scenario 211:  April and September open for all</a></h3>
+<p>Monthly median outcomes for the &ldquo;Scenario 211&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,505             34             83,065          0.03             94.30         14.30 |
+  |     6        48,944             99            128,501          0.11            135.57         20.70 |
+  |     7        33,206             26             94,082          0.04             98.74         14.96 |
+  |     8        41,798             33             50,926          0.03             53.72          8.20 |
+  |     9        66,212         15,746            103,507         43.88             77.70         55.79 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,882              0             34,034          0.00             33.89          5.18 |
+  |    11        31,705             31             62,465          0.02             61.35          9.37 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        74,052          7,748             45,214         19.49             28.78         23.85 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       352,303         23,718            601,794         63.61            584.06        152.35 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#scenario-23-april-closed-and-september-open-for-all" id="scenario-23-april-closed-and-september-open-for-all">Scenario 23:  April Closed and September open for all</a></h2>
+<p>Monthly median outcomes for the &ldquo;Scenario 23&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             61             82,507          0.04             91.95         13.87 |
+  |     6        49,163            101            127,938          0.16            140.13         21.20 |
+  |     7        33,158             38             93,625          0.06            100.88         15.17 |
+  |     8        41,881             54             51,538          0.04             54.15          8.17 |
+  |     9        59,857         13,972             92,522         38.56             70.42         49.22 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,964              0             33,609          0.00             33.39          5.12 |
+  |    11        31,705              0             63,332          0.00             60.90          9.14 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        70,439             59             50,246          0.05             47.16          7.15 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       342,615         14,286            595,316         38.91            598.97        129.03 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h1><a href="#numbers-at-age" id="numbers-at-age">Numbers at age</a></h1>
+<pre><code></code></pre>
+<p>Here are the numbers at age, in thousands for 2020 to 2022. All from the 2021 assessment update; we combined the projections from the M2 and MRAMP models and then taken the median.   Because of the way the projection handles recruitment, we are starting to get more small fish that will start to get caught by the fishery in 2022. This will continue in 2023. On average.</p>
+<pre><code>
+  +-------------------------------------------------------------------------------------+
+  | year      age1      age2      age3      age4    age5    age6    age7    age8   age9 |
+  |-------------------------------------------------------------------------------------|
+  | 2020   1,309.3     987.8   1,765.7     394.8   141.6   122.7   157.6    21.0   18.5 |
+  | 2021   3,620.7     926.2     705.0   1,232.6   262.4    91.4    78.7   101.0   25.3 |
+  | 2022   3,490.1   2,016.5     615.8     455.8   806.9   166.4    57.5    49.8   79.1 |
+  +-------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>The 2022 cod stock is approximately 27% age 2<br />
+The 2021 cod stock is approximately 13% age 2</p>
+<pre><code></code></pre>
+<p><img src="cod_NAA.png" height="400" alt="Cod Numbers at age for 2020-2023" ></p>
+<pre><code></code></pre>
+<p><img src="cod_NAA_2.png" height="400" alt="Cod Numbers at age for 2020-2023" ></p>
+<pre><code></code></pre>
+<p>The number of cod (thousands)  in each length class (inch) in 2021 and 2022. We use the same age-length key as we use for the simulation model.  There are slightly more smaller cod in 2022 than 2021.  We excluded the ageclass=1 because it is not encountered by the recreational fishery</p>
+<p><img src="cod_sizes.png" height="400" alt="Cod sizes for 2021 and 2022" ></p>
+<pre><code></code></pre>
+<p>The cumulative number of cod that are less than or equal to a particular length class (in inches) for 2021 and 2022.</p>
+<p><img src="cod_cdf.png" height="400" alt="Cod cumulative size distribution for 2021 and 2022" ></p>

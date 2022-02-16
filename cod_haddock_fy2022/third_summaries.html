@@ -1,0 +1,644 @@
+<!---A small document to read in and display some model results ---> 
+<!---Execute this with:
+
+
+/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  DONE   */
+/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
+	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
+	could be the fact that we're using annual data. 
+		Added in the graphs about the NAA and length structures
+
+	Slot limit of 23 to 28" for GB cod --
+		With open seasons that are the same for private and for-hire.
+	
+		How to test this out
+			Run the model with a 21 to 22" slot limit. Very few fish should be kept.
+			The model is coded for \geq the minimum and leq the maximum. So if I want a 23-28" slot, I need to enter the max as 27.9 
+
+
+ageclass lines for 2020 to 2022.  Take out the age 1's.
+				
+	*/
+
+
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+}
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+dyndoc "${code_dir}/postsim/third_summaries.txt", saving(${project_dir}/third_summaries.html) replace
+---> 
+<pre><code></code></pre>
+<h1><a href="#inputs-and-background" id="inputs-and-background">Inputs and Background</a></h1>
+<h2><a href="#fishing-year-2020-and-2021-regulations" id="fishing-year-2020-and-2021-regulations">Fishing Year 2020 and 2021 Regulations</a></h2>
+<p>The same regulations were in place for FY2020 and FY2021.</p>
+<p>Haddock:</p>
+<ul>
+<li>15 fish, 17&quot;</li>
+<li>Open May1-Feb 28 and April 1- April 30</li>
+<li>No Changes from 2019</li>
+</ul>
+<p>Cod:</p>
+<ul>
+<li>1 fish, 21&quot;</li>
+<li>Open Sept 15-Sept 30 and April 1-April 14 for private anglers</li>
+<li>Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers</li>
+</ul>
+<p>FY 2020 Regulations can be found <a href="https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020">here</a>.  Since there were no changes in FY2021, there is no federal register notice.</p>
+<p>The rec sub-ACL for cod was 193mt in 2020.</p>
+<h2><a href="#fishing-year-2022-regulations" id="fishing-year-2022-regulations">Fishing Year 2022 Regulations</a></h2>
+<p>The recreational sub-ACL for GoM cod is      192 mt for FY 2022. The recreational sub-ACL for GOM haddock is    3,634 mt.</p>
+<h2><a href="#data" id="data">Data</a></h2>
+<ol>
+<li><strong>Annual</strong> length-frequencies for cod and haddock</li>
+<li><strong>Monthly</strong> catch-per-trip for cod and haddock
+<ol>
+<li>The April 2021 catch-per-trip distribution for cod has 33.5% trips with 0 cod, 64.9% of trips with 1 cod, and <strong>1.5% of trips catching 2 or more cod</strong>.  This is really similar to March, 2021 and VERY different from May, 2021 .</li>
+<li>May 2021: 39% of trips with 0 cod, 23% with 1 cod, 10.7% with 2, 7% with 3 cod, 3% with 4 cod, and there&rsquo;s a smooth decline typical of a reasonably sampled dataset.</li>
+<li>March 2021: 40% of trips with 0 cod, 52.4% with 1 cod, 1.3% with 2, 2.7% with 3 cod, 3% with 10 cod.</li>
+</ol>
+</li>
+<li>2022 numbers at age for cod and haddock from the AGEPRO projections.</li>
+<li>Bottomtrawl survey data from 2017-2019 to form the age-length keys.</li>
+<li>Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)</li>
+</ol>
+<p>MRIP data uses &ldquo;trimmed landings&rdquo; estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions.</p>
+<h1><a href="#simulations" id="simulations">Simulations</a></h1>
+<!---
+1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100". This does the same thing. 
+1.  I'm ignoring the Oct1 to Oct 7 cod opening for the for-hire fleet. But I'm also ignoring the Sept 1 to Sept 7 cod closure for the for hire fleet. So, we should look at Sept and October together.
+SQ averages scenario numbers 1 and 3.   Scenario 1 is "April open for haddock, open for cod" and Scenario 3 is "April open for haddock, closed for cod."
+Whole month of April for Cod and closed for haddock (scenario 4).
+Whole month of April for both Cod and Haddock scenario 1.
+--->
+<h2><a href="#scenario-key-and-notes" id="scenario-key-and-notes">Scenario Key and Notes</a></h2>
+<table>
+<thead>
+<tr><th align="left"> Scenario number</th><th align="left"> Short Description </th><th align="left"> Long Description</th><th align="left"> Status</th></tr>
+</thead>
+<tbody>
+<tr><td align="left"> 0</td><td align="left"> Status Quo 2022       </td><td align="left"> Same regs from 2021.   </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 552</td><td align="left">   CMTE </td><td align="left"> CMTE - 5 week fall, 2 week spring. 1 cod at 22-28&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 562</td><td align="left">   RAP </td><td align="left"> RAP 5 week fall, 2 week spring. 1 cod at 21&quot; </td><td align="left"> Done</td></tr>
+</tbody>
+</table>
+<!---
+| Scenario number| Short Description | Long Description| Status|
+| :-----        |    :---------------   |          :--------------------- |   :-----|
+| 0| Status Quo 2022       | Same regs from 2021.   | Done|
+| 1| April Open        | Same regs from 2021, except April is open all month for both| Done|
+| 3| April Closed for Cod        | Same regs from 2021, except April is open all month for haddock and closed for cod | Done|
+| 5| 1Cod_20        |  April is open for both all month.1 cod at 20" | Done|
+| 11| 1Cod_19 |   April is open for both all month. 1 cod at 19" | Done|
+| 13| Slot 21-23		|  1 Cod slot at 21-23" for testing  | Done|
+| 14| Slot 22-28		|  1 Cod slot at 22-28" | Done|
+| 16| Slot 22-28 Sept	|  1 Cod slot at 22-28" Sept open| Done|
+| 21| April and Sept | April and sept open for everyone| Done|
+| 23| Sept    | April closed for cod, sept open for everyone| Done|
+| 25| April and Sept 20 | April and sept open for everyone. 1 cod at 20" | Done|
+| 470|   21in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 21" | Done|
+| 471| 21in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 21" | Done|
+| 472|   21in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 21" | Done|
+| 480|   22 in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 22" | Done|
+| 481|   22 in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22" | Done|
+| 482|   22 in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 22" | Done|
+| 490|   Slot Fall 4,  spring 0| 4 week fall, April closed. 1 cod at 22-28" | Done|
+| 491|   Slot in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22-28" | Done|
+| 492|   Slot in, Fall 4 spring 2| 4 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 570|   21in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 21" | Done|
+| 571|   21in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 21" | Done|
+| 572|   21in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 21" | Done|
+| 580|   22 in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 22" | Done|
+| 581|   22 in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22" | Done|
+| 582|   22 in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 22" | Done|
+| 590|   Slot Fall 5,  spring 0| 5 week fall, April closed. 1 cod at 22-28" | Done|
+| 591|   Slot in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22-28" | Done|
+| 592|   Slot in, Fall 5 spring 2| 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 670|   21in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 21" | Done|
+| 671|   21in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 21" | Done|
+| 672|   21in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 21" | Done|
+| 680|   22 in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 22" | Done|
+| 681|   22 in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22" | Done|
+| 682|   22 in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 22" | Done|
+| 690|   Slot Fall 6,  spring 0| 6 week fall, April closed. 1 cod at 22-28" | Done|
+| 691|   Slot in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22-28" | Done|
+| 692|   Slot in, Fall 6 spring 2| 6 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 552|   CMTE | CMTE - 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 562|   RAP | RAP 5 week fall, 2 week spring. 1 cod at 21" | Done|
+
+We are running the status quo and 3 sets of regulations under varying "fall scenarios"
+
+The scenarios numbers are ABC
+1 cod at 21": B=7
+1 cod at 22": B=8
+1 cod at 22-28": B=9
+
+Fall season of "1 month": A=4
+fall season of 5 weeks: A=5
+fall season of 6 weeks A=6
+
+April open: C=0
+April closed: C=1
+April partially open:C=2
+
+I have to run 3 separate calling files -- 
+_OpenSept
+_OpenSept5
+_OpenSept6
+ ---> 
+<h1><a href="#annual-results" id="annual-results">Annual Results</a></h1>
+<p>Here are some results.  In this section, I first compute the annual totals for every replicate. Then I report out on the medians.</p>
+<pre><code></code></pre>
+<pre><code></code></pre>
+<h2><a href="#cod-mortality-over-the-different-scenarios" id="cod-mortality-over-the-different-scenarios">Cod mortality over the different scenarios.</a></h2>
+<pre><code></code></pre>
+<p><img src="cod_annual_box_round2.png" height="400" alt="Box Plot of cod mortality in each scenario" ></p>
+<pre><code></code></pre>
+<p>These are just final three options: status quo, CMTE, and RAP .</p>
+<p><img src="cod_annual_final.png" height="400" alt="Box Plot of cod mortality in each scenario" ></p>
+<h2><a href="#haddock-mortality-over-the-different-scenarios" id="haddock-mortality-over-the-different-scenarios">Haddock mortality over the different scenarios.</a></h2>
+<pre><code></code></pre>
+<p><img src="hadd_annual_box_round2.png" height="400" alt="Box Plot of haddock mortality in each scenario" ></p>
+<pre><code></code></pre>
+<p>These are just final three options: status quo, CMTE, and RAP .</p>
+<p><img src="hadd_annual_final.png" height="400" alt="Box Plot of haddock mortality in each scenario" ></p>
+<pre><code></code></pre>
+<h2><a href="#summary-outputs" id="summary-outputs">Summary Outputs</a></h2>
+<p>These scenarios are under the cod ACL and haddock ACL. Apart from the status-quo scenario and 3 , they also are open for both stocks for the full month of April.</p>
+<pre><code>
+
+
+
+
+  +-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+  | option |             mode | cod_limit | cod_size |                                 cod_open_season | cod_mort_mt | hadd_limit | hadd_size |          had_open_season | hadd_mort_mt | total_trips | cod_ok | hadd_ok | scenario_num |
+  |--------+------------------+-----------+----------+-------------------------------------------------+-------------+------------+-----------+--------------------------+--------------+-------------+--------+---------+--------------|
+  |        | Private For-Hire |         1 |      21&quot; |  Sep 15-Sep 30, Apr 1-14   Sep8-Oct 7, Apr 1-14 |         116 |         15 |       17&quot; |  May-Feb28, Apr 15-Apr30 |          875 |     318,549 |     95 |     100 |            0 |
+  |        |              All |         1 |   22-28&quot; |                       Sept 1 -Oct 8, April 1-14 |         129 |         20 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,016 |     357,924 |     95 |     100 |          552 |
+  |        |              All |         1 |      21&quot; |                       Sept 1 -Oct 8, April 1-14 |         155 |         20 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,024 |     361,551 |     78 |     100 |          562 |
+  |        |              All |         1 |      21&quot; |                     Sept 1 -Sept 30, April 1-14 |         140 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          958 |     345,711 |     90 |     100 |          472 |
+  |        |              All |         1 |      21&quot; |                       Sept 1 -Oct 8, April 1-14 |         151 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,006 |     360,062 |     82 |     100 |          572 |
+  |        |              All |         1 |      21&quot; |                      Sept 1 -Oct 14, April 1-14 |         162 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,050 |     375,081 |     70 |     100 |          672 |
+  |        |              All |         1 |      22&quot; |                     Sept 1 -Sept 30, April 1-14 |         136 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          955 |     344,636 |     91 |     100 |          482 |
+  |        |              All |         1 |      22&quot; |                       Sept 1 -Oct 8, April 1-14 |         146 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,003 |     358,743 |     84 |     100 |          582 |
+  |        |              All |         1 |      22&quot; |                      Sept 1 -Oct 14, April 1-14 |         157 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,048 |     373,655 |     72 |     100 |          682 |
+  |        |              All |         1 |   22-28&quot; |                     Sept 1 -Sept 30, April 1-14 |         123 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |          952 |     343,192 |     96 |     100 |          492 |
+  |        |              All |         1 |   22-28&quot; |                       Sept 1 -Oct 8, April 1-14 |         129 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,000 |     357,455 |     95 |     100 |          592 |
+  |        |              All |         1 |   22-28&quot; |                      Sept 1 -Oct 14, April 1-14 |         138 |         15 |       17&quot; |   May-Feb28, Apr 1-Apr30 |        1,043 |     372,076 |     90 |     100 |          692 |
+  +-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#trips-cod-catch-cod-landings-and-cod-discards" id="trips-cod-catch-cod-landings-and-cod-discards">Trips, cod catch, cod landings, and cod discards</a></h2>
+<pre><code>
+
+
+
+  +------------------------------------------------------------------------------------------------------------------------------------------------------+
+  | scenario_num                 scenario   total_trips   cod_catch   cod_num_kept   cod_num_released   hadd_catch   haddock_num_kept   haddock_num_re~d |
+  |------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |            0          Status Quo 2022       318,549     566,984         12,497            554,487    1,182,456            726,629            455,827 |
+  |          552                Committee       357,924     635,889         14,710            621,179    1,333,201            842,124            491,077 |
+  |          562                      RAP       361,551     641,429         25,268            616,161    1,342,664            848,051            494,613 |
+  |          472        21in,Fall 4 weeks       345,711     616,303         18,944            597,359    1,275,271            787,072            488,199 |
+  |          572        21in,Fall 5 weeks       360,062     639,258         22,623            616,635    1,338,607            827,263            511,344 |
+  |------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |          672        21in,Fall 6 weeks       375,081     670,057         26,034            644,023    1,389,726            857,966            531,760 |
+  |          482        22in,Fall 4 weeks       344,636     614,964         15,835            599,129    1,272,083            784,839            487,244 |
+  |          582        22in,Fall 5 weeks       358,743     636,578         18,160            618,418    1,335,444            825,164            510,280 |
+  |          682        22in,Fall 6 weeks       373,655     668,016         21,870            646,146    1,385,873            855,711            530,162 |
+  |          492   22-28slot,Fall 4 weeks       343,192     613,976         12,591            601,385    1,269,762            782,903            486,859 |
+  |------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |          592   22-28slot,Fall 5 weeks       357,455     634,987         14,703            620,284    1,331,505            822,251            509,254 |
+  |          692   22-28slot,Fall 6 weeks       372,076     666,542         17,345            649,198    1,382,244            853,569            528,674 |
+  +------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h1><a href="#monthly-detailed-results" id="monthly-detailed-results">Monthly Detailed results</a></h1>
+<p>The following tables summarize the results of some of the scenarios at the monthly level.  Looking changes within the fishing season may be informative.  In this section, I compute the median outcome in each month.  I have also presented the sum of the medians as a final row.  The sum row in the following tables will not match the annual results exactly. This is expected because the sum of the medians is not the identical to the median of the sums.</p>
+<h2><a href="#status-quo" id="status-quo">Status Quo</a></h2>
+<p>Monthly median outcomes for the &ldquo;Status Quo 2022&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             30             82,399          0.03             93.41         14.10 |
+  |     6        49,090             94            127,686          0.12            138.83         21.09 |
+  |     7        33,401              2             93,724          0.00            100.56         15.14 |
+  |     8        41,879             55             51,486          0.04             53.99          8.20 |
+  |     9        33,025          7,616             50,985         21.85             39.87         27.68 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,951              0             33,760          0.00             33.61          5.15 |
+  |    11        31,680             22             63,258          0.03             61.39          9.29 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,945          3,833             47,355          9.86             37.67         15.33 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       317,419         11,651            550,653         31.94            559.32        115.99 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#committee-scenario" id="committee-scenario">Committee scenario</a></h2>
+<p>GC recommendation:</p>
+<p>Gulf of Maine cod – Change from 21&quot; min to slot limit</p>
+<pre><code>Open season (all modes): September 1 through October 7; April 1 - 14
+Slot limit: 22&quot; to 28&quot;
+Possession limit: 1 fish per day
+</code></pre>
+<p>Gulf of Maine haddock – Increase the bag limit to 20 fish (from 15 fish)</p>
+<pre><code>Open season: May 1–Feb 28/29; April 1–30
+Minimum size: 17 inches
+Possession limit: 20 fish per day
+</code></pre>
+<p>Monthly median outcomes for the &ldquo;Committee scenario&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,828             16             82,128          0.02             93.36         14.14 |
+  |     6        48,990            162            127,551          0.21            136.09         20.62 |
+  |     7        33,253             25             93,027          0.03             99.77         15.00 |
+  |     8        42,180             24             51,571          0.02             54.03          8.21 |
+  |     9        72,636         11,633            117,546         28.74            105.64         43.90 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,948              0             34,058          0.00             34.32          5.15 |
+  |    11        31,685              2             62,776          0.00             61.37          9.28 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,770          2,530             48,976          5.92             42.15         12.08 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       357,287         14,392            617,634         34.93            626.73        128.38 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#rap-scenario" id="rap-scenario">RAP scenario</a></h2>
+<p>RAPs recommendation:</p>
+<p>Gulf of Maine cod</p>
+<pre><code>Open season (all modes): September 1 through October 7; April 1 - 14
+Minimum size: 21 inches
+Possession limit: 1 fish per day
+</code></pre>
+<p>Gulf of Maine haddock – Increase the bag limit to 20 fish (from 15 fish)</p>
+<pre><code>Open season: May 1–Feb 28/29; April 1–30
+Minimum size: 17 inches
+Possession limit: 20 fish per day
+</code></pre>
+<p>Monthly median outcomes for the &ldquo;RAP scenario&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,828             27             82,128          0.03             93.36         14.14 |
+  |     6        48,990            162            127,551          0.22            136.09         20.62 |
+  |     7        33,253             25             93,022          0.03             99.77         15.00 |
+  |     8        42,180             24             51,571          0.02             54.03          8.21 |
+  |     9        74,563         17,381            114,809         48.70             89.49         61.66 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,948              0             34,058          0.00             34.32          5.15 |
+  |    11        31,685              5             62,776          0.01             61.37          9.27 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        73,211          6,096             46,734         14.86             33.60         20.08 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       360,655         23,720            612,650         63.85            602.03        154.12 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#21-inch-4-week-fall" id="21-inch-4-week-fall">21 inch, 4 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;21 inch, 4 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             61             82,507          0.04             91.82         13.85 |
+  |     6        49,163            101            127,938          0.16            139.97         21.17 |
+  |     7        33,158             38             93,625          0.06            100.86         15.15 |
+  |     8        41,875             54             51,538          0.04             53.98          8.17 |
+  |     9        59,836         13,961             92,538         38.55             70.19         49.22 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,964              0             33,609          0.00             33.32          5.11 |
+  |    11        31,705              0             63,332          0.00             60.84          9.13 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        72,318          3,988             47,473         10.17             38.34         15.56 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       344,467         18,204            592,559         49.02            589.31        137.37 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#22-inch-4-week-fall" id="22-inch-4-week-fall">22 inch, 4 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;22 inch, 4 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             61             82,507          0.04             91.82         13.85 |
+  |     6        49,163            101            127,938          0.16            139.97         21.17 |
+  |     7        33,158             38             93,625          0.06            100.86         15.15 |
+  |     8        41,875             54             51,538          0.04             53.98          8.17 |
+  |     9        59,247         11,881             93,306         36.57             71.38         47.12 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,964              0             33,609          0.00             33.32          5.12 |
+  |    11        31,705              0             63,332          0.00             60.81          9.13 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,880          2,926             48,136          8.62             39.65         14.33 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       343,440         15,062            593,991         45.48            591.78        134.05 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#22-28-inch-slot-4-week-fall" id="22-28-inch-slot-4-week-fall">22-28 inch slot, 4 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;22-28 inch slot, 4 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,449             61             82,507          0.04             91.95         13.87 |
+  |     6        49,163             94            127,938          0.15            140.13         21.20 |
+  |     7        33,158             38             93,625          0.06            100.88         15.17 |
+  |     8        41,881             54             51,538          0.04             54.15          8.17 |
+  |     9        58,473          9,276             94,631         22.92             81.86         35.23 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,964              0             33,609          0.00             33.39          5.12 |
+  |    11        31,705              0             63,332          0.00             61.07          9.16 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,656          2,476             48,647          5.95             42.25         12.26 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       342,448         12,000            595,827         29.15            605.68        120.17 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#21-inch-5-week-fall" id="21-inch-5-week-fall">21 inch, 5 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;21 inch, 5 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,632             27             81,829          0.03             92.76         14.09 |
+  |     6        48,898            162            127,267          0.22            135.76         20.54 |
+  |     7        33,242             25             93,010          0.03             99.61         14.95 |
+  |     8        42,146             24             51,501          0.02             53.90          8.17 |
+  |     9        74,521         17,285            114,762         48.61             89.31         61.32 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,939              0             34,021          0.00             34.16          5.12 |
+  |    11        31,685              5             62,776          0.01             61.29          9.21 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        72,361          4,017             48,020          9.81             37.91         15.73 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       359,422         21,545            613,185         58.72            604.71        149.13 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#22-inch-5-week-fall" id="22-inch-5-week-fall">22 inch, 5 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;22 inch, 5 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,632             27             81,829          0.03             92.76         14.09 |
+  |     6        48,898            162            127,267          0.22            135.76         20.54 |
+  |     7        33,242             25             93,010          0.03             99.61         14.95 |
+  |     8        42,146             24             51,501          0.02             53.90          8.17 |
+  |     9        73,705         14,995            116,017         45.96             91.99         58.48 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,939              0             34,021          0.00             34.16          5.12 |
+  |    11        31,685              5             62,776          0.01             61.23          9.20 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,942          2,963             48,494          7.96             39.43         14.08 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       358,187         18,201            614,914         54.23            608.84        144.62 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#22-28-inch-slot-5-week-fall" id="22-28-inch-slot-5-week-fall">22-28 inch slot, 5 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;22-28 inch slot, 5 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,632             16             81,828          0.02             92.94         14.10 |
+  |     6        48,898            162            127,267          0.21            135.95         20.57 |
+  |     7        33,242             25             93,016          0.03             99.75         15.00 |
+  |     8        42,146             24             51,501          0.02             53.98          8.20 |
+  |     9        72,630         11,633            117,494         28.74            105.62         43.90 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,939              0             34,021          0.00             34.30          5.15 |
+  |    11        31,685              2             62,776          0.00             61.37          9.28 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,756          2,530             48,961          5.92             42.15         12.08 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       356,927         14,392            616,864         34.93            626.06        128.26 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#21-inch-6-week-fall" id="21-inch-6-week-fall">21 inch, 6 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;21 inch, 5 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,339             56             81,561          0.04             91.68         13.87 |
+  |     6        49,372             79            128,514          0.13            138.27         20.80 |
+  |     7        33,498              0             95,041          0.00             98.25         14.74 |
+  |     8        41,880             40             51,468          0.03             53.65          8.10 |
+  |     9        89,519         20,716            139,845         57.36            106.25         72.91 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,959              0             33,896          0.00             32.92          5.01 |
+  |    11        31,710              1             62,404          0.00             60.08          9.09 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        72,395          3,956             47,760         10.01             37.86         15.75 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       374,671         24,849            640,487         67.58            618.96        160.28 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#22-inch-6-week-fall" id="22-inch-6-week-fall">22 inch, 6 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;22 inch, 5 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,339             56             81,561          0.04             91.68         13.87 |
+  |     6        49,372             79            128,514          0.13            138.27         20.80 |
+  |     7        33,498              0             95,041          0.00             98.25         14.74 |
+  |     8        41,880             40             51,468          0.03             53.65          8.10 |
+  |     9        88,666         17,691            141,457         53.47            108.55         69.79 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,959              0             33,896          0.00             32.93          5.02 |
+  |    11        31,710              1             62,404          0.00             60.06          9.08 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,901          3,011             48,416          8.43             38.84         14.28 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       373,324         20,878            642,755         62.11            622.22        155.68 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h2><a href="#22-28-inch-slot-6-week-fall" id="22-28-inch-slot-6-week-fall">22-28 inch slot, 6 week fall</a></h2>
+<p>Monthly median outcomes for the &ldquo;22-28 inch slot, 5 week fall&rdquo; simulation:</p>
+<pre><code>
+
+
+
+
+
+
+  +-----------------------------------------------------------------------------------------------------+
+  | month   total_trips   cod_num_kept   cod_num_released   cod_kept_mt   cod_released_mt   cod_mort_mt |
+  |-----------------------------------------------------------------------------------------------------|
+  |     5        43,339             50             81,561          0.04             91.79         13.91 |
+  |     6        49,371             75            128,514          0.11            138.35         20.82 |
+  |     7        33,498              0             95,041          0.00             98.45         14.78 |
+  |     8        41,880             36             51,479          0.03             53.64          8.12 |
+  |     9        87,308         13,836            142,933         34.01            126.24         53.43 |
+  |-----------------------------------------------------------------------------------------------------|
+  |    10        12,959              0             33,896          0.00             33.21          5.01 |
+  |    11        31,710              0             62,416          0.00             60.33          9.12 |
+  |    12             0              0                  0          0.00              0.00          0.00 |
+  |     1             0              0                  0          0.00              0.00          0.00 |
+  |     2             0              0                  0          0.00              0.00          0.00 |
+  |-----------------------------------------------------------------------------------------------------|
+  |     3             0              0                  0          0.00              0.00          0.00 |
+  |     4        71,637          2,481             48,893          5.94             41.76         12.02 |
+  |-----------------------------------------------------------------------------------------------------|
+  |   Sum       371,702         16,479            644,733         40.14            643.77        137.22 |
+  +-----------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h1><a href="#numbers-at-age" id="numbers-at-age">Numbers at age</a></h1>
+<pre><code></code></pre>
+<p>Here are the numbers at age, in thousands for 2020 to 2022. All from the 2021 assessment update; we combined the projections from the M2 and MRAMP models and then taken the median.   Because of the way the projection handles recruitment, we are starting to get more small fish that will start to get caught by the fishery in 2022. This will continue in 2023. On average.</p>
+<pre><code>
+  +-------------------------------------------------------------------------------------+
+  | year      age1      age2      age3      age4    age5    age6    age7    age8   age9 |
+  |-------------------------------------------------------------------------------------|
+  | 2020   1,309.3     987.8   1,765.7     394.8   141.6   122.7   157.6    21.0   18.5 |
+  | 2021   3,620.7     926.2     705.0   1,232.6   262.4    91.4    78.7   101.0   25.3 |
+  | 2022   3,490.1   2,016.5     615.8     455.8   806.9   166.4    57.5    49.8   79.1 |
+  +-------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>The 2022 cod stock is approximately 27% age 2<br />
+The 2021 cod stock is approximately 13% age 2</p>
+<pre><code></code></pre>
+<p><img src="cod_NAA.png" height="400" alt="Cod Numbers at age for 2020-2023" ></p>
+<pre><code></code></pre>
+<p><img src="cod_NAA_2.png" height="400" alt="Cod Numbers at age for 2020-2023" ></p>
+<pre><code></code></pre>
+<p>The number of cod (thousands)  in each length class (inch) in 2021 and 2022. We use the same age-length key as we use for the simulation model.  There are slightly more smaller cod in 2022 than 2021.  We excluded the ageclass=1 because it is not encountered by the recreational fishery</p>
+<p><img src="cod_sizes.png" height="400" alt="Cod sizes for 2021 and 2022" ></p>
+<pre><code></code></pre>
+<p>The cumulative number of cod that are less than or equal to a particular length class (in inches) for 2021 and 2022.</p>
+<p><img src="cod_cdf.png" height="400" alt="Cod cumulative size distribution for 2021 and 2022" ></p>
