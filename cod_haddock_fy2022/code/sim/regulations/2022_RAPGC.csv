@@ -1,0 +1,65 @@
+scenario,simname,simmonth,haddockmin,haddockmax,haddockbag,codmin,codmax,codbag,closedbehavior
+50,CMTE,1,17,100,20,98,100,5,alwaysonboth
+50,CMTE,2,17,100,20,98,100,5,alwaysonboth
+50,CMTE,3,99,100,20,98,100,5,alwaysonboth
+50,CMTE,4,17,100,20,98,100,5,alwaysonboth
+50,CMTE,5,17,100,20,98,100,5,alwaysonboth
+50,CMTE,6,17,100,20,98,100,5,alwaysonboth
+50,CMTE,7,17,100,20,98,100,5,alwaysonboth
+50,CMTE,8,17,100,20,98,100,5,alwaysonboth
+50,CMTE,9,17,100,20,22,27.9,1,alwaysonboth
+50,CMTE,10,17,100,20,98,100,5,alwaysonboth
+50,CMTE,11,17,100,20,98,100,5,alwaysonboth
+50,CMTE,12,17,100,20,98,100,5,alwaysonboth
+50,CMTE,13,17,100,20,98,100,5,alwaysonboth
+50,CMTE,14,17,100,20,98,100,5,alwaysonboth
+50,CMTE,15,99,100,20,98,100,5,alwaysonboth
+50,CMTE,16,17,100,20,22,27.9,1,alwaysonboth
+51,CMTE April Closed,1,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,2,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,3,99,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,4,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,5,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,6,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,7,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,8,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,9,17,100,20,22,27.9,1,alwaysonboth
+51,CMTE April Closed,10,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,11,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,12,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,13,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,14,17,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,15,99,100,20,98,100,5,alwaysonboth
+51,CMTE April Closed,16,17,100,20,98,100,5,alwaysonboth
+60,RAP,1,17,100,20,98,100,5,alwaysonboth
+60,RAP,2,17,100,20,98,100,5,alwaysonboth
+60,RAP,3,99,100,20,98,100,5,alwaysonboth
+60,RAP,4,17,100,20,98,100,5,alwaysonboth
+60,RAP,5,17,100,20,98,100,5,alwaysonboth
+60,RAP,6,17,100,20,98,100,5,alwaysonboth
+60,RAP,7,17,100,20,98,100,5,alwaysonboth
+60,RAP,8,17,100,20,98,100,5,alwaysonboth
+60,RAP,9,17,100,20,21,100,1,alwaysonboth
+60,RAP,10,17,100,20,98,100,5,alwaysonboth
+60,RAP,11,17,100,20,98,100,5,alwaysonboth
+60,RAP,12,17,100,20,98,100,5,alwaysonboth
+60,RAP,13,17,100,20,98,100,5,alwaysonboth
+60,RAP,14,17,100,20,98,100,5,alwaysonboth
+60,RAP,15,99,100,20,98,100,5,alwaysonboth
+60,RAP,16,17,100,20,21,100,1,alwaysonboth
+61,RAP April Closed,1,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,2,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,3,99,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,4,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,5,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,6,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,7,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,8,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,9,17,100,20,21,100,1,alwaysonboth
+61,RAP April Closed,10,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,11,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,12,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,13,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,14,17,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,15,99,100,20,98,100,5,alwaysonboth
+61,RAP April Closed,16,17,100,20,98,100,5,alwaysonboth

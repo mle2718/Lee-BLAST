@@ -1,0 +1,1181 @@
+<<dd_version: 2>>
+
+
+<!---A small document to read in and display some model results ---> 
+
+<!---Execute this with:
+
+
+/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  DONE   */
+/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
+	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
+	could be the fact that we're using annual data. 
+		Added in the graphs about the NAA and length structures
+
+	Slot limit of 23 to 28" for GB cod --
+		With open seasons that are the same for private and for-hire.
+	
+		How to test this out
+			Run the model with a 21 to 22" slot limit. Very few fish should be kept.
+			The model is coded for \geq the minimum and leq the maximum. So if I want a 23-28" slot, I need to enter the max as 27.9 
+
+
+ageclass lines for 2020 to 2022.  Take out the age 1's.
+				
+	*/
+
+
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+}
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+dyndoc "${code_dir}/postsim/third_summaries.txt", saving(${project_dir}/third_summaries.html) replace
+---> 
+~~~~
+<<dd_do:quietly>>
+/****************************/
+/****************************/
+/* Haddock and Cod rec ACLs in mt*/
+/****************************/
+/****************************/
+
+global hadd_recACL=3634
+global cod_recACL=192
+
+<</dd_do>>
+~~~~
+
+# Inputs and Background
+
+## Fishing Year 2020 and 2021 Regulations
+
+The same regulations were in place for FY2020 and FY2021.
+
+Haddock:
+
+*    15 fish, 17"
+*    Open May1-Feb 28 and April 1- April 30
+*    No Changes from 2019
+
+Cod: 
+
+*   1 fish, 21"
+*   Open Sept 15-Sept 30 and April 1-April 14 for private anglers
+*   Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers
+
+FY 2020 Regulations can be found [here](https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020).  Since there were no changes in FY2021, there is no federal register notice.
+
+The rec sub-ACL for cod was 193mt in 2020.  
+
+## Fishing Year 2022 Regulations
+
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.
+
+
+## Data
+
+
+1.  **Annual** length-frequencies for cod and haddock
+1.  **Monthly** catch-per-trip for cod and haddock
+    1.  The April 2021 catch-per-trip distribution for cod has 33.5% trips with 0 cod, 64.9% of trips with 1 cod, and **1.5% of trips catching 2 or more cod**.  This is really similar to March, 2021 and VERY different from May, 2021 .
+	1.  May 2021: 39% of trips with 0 cod, 23% with 1 cod, 10.7% with 2, 7% with 3 cod, 3% with 4 cod, and there's a smooth decline typical of a reasonably sampled dataset.
+	1.  March 2021: 40% of trips with 0 cod, 52.4% with 1 cod, 1.3% with 2, 2.7% with 3 cod, 3% with 10 cod. 
+1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
+1.  Bottomtrawl survey data from 2017-2019 to form the age-length keys.
+1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)
+
+MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions. 
+
+# Simulations 
+
+<!---
+1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100". This does the same thing. 
+1.  I'm ignoring the Oct1 to Oct 7 cod opening for the for-hire fleet. But I'm also ignoring the Sept 1 to Sept 7 cod closure for the for hire fleet. So, we should look at Sept and October together.
+SQ averages scenario numbers 1 and 3.   Scenario 1 is "April open for haddock, open for cod" and Scenario 3 is "April open for haddock, closed for cod."
+Whole month of April for Cod and closed for haddock (scenario 4).
+Whole month of April for both Cod and Haddock scenario 1.
+--->
+
+
+##  Scenario Key and Notes
+
+
+| Scenario number| Short Description | Long Description| Status|
+| :-----        |    :---------------   |          :--------------------- |   :-----|
+| 0| Status Quo 2022       | Same regs from 2021.   | Done|
+| 552|   CMTE | CMTE - 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 562|   RAP | RAP 5 week fall, 2 week spring. 1 cod at 21" | Done|
+
+
+<!---
+| Scenario number| Short Description | Long Description| Status|
+| :-----        |    :---------------   |          :--------------------- |   :-----|
+| 0| Status Quo 2022       | Same regs from 2021.   | Done|
+| 1| April Open        | Same regs from 2021, except April is open all month for both| Done|
+| 3| April Closed for Cod        | Same regs from 2021, except April is open all month for haddock and closed for cod | Done|
+| 5| 1Cod_20        |  April is open for both all month.1 cod at 20" | Done|
+| 11| 1Cod_19 |   April is open for both all month. 1 cod at 19" | Done|
+| 13| Slot 21-23		|  1 Cod slot at 21-23" for testing  | Done|
+| 14| Slot 22-28		|  1 Cod slot at 22-28" | Done|
+| 16| Slot 22-28 Sept	|  1 Cod slot at 22-28" Sept open| Done|
+| 21| April and Sept | April and sept open for everyone| Done|
+| 23| Sept    | April closed for cod, sept open for everyone| Done|
+| 25| April and Sept 20 | April and sept open for everyone. 1 cod at 20" | Done|
+| 470|   21in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 21" | Done|
+| 471| 21in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 21" | Done|
+| 472|   21in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 21" | Done|
+| 480|   22 in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 22" | Done|
+| 481|   22 in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22" | Done|
+| 482|   22 in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 22" | Done|
+| 490|   Slot Fall 4,  spring 0| 4 week fall, April closed. 1 cod at 22-28" | Done|
+| 491|   Slot in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22-28" | Done|
+| 492|   Slot in, Fall 4 spring 2| 4 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 570|   21in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 21" | Done|
+| 571|   21in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 21" | Done|
+| 572|   21in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 21" | Done|
+| 580|   22 in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 22" | Done|
+| 581|   22 in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22" | Done|
+| 582|   22 in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 22" | Done|
+| 590|   Slot Fall 5,  spring 0| 5 week fall, April closed. 1 cod at 22-28" | Done|
+| 591|   Slot in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22-28" | Done|
+| 592|   Slot in, Fall 5 spring 2| 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 670|   21in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 21" | Done|
+| 671|   21in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 21" | Done|
+| 672|   21in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 21" | Done|
+| 680|   22 in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 22" | Done|
+| 681|   22 in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22" | Done|
+| 682|   22 in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 22" | Done|
+| 690|   Slot Fall 6,  spring 0| 6 week fall, April closed. 1 cod at 22-28" | Done|
+| 691|   Slot in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22-28" | Done|
+| 692|   Slot in, Fall 6 spring 2| 6 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 552|   CMTE | CMTE - 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 562|   RAP | RAP 5 week fall, 2 week spring. 1 cod at 21" | Done|
+
+We are running the status quo and 3 sets of regulations under varying "fall scenarios"
+
+The scenarios numbers are ABC
+1 cod at 21": B=7
+1 cod at 22": B=8
+1 cod at 22-28": B=9
+
+Fall season of "1 month": A=4
+fall season of 5 weeks: A=5
+fall season of 6 weeks A=6
+
+April open: C=0
+April closed: C=1
+April partially open:C=2
+
+I have to run 3 separate calling files -- 
+_OpenSept
+_OpenSept5
+_OpenSept6
+ ---> 
+
+
+
+
+# Annual Results 
+
+Here are some results.  In this section, I first compute the annual totals for every replicate. Then I report out on the medians.
+~~~
+<<dd_do:quietly>>
+
+
+/****************************/
+/****************************/
+/* FOLDER setups */
+/****************************/
+/****************************/
+
+/*minyangWin is setup to connect to oracle yet */
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
+	global 	oracle_cxn  " $mysole_conn"
+}
+/* These are only needed 
+local my_common1 "atlanticcod"
+local my_common2 "haddock"
+*/
+
+
+
+global cm_to_inch=0.39370787
+global cod_naa "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
+global cod_naa_start "${source_data}/cod agepro/GOM_COD_2021_UPDATE_BOTH.dta"
+
+global codalkey "${working_data}/cod_al_key.dta"
+
+
+
+global working_year 2022
+global previous=$working_year-1
+
+
+global output_dir "${project_dir}/output"
+
+/****************************/
+/****************************/
+/* Files to read in  */
+/****************************/
+/****************************/
+
+
+/* Read in all the model runs that match `stub' */
+local stub "recreational_catches_2022Combine_"
+*local stub2 "recreational_catches_2022A"
+
+*local OpenSept "recreational_catches_2022_Open_Sept_"
+*local SlotA "recreational_catches_2022Slot_A_"
+*local SlotAOS "recreational_catches_2022Slot_AOS_"
+*local sensitivity "recreational_catches_2022_OS_sensA_"
+
+local round25 "recreational_catches5_2022_Round2"
+local round26 "recreational_catches6_2022_Round2"
+local round24 "recreational_catches_2022_Round2"
+local roundCMTE "recreational_catches5_2022_RAPGC"
+
+
+local filelist1: dir "${output_dir}" files "`stub'*.dta"
+local filelist2: dir "${output_dir}" files "`round25'*.dta"
+local filelist3: dir "${output_dir}" files "`round26'*.dta"
+local filelist4: dir "${output_dir}" files "`round24'*.dta"
+local filelist5: dir "${output_dir}" files "`roundCMTE'*.dta"
+
+local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
+
+
+
+/****************************/
+/****************************/
+/* Read in results and parse the source  */
+/****************************/
+/****************************/
+clear
+gen str40 source=""
+foreach file of local combinedfiles{
+capture append using ${output_dir}/`file'
+replace source="`file'"  if source==""
+}
+
+
+split source, parse("/") gen(ss)
+scalar rnvars=r(nvars)
+local all=r(varlist)
+local m="ss"+scalar(rnvars)
+local dropper : list all - m
+
+
+/****************************/
+/****************************/
+/* Tidy ups
+Drop the rows corresponding to the previous fishing year. 
+Generate the fishing year variable
+construct total catch (numbers) and mortality (mt)
+ */
+/****************************/
+/****************************/
+
+
+
+drop if month<=4
+gen fishing_year=$working_year
+gen year=fishing_year
+gen month_of_fy=month-4
+
+replace year=year+1 if month>=13
+replace month=month-12 if month>=13
+
+
+/* accidentally ran #10, drop it */
+drop if scenario_num==10 
+preserve
+
+
+/* construct the SQ 0 scenario by averaging the 3 and 4 scenarios.*/
+
+keep if inlist(scenario_num,3,1)
+gen freq=1
+replace scenario_num=0
+
+replace scenario="Status Quo 2022" 
+
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by( scenario scenario_num ss1 fishing_year year source  month replicate month_of_fy)
+
+tempfile s34
+save `s34', replace emptyok
+
+restore
+
+preserve
+
+/* construct the  472, 482, 492, 572, 582, 592, 672, 682, 692 scenarios by averaging the corresponding 0 and 1 scenarios.*/
+
+keep if scenario_num>=470 & scenario_num<=691
+gen freq=1
+
+replace scenario_num=floor(scenario_num/10)*10+2
+
+
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy)
+
+
+
+tempfile s470
+save `s470', replace emptyok
+restore
+
+
+append using `s34' `s470'
+
+
+
+
+
+gen cod_tot_cat=cod_num_kept+cod_num_released
+gen hadd_tot_cat=haddock_num_kept+haddock_num_released
+
+sort month
+order cod_tot_cat hadd_tot_cat, after(month)
+format *num* %09.1gc
+format *mt %06.1fc
+format *tot_cat %09.1gc
+
+gen cod_mort_mt=cod_kept_mt+cod_released_dead_mt
+gen hadd_mort_mt=hadd_kept_mt+hadd_released_dead_mt
+
+
+
+gen cod_avg_weight=2204*(cod_kept_mt+cod_released_mt)/cod_tot_cat
+
+gen haddock_relptrip=haddock_num_released/total_trips
+gen haddock_landptrip=haddock_num_kept/total_trips
+
+gen cod_relptrip=cod_num_released/total_trips
+gen cod_landptrip=cod_num_kept/total_trips
+
+
+
+label var haddock_relptrip "Haddock released/ trip"
+label var haddock_landptrip "Haddock landed/ trip"
+label var cod_landptrip "Cod landed/trip"
+label var cod_relptrip "Cod released/trip"
+
+label var total_trips  "Trips"
+label var cod_mort_mt  "Cod Mortality (mt)"
+
+label var hadd_mort_mt "Haddock Mortality (mt)"
+label var cod_kept_mt "Cod Kept (mt)"
+label var cod_released_mt "Cod Released (mt)"
+label var hadd_kept_mt "Haddock Kept (mt)"
+label var hadd_released_mt "Haddock Released(mt)"
+label var cod_num_kept "Cod kept (#)"
+
+label var cod_num_released "Cod released (#)"
+label var haddock_num_kept "Haddock kept (#)"
+label var haddock_num_released "Haddock relased (#)"
+
+tempfile raw_results
+
+replace scenario="April Closed" if scenario_num==2
+replace scenario="April Open" if scenario_num==1
+replace scenario="April Closed for Cod" if scenario_num==3
+replace scenario="April Closed for Haddock" if scenario_num==4
+
+replace scenario="1Cod 20" if scenario_num==5
+replace scenario="1Cod 20, April closed for haddock" if scenario_num==6
+replace scenario="2Cod 21" if scenario_num==7
+replace scenario="2Cod 21, April closed for haddock" if scenario_num==8
+
+replace scenario="2Cod 20" if scenario_num==9
+replace scenario="2Cod 20, April closed for haddock" if scenario_num==10
+
+
+replace scenario="1Cod 19" if scenario_num==11
+replace scenario="2Cod 19" if scenario_num==12
+
+
+
+replace scenario="Slot 21-23" if scenario_num==13
+replace scenario="Slot 22-28" if scenario_num==14
+replace scenario="2 at Slot 22-28" if scenario_num==15
+
+replace scenario="Slot 22-28 Sept All" if scenario_num==16
+
+replace scenario="Slot 22-28 Sept All (S)" if scenario_num==161
+replace scenario="2 at Slot 22-28 Sept All" if scenario_num==17
+
+
+replace scenario="April and Sept All" if scenario_num==21
+
+replace scenario="April and Sept All (S)" if scenario_num==211
+replace scenario="April closed for cod, Sept All" if scenario_num==23
+
+replace scenario="April and Sept All, 1 cod 20" if scenario_num==25
+
+/*round 2 scenario names */
+
+replace scenario="21in, Fall 4, spring 2" if scenario_num==472
+replace scenario="22in, Fall 4, spring 2" if scenario_num==482
+replace scenario="22-28slot, Fall 4, spring 2" if scenario_num==492
+
+replace scenario="21in, Fall 5, spring 2" if scenario_num==572
+replace scenario="22in, Fall 5, spring 2" if scenario_num==582
+replace scenario="22-28slot, Fall 5, spring 2" if scenario_num==592
+
+replace scenario="21in, Fall 6, spring 2" if scenario_num==672
+replace scenario="22in, Fall 6, spring 2" if scenario_num==682
+replace scenario="22-28slot, Fall 6, spring 2" if scenario_num==692
+
+
+/* RAP CMTE scenario names */
+
+sort scenario_num
+
+replace scenario="Committee" if scenario_num==552
+replace scenario="RAP" if scenario_num==562
+
+
+
+
+gen cod_limit=1 if inlist(scenario_num,0,1,2,3,4,5,6,11,13,14,21,23,25,16,161,211)
+/*round 2 cod limits */
+replace cod_limit=1 if scenario_num>=470 & scenario_num<=692
+
+
+replace cod_limit=2 if inlist(scenario_num,7,8,9,10,12,15,17)
+gen hadd_limit=15 
+replace hadd_limit=20 if inlist(scenario_num,550,551,552,560,561,562)
+
+gen str10 hadd_size=`"17""'
+
+gen str10 cod_size=`"21""' 
+replace cod_size=`"20""' if inlist(scenario_num,5,6,9,10)
+replace cod_size=`"19""' if inlist(scenario_num,11,12)
+replace cod_size=`"21-23""' if inlist(scenario_num,13)
+replace cod_size=`"22-28""' if inlist(scenario_num,14,15,16,17,161)
+
+/* round 2 cod sizes*/
+
+replace cod_size=`"22""' if inlist(scenario_num,480, 481, 482, 580, 581, 582, 680, 681, 682)
+replace cod_size=`"22-28""' if inlist(scenario_num,490, 491, 492, 590, 591, 592, 690, 691, 692, 550, 551,552)
+
+
+
+
+
+
+
+
+
+
+
+
+gen str20 mode="Private For-Hire"
+replace mode="All" if inlist(scenario_num,16,17,161,21,23,25,211)
+/*round 2 modes */
+replace mode="All" if scenario_num>=470 & scenario_num<=692 
+
+gen str60 cod_open_season=" Sep 15-Sep 30, Apr 1-14   Sep8-Oct 7, Apr 1-14" if inlist(scenario_num,0)
+replace  cod_open_season=" Sep 15-Sep 30, Apr 1-30   Sep8-Oct 7, Apr 1-30" if inlist(scenario_num,1,4,5,6,7,8,9,10,11,12,13,14,15)
+replace  cod_open_season=" Sep 15-Sep 30             Sep8-Oct 7" if inlist(scenario_num,2,3)
+replace  cod_open_season="Sept 8 -Oct 7 Apr 1-30" if inlist(scenario_num,21,23,25,16,17,211,161)
+replace  cod_open_season="Sept 8 -Oct 7" if inlist(scenario_num,23)
+
+replace  cod_open_season="Sept 1 -Sept 30, April 1-30" if inlist(scenario_num,470,480,490)
+replace  cod_open_season="Sept 1 -Oct 8, April 1-30" if inlist(scenario_num,570,580,590, 550, 560)
+replace  cod_open_season="Sept 1 -Oct 14, April 1-30" if inlist(scenario_num,670,680,690)
+
+
+replace  cod_open_season="Sept 1 -Sept 30, April 1-14" if inlist(scenario_num,472,482,492)
+replace  cod_open_season="Sept 1 -Oct 8, April 1-14" if inlist(scenario_num,572,582,592, 552, 562)
+replace  cod_open_season="Sept 1 -Oct 14, April 1-14" if inlist(scenario_num,672,682,692)
+
+
+replace  cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,471,481,491)
+replace  cod_open_season="Sept 1 -Oct 8 " if inlist(scenario_num,571,581,591,551,561 )
+replace  cod_open_season="Sept 1 -Oct 14" if inlist(scenario_num,671,681,691)
+
+/*round 2 cod open seasons */
+
+
+
+
+gen str60 had_open_season=" May-Feb28, Apr 15-Apr30" if inlist(scenario_num,0)
+replace  had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,1,3,5,7,9,11,12,13,14,15,21,22,25,16,17,23,211,161)
+replace  had_open_season=" May-Feb28, Apr 1-Apr30" if scenario_num>=470 & scenario_num<=692 
+
+replace  had_open_season=" May-Feb28" if inlist(scenario_num,2,4,6,8,10)
+
+save `raw_results', replace
+
+
+/****************************/
+/****************************/
+/* Contract to annual  */
+/****************************/
+/****************************/
+collapse (sum) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (first) cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season, by(scenario source scenario_num replicate )
+
+/* Flag replicates where mortality less than subacl*/
+
+gen cod_ok=0
+replace cod_ok=1 if cod_mort_mt<=$cod_recACL
+
+gen hadd_ok=0 
+replace hadd_ok=1 if hadd_mort_mt<=$hadd_recACL
+
+
+
+
+label var haddock_relptrip "Haddock released/ trip"
+label var haddock_landptrip "Haddock landed/ trip"
+label var cod_landptrip "Cod landed/trip"
+label var cod_relptrip "Cod released/trip"
+
+label var total_trips  "Trips"
+label var cod_mort_mt  "Cod Mortality (mt)"
+
+label var hadd_mort_mt "Haddock Mortality (mt)"
+label var cod_kept_mt "Cod Kept (mt)"
+label var cod_released_mt "Cod Released (mt)"
+label var hadd_kept_mt "Haddock Kept (mt)"
+label var hadd_released_mt "Haddock Released(mt)"
+label var cod_ok "% Under Cod subACL"
+
+label var hadd_ok "% Under Haddock subACL"
+label var source "Where is this data"
+
+label var cod_num_kept "Cod kept (#)"
+
+label var cod_num_released "Cod released (#)"
+label var haddock_num_kept "Haddock kept (#)"
+label var haddock_num_released "Haddock relased (#)"
+
+tempfile annual_results
+save `annual_results', replace
+<</dd_do>>
+~~~~
+
+
+
+
+
+~~~~
+<<dd_do:quietly>>
+/* Tidy things up a bit */
+local graphlist 0,472,572,672,482,582,682,492,592,692,552,562 
+keep if inlist(scenario_num, `graphlist')
+
+/*reorder */
+gen scott_order=mod(scenario_num,100)*10+floor(scenario_num/100)
+
+replace scenario=subinstr(scenario,", spring 2","", .) 
+replace scenario=subinstr(scenario," Fall 4","Fall 4 weeks", .) 
+replace scenario=subinstr(scenario," Fall 5","Fall 5 weeks", .)
+replace scenario=subinstr(scenario," Fall 6","Fall 6 weeks", .) 
+
+<</dd_do>>
+~~~~
+
+
+
+
+## Cod mortality over the different scenarios.
+~~~~
+<<dd_do:quietly>>
+local graphopts  "over(scenario, sort(scott_order) label(angle(forty_five))) yline($cod_recACL, lwidth(thick) lpattern(dash)) nooutsides "
+graph box cod_mort_mt if inlist(scenario_num, `graphlist') , `graphopts'
+<</dd_do>>
+~~~~
+<<dd_graph: sav("cod_annual_box_round2.png") alt("Box Plot of cod mortality in each scenario") replace height(400)>>
+
+
+
+
+~~~~
+<<dd_do:quietly>>
+preserve
+keep if inlist(scenario_num, 0,552,562) 
+local graphopts  "over(scenario, sort(scenario_num) label(angle(forty_five))) yline($cod_recACL, lwidth(thick) lpattern(dash)) nooutsides "
+graph box cod_mort_mt , `graphopts'
+restore
+<</dd_do>>
+~~~~
+These are just final three options: status quo, CMTE, and RAP .
+
+<<dd_graph: sav("cod_annual_final.png") alt("Box Plot of cod mortality in each scenario") replace height(400)>>
+
+
+
+
+## Haddock mortality over the different scenarios.
+~~~~
+<<dd_do:quietly>>
+local graphopts  "over(scenario, sort(scott_order) label(angle(forty_five))) nooutsides"
+graph box hadd_mort_mt   if inlist(scenario_num, `graphlist') , `graphopts'
+<</dd_do>>
+~~~~
+<<dd_graph: sav("hadd_annual_box_round2.png") alt("Box Plot of haddock mortality in each scenario") replace height(400)>>
+
+
+~~~~
+<<dd_do:quietly>>
+preserve
+keep if inlist(scenario_num, 0,552,562) 
+local graphopts  "over(scenario, sort(scenario_num) label(angle(forty_five)))  nooutsides "
+graph box hadd_mort_mt , `graphopts'
+restore
+<</dd_do>>
+~~~~
+These are just final three options: status quo, CMTE, and RAP .
+
+<<dd_graph: sav("hadd_annual_final.png") alt("Box Plot of haddock mortality in each scenario") replace height(400)>>
+~~~~
+<<dd_do: quietly>>
+graph close _all
+
+/****************************/
+/****************************/
+/* Contract to medians  */
+/****************************/
+/****************************/
+use  `annual_results', replace
+
+
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip   (sum) cod_ok hadd_ok  (count) N=replicate, by(scenario source scenario_num cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season)
+replace cod_ok=cod_ok/N*100
+replace hadd_ok=hadd_ok/N*100
+
+
+
+label var haddock_relptrip "Haddock released/ trip"
+label var haddock_landptrip "Haddock landed/ trip"
+label var cod_landptrip "Cod landed/trip"
+label var cod_relptrip "Cod released/trip"
+
+label var total_trips  "Trips"
+label var cod_mort_mt  "Cod Mortality (mt)"
+
+label var hadd_mort_mt "Haddock Mortality (mt)"
+label var cod_kept_mt "Cod Kept (mt)"
+label var cod_released_mt "Cod Released (mt)"
+label var hadd_kept_mt "Haddock Kept (mt)"
+label var hadd_released_mt "Haddock Released(mt)"
+label var cod_ok "% Under Cod subACL"
+
+label var hadd_ok "% Under Haddock subACL"
+label var source "Where is this data"
+
+label var cod_num_kept "Cod kept (#)"
+
+label var cod_num_released "Cod released (#)"
+label var haddock_num_kept "Haddock kept (#)"
+label var haddock_num_released "Haddock relased (#)"
+
+gen hadd_catch=haddock_num_kept+haddock_num_released
+
+gen cod_catch=cod_num_kept+cod_num_released
+
+replace scenario=ltrim(rtrim(itrim(scenario)))
+tempfile summed_results
+
+
+local graphlist 0,472,572,672,482,582,682,492,592,692,552,562 
+keep if inlist(scenario_num, `graphlist')
+
+/*reorder */
+gen scott_order=mod(scenario_num,100)*10+floor(scenario_num/100)
+
+replace scenario=subinstr(scenario,", spring 2","", .) 
+replace scenario=subinstr(scenario," Fall 4","Fall 4 weeks", .) 
+replace scenario=subinstr(scenario," Fall 5","Fall 5 weeks", .)
+replace scenario=subinstr(scenario," Fall 6","Fall 6 weeks", .) 
+
+
+
+save `summed_results', replace
+
+<</dd_do>>
+~~~~
+
+ 
+## Summary Outputs
+
+These scenarios are under the cod ACL and haddock ACL. Apart from the status-quo scenario and 3 , they also are open for both stocks for the full month of April.  
+~~~~
+<<dd_do:nocommands>>
+
+use `summed_results', clear
+format total_trips cod_mort_mt hadd_mort_mt hadd_catch cod_catch total_trips %10.0fc 
+sort scott_order
+qui gen str1 option=""
+list option mode cod_limit cod_size cod_open_season cod_mort_mt hadd_limit hadd_size  had_open_season hadd_mort_mt total_trips cod_ok hadd_ok scenario_num if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+<</dd_do>>
+~~~~
+
+
+
+## Trips, cod catch, cod landings, and cod discards 
+~~~~
+<<dd_do:nocommands>>
+use `summed_results', clear
+format total_trips cod_mort_mt hadd_mort_mt hadd_catch cod_catch %10.0fc 
+sort scott_order
+list scenario_num scenario total_trips cod_catch cod_num_kept cod_num_released hadd_catch haddock_num_kept haddock_num_released, abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+# Monthly Detailed results
+
+The following tables summarize the results of some of the scenarios at the monthly level.  Looking changes within the fishing season may be informative.  In this section, I compute the median outcome in each month.  I have also presented the sum of the medians as a final row.  The sum row in the following tables will not match the annual results exactly. This is expected because the sum of the medians is not the identical to the median of the sums.  
+
+## Status Quo 
+
+Monthly median outcomes for the "Status Quo 2022" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==0
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+
+## Committee scenario 
+
+GC recommendation:
+
+Gulf of Maine cod – Change from 21" min to slot limit
+
+    Open season (all modes): September 1 through October 7; April 1 - 14
+    Slot limit: 22" to 28"
+    Possession limit: 1 fish per day
+
+Gulf of Maine haddock – Increase the bag limit to 20 fish (from 15 fish)
+
+    Open season: May 1–Feb 28/29; April 1–30
+    Minimum size: 17 inches
+    Possession limit: 20 fish per day
+	
+Monthly median outcomes for the "Committee scenario" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==552
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+
+## RAP scenario 
+
+
+
+RAPs recommendation:
+
+Gulf of Maine cod
+
+    Open season (all modes): September 1 through October 7; April 1 - 14
+    Minimum size: 21 inches
+    Possession limit: 1 fish per day
+
+Gulf of Maine haddock – Increase the bag limit to 20 fish (from 15 fish)
+
+    Open season: May 1–Feb 28/29; April 1–30
+    Minimum size: 17 inches
+    Possession limit: 20 fish per day
+
+
+Monthly median outcomes for the "RAP scenario" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==562
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+
+
+
+
+## 21 inch, 4 week fall 
+
+Monthly median outcomes for the "21 inch, 4 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==472
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+## 22 inch, 4 week fall 
+
+Monthly median outcomes for the "22 inch, 4 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==482
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+## 22-28 inch slot, 4 week fall 
+
+Monthly median outcomes for the "22-28 inch slot, 4 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==492
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+
+
+## 21 inch, 5 week fall 
+
+Monthly median outcomes for the "21 inch, 5 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==572
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+## 22 inch, 5 week fall 
+
+Monthly median outcomes for the "22 inch, 5 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==582
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+## 22-28 inch slot, 5 week fall 
+
+Monthly median outcomes for the "22-28 inch slot, 5 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==592
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+## 21 inch, 6 week fall 
+
+Monthly median outcomes for the "21 inch, 5 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==672
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+## 22 inch, 6 week fall 
+
+Monthly median outcomes for the "22 inch, 5 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==682
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+## 22-28 inch slot, 6 week fall 
+
+Monthly median outcomes for the "22-28 inch slot, 5 week fall" simulation:
+~~~~
+<<dd_do:nocommands>>
+use `raw_results', clear
+qui keep if scenario_num==692
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (count) N=replicate, by(scenario source scenario_num month month_of_fy)
+
+format total_trips cod_num_kept cod_num_released %10.0fc 
+format  cod_kept_mt cod_released_mt cod_mort_mt  %6.2fc 
+sort scenario_num month_of_fy
+
+list month total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt , sum(total_trips cod_num_kept cod_num_released cod_kept_mt cod_released_mt cod_mort_mt) labvar(month) abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+
+
+
+
+
+
+
+
+
+
+# Numbers at age
+~~~~
+<<dd_do:quietly>>
+use "$cod_naa_start", clear
+keep if year>=2022
+foreach var of varlist age1-age9{
+    replace `var'=`var'/1000
+}
+collapse (median) age1-age9, by(year)
+append using "$cod_naa"
+sort year
+format age* %10.1fc
+<</dd_do>>
+~~~~
+
+Here are the numbers at age, in thousands for 2020 to 2022. All from the 2021 assessment update; we combined the projections from the M2 and MRAMP models and then taken the median.   Because of the way the projection handles recruitment, we are starting to get more small fish that will start to get caught by the fishery in 2022. This will continue in 2023. On average.
+~~~~
+<<dd_do:nocommands>>
+list year age* if year>=2020 & year<=2022,abbreviate(16) noobs
+<</dd_do>>
+~~~~
+
+The 2022 cod stock is approximately 27% age 2  
+The 2021 cod stock is approximately 13% age 2
+
+~~~~
+<<dd_do:quietly>>
+reshape long age, i(year) j(ageclass)
+rename age NAA
+tsset year ageclass
+keep if year>=2020 & year<=2022
+format NAA %10.0g
+xtline NAA if ageclass>=2, ylabel(0(1000)4000) tlabel(1(2)9) tmtick(##2)
+preserve
+<</dd_do>>
+~~~~
+<<dd_graph: sav("cod_NAA.png") alt("Cod Numbers at age for 2020-2023") replace height(400)>>
+
+
+~~~~
+<<dd_do:quietly>>
+xtline NAA if ageclass>=2, ylabel(0(500)2000) tlabel(1(2)9) tmtick(##2) legend(order(1 "2020" 2 "2021" 3 "2022") rows(1)) overlay plot1opts(lwidth(thin) lcolor(gs12)) plot2opts(lwidth(medthin) lcolor(blue))  plot3opts(lwidth(medthick) lcolor(black))
+<</dd_do>>
+~~~~
+
+<<dd_graph: sav("cod_NAA_2.png") alt("Cod Numbers at age for 2020-2023") replace height(400)>>
+
+
+
+~~~~
+<<dd_do:quietly>>
+use "$codalkey", clear
+destring, replace
+
+foreach var of varlist * {
+	capture confirm string variable `var'
+		if !_rc{
+			egen `var'2 = sieve(`var'), keep(n)
+			destring `var'2, replace
+			drop `var'
+			rename `var'2 `var'
+		}
+	}
+		
+/* here is a comment
+Convert CM to inches and then then round DOWN to nearest inch.  This is consistent with LNGCAT from the recreational catches 
+ */
+drop if age==0
+drop if age==1
+replace length=floor(length*$cm_to_inch) 
+
+ /* THIS STEP CONVERTS THINGS FROM METRIC TO IMPERIAL
+I use FLOOR to be consistent with the way that the length categories are constructed in the recreational data
+ */
+replace age=9 if age>=9
+
+collapse (sum) count, by(age length)
+/* this step fills in any missing age and length classes with missing values */
+reshape wide count, i(age) j(length)
+tsset age
+tsfill, full
+
+reshape long
+reshape wide count, i(length) j(age)
+tsset length
+tsfill, full
+
+reshape long
+reshape wide count, i(length) j(age)
+
+
+
+/* This step fills in any missing values with zeros and then does a separate lowess smoother for each age class */
+foreach var of varlist count*{
+	replace `var'=0 if `var'==.
+	lowess `var' length, adjust bwidth(.5) gen(s`var') nograph
+	replace s`var'=0 if s`var'<=0
+}
+
+reshape long count scount, i(length) j(age)
+order age length
+sort age length 
+
+
+egen double tc=total(count), by(age)
+gen double prob=count/tc
+
+keep age length prob
+replace prob=0 if prob<=9e-11
+
+rename length t
+rename prob length
+reshape wide length, i(age) j(t)
+rename age ageclass
+tempfile alkey
+save `alkey', replace
+restore
+
+keep if ageclass>=2
+
+merge m:1 ageclass using `alkey'
+
+foreach var of varlist length*{
+replace `var'=`var'*NAA
+}
+
+collapse (sum) length* , by(year)
+reshape long length, i(year) j(lngcat)
+rename length num
+
+xtset year lngcat
+
+/*raw numbers */
+xtline num if inlist(year, 2021 , 2022), overlay
+<</dd_do>>
+~~~~
+
+The number of cod (thousands)  in each length class (inch) in 2021 and 2022. We use the same age-length key as we use for the simulation model.  There are slightly more smaller cod in 2022 than 2021.  We excluded the ageclass=1 because it is not encountered by the recreational fishery
+
+<<dd_graph: sav("cod_sizes.png") alt("Cod sizes for 2021 and 2022") replace height(400)>>
+
+~~~
+<<dd_do:quietly>>
+sort year lngcat
+bysort year: egen t=total(num)
+gen pdf=num/t
+sort year lngcat
+bysort year: gen cdf=sum(pdf)
+
+/*cumulative */
+xtline cdf if inlist(year, 2021 , 2022), overlay ytitle("Cumulative Proportion of cod <= to a certain size")
+<</dd_do>>
+~~~~
+
+
+The cumulative number of cod that are less than or equal to a particular length class (in inches) for 2021 and 2022.
+
+<<dd_graph: sav("cod_cdf.png") alt("Cod cumulative size distribution for 2021 and 2022") replace height(400)>>
+
+
+
+<<dd_do:nocommands>>
+use `annual_results', clear
+<</dd_do>>
+
+

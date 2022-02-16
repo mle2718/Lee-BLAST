@@ -4,8 +4,8 @@
 
 /*
 This .do file was written by Min-Yang.Lee@noaa.gov 
-Version 1.2021
-Dec 3, 2021
+Version 1.2019
+Dec 3, 201
 
 Calibrated to the 3 year average of trips (320,750).  If you want to simulate "opening" one of the partially closed months, you need to adjust the rec_wave matrix
 
@@ -83,17 +83,11 @@ multiply by weight-at-maturity.
 
 clear
 mata:mata clear
+macro drop _all
 scalar drop _all
 matrix drop _all
 pause off
-
-
-/*minyangWin is setup to connect to oracle yet */
-if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_11_16" 
-}
-
+global project_dir "/home/mlee/Documents/Workspace/recreational_simulations/cod_haddock_fy2020"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -108,10 +102,11 @@ local time: display c(current_time)
 local time=subinstr(trim("`time'"),":","_",.)
 local hours=substr("`time'",1,2)
 
-/* name of file that contains regulations that you want to simulate over */
-global rec_management "2021calibrate"
+
+global rec_management "2019calibrateB"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
+
 cd $project_dir
 
 
@@ -120,7 +115,6 @@ version 12
 
 set more off
 set seed 8675309
-
 *set seed 9035768
 
 timer clear
@@ -197,33 +191,36 @@ global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
-/* FY 2020 had 407,000 trips. 
-FY2021 is on track for a similar number (371,900) 
-We'll probably need to set tot_trips to around 600 000
+
+/* To calibrate the model to 2017 
+I need to have 150799 trips*/
+/* To calibrate te model to 2019 (273825)
+
+I need to have 420500 trips*/
+
+/* To calibrate te model to average 2017-2019 (320750) i need 
+I need to have 493940 tot_trips trips*/
 
 
-global tot_trips 494000 --> 202,000 actual trips.
-
-
-*/
-
-
-global tot_trips 877000
-global tot_trips 893700
-global scale_factor 100
+global tot_trips 421000
+global scale_factor 10
 global numtrips=$tot_trips/$scale_factor
 
-global which_year=2021
+global which_year=2019
 
 
 /* read in biological data, economic data, and backround data on catch from the commercial fishery*/
 do "${code_dir}/presim/cod_hadd_bio_params.do"
-
-/* or this one */
-/*do "${code_dir}/presim/economic_parameters.do" */
-
 do "${code_dir}/presim/economic_parameters_mod.do"
 do "${code_dir}/presim/commercial_quotas.do"
+
+
+
+
+
+
+
+
 
 
 /* These globals contain the locations of the cod age-length key raw data */
@@ -233,11 +230,8 @@ do "${code_dir}/presim/commercial_quotas.do"
 global codalkey "${working_data}/cod_al_key.dta"
 global haddalkey "${working_data}/haddock_al_key9max.dta"
 
-
-global hadd_naa_sort "${source_data}/haddock agepro/haddock_beginning_sorted2022.dta"
-global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2022.dta"
-
-
+global hadd_naa_sort "$working_data/haddock_beginning_sorted2019.dta"
+global cod_naa_sort "$working_data/cod_beginning_sorted2019.dta"
 
 /*
 global hadd_naa_sort_bad "$working_data/haddock_beginning_sorted2017_low_recruits.dta"
@@ -249,8 +243,8 @@ pause
 /* set up the name of the postfiles.  These names are use by the postfile command*/
 tempname species1 species2 species1b species2b economic rec_catch
 
-postfile `economic' str32(scenario) scenario_num month choice_occasions total_trips WTP CV_A CV_E replicate cbag hbag cmin hmin cmax hmax codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `econ_out', replace
-postfile `rec_catch' str32(scenario) scenario_num month choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt replicate  cbag hbag cmin hmin cmax hmax crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `rec_out', replace
+postfile `economic' str32(scenario) scenario_num month total_trips WTP CV_A CV_E replicate cbag hbag cmin hmin cmax hmax codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `econ_out', replace
+postfile `rec_catch' str32(scenario) scenario_num month total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt replicate  cbag hbag cmin hmin cmax hmax crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort using `rec_out', replace
 
 postfile `species1' str32(scenario) scenario_num  month commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp1_out', replace
 postfile `species2' str32(scenario) scenario_num month commercial_catch commercial_discards age1 age2 age3 age4 age5 age6 age7 age8 age9 replicate  cbag hbag cmin hmin cmax hmax cod_release_mort hadd_release_mort using `sp2_out', replace
@@ -294,12 +288,9 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.27718  \ 5, 0.10032 \ 6, 0.1400 \ 7 ,0.08725 \ 8, .1288 \ 9 , .1159  \10, .00924 \ 11, .1413 \ 12,0.00)   
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.2967  \ 5, 0.0975 \ 6, 0.1365 \ 7 ,0.0846 \ 8, .1263 \ 9 , .1117 \10, .00892 \ 11, .1379 \ 12,0.00)   
-
-
-recreational_effort_waves = J(10,1,recreational_effort_waves)
-recreational_effort_monthly = J(10,1,recreational_effort_months) 
+recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4,0.209 \ 5, 0.106 \ 6, 0.055 \ 7 ,0.216 \ 8, .147 \ 9 , .212  \10, .056 \ 11, .00 \ 12,0.00)   
+ recreational_effort_waves = J(10,1,recreational_effort_waves)
+ recreational_effort_monthly = J(10,1,recreational_effort_months) 
 end
 /* END of Global macros */
 /**************************************************************/
@@ -325,18 +316,8 @@ This is useful for troubleshooting and debugging  */
 global hadd_relax_main=1
 global hadd_relax_mjj=$hadd_relax_main
 
-global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.004
-
-
-/* Cod sub-legals after wave 2 */
-
-global cod_relax_main=2
-global cod_sublegal_low=.001
-global cod_sublegal_hi=.001+$cod_sublegal_low
-
-
-
+global haddock_sublegal_low=0.0 
+global haddock_sublegal_hi=0.50
 
 /* read in regulations and run the model.*/
 foreach scenario of local scenario_list{
@@ -353,7 +334,7 @@ foreach scenario of local scenario_list{
 timer on 90
 nois _dots 0, title(Loop running: scenario $ws) reps($total_reps)
 
-quietly forvalues replicate=1/$total_reps{	
+qui forvalues replicate=1/$total_reps{	
 	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
@@ -474,7 +455,7 @@ putmata cod_initial_counts=(age*), replace
 clear
 
 
- forvalues this_month=1/`max_months'{
+qui forvalues this_month=1/`max_months'{
 
 /*Send/Extract the commercial fishing and recreational effort to scalars
 The mata: .... end command doesn't play nicely with a forvalues loop.
@@ -953,8 +934,8 @@ putmata rec_dead_haddock=(age1-age9), replace
 
 
 /* FIX THIS LATER: What do I need to save? */
-post `economic'  ("$scenario_name") ($scenario_num) (`this_month')  ($wave_numtrips*$scale_factor)  (scalar(tripcount)) (scalar(total_WTP)) (scalar(total_UA)) (scalar(total_UE))  (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
-post `rec_catch' ("$scenario_name") ($scenario_num) (`this_month')  ($wave_numtrips*$scale_factor)  (scalar(tripcount)) (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased))  (scalar(cod_kept_mt)) (scalar(cod_released_mt)) (scalar(cod_released_dead_mt)) (scalar(hadd_kept_mt)) (scalar(hadd_released_mt)) (scalar(hadd_released_dead_mt))     (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) (scalar(creplicate)) (scalar(hreplicate)) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
+post `economic'  ("$scenario_name") ($scenario_num) (`this_month') (scalar(tripcount)) (scalar(total_WTP)) (scalar(total_UA)) (scalar(total_UE))  (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
+post `rec_catch' ("$scenario_name") ($scenario_num) (`this_month') (scalar(tripcount)) (scalar(ckept)) (scalar(creleased)) (scalar(hkept)) (scalar(hreleased))  (scalar(cod_kept_mt)) (scalar(cod_released_mt)) (scalar(cod_released_dead_mt)) (scalar(hadd_kept_mt)) (scalar(hadd_released_mt)) (scalar(hadd_released_dead_mt))     (`replicate') ($codbag) ($haddockbag) ($cod_min_keep) ($hadd_min_keep) ($cod_max_keep) ($hadd_max_keep) (scalar(creplicate)) (scalar(hreplicate)) ($pcbag_comply)  ($cod_sublegal_hi)  ($mortality_release) ($haddock_mortality_release)
 	disp "checkpoint2"
 *  haddock_discard_dead_weight cod_discarded_dead_weight
 
@@ -1031,8 +1012,3 @@ shell chmod 440 `econ_out'
 
 timer list
 log close
-
-global file_in `rec_out' 
-/* output */
-
-dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace

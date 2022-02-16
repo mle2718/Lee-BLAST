@@ -121,7 +121,7 @@ use "${cod_naa_start}", clear
 preserve
 tempfile jumble
 keep replicate
-dups, drop terse
+duplicates drop
 gen u1=runiform()
 gen u2=runiform()
 
@@ -145,7 +145,7 @@ use "${hadd_naa_start}", clear
 preserve
 tempfile jumble2
 keep replicate
-dups, drop terse
+duplicates drop
 gen u1=runiform()
 gen u2=runiform()
 

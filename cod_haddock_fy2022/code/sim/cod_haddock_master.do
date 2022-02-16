@@ -4,12 +4,10 @@
 
 /*
 This .do file was written by Min-Yang.Lee@noaa.gov 
-Version 1.2021
-Dec 3, 2021
+Version 1.2019
+Dec 3, 201
 
 Calibrated to the 3 year average of trips (320,750).  If you want to simulate "opening" one of the partially closed months, you need to adjust the rec_wave matrix
-
-
 TABLE OF CONTENTS
 0.  File description, Meta Data, changegoals, and changelog
 1.  Global, scalar, and other setup (parameterization)
@@ -18,6 +16,13 @@ TABLE OF CONTENTS
 4.  Loop?
 */
 
+
+/* changes
+A. Deal with folders a little more intelligently
+	Folders for source data
+	
+
+ */
 
 /* BEGIN Section 0: FILE DESCRIPTION */
 
@@ -91,7 +96,7 @@ pause off
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_11_16" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
 }
 
 
@@ -107,9 +112,14 @@ local date=subinstr(trim("`date'"), " " , "_", .)
 local time: display c(current_time)
 local time=subinstr(trim("`time'"),":","_",.)
 local hours=substr("`time'",1,2)
+local mins=substr("`time'",4,2)
 
-/* name of file that contains regulations that you want to simulate over */
-global rec_management "2021calibrate"
+/*
+2021calibrate - 4 sets of regs that i'm using to calibrate the 2021 model.
+2022SQ is a copy of the 2021calibrate.
+*/
+
+global rec_management "2022Combine"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
@@ -120,9 +130,6 @@ version 12
 
 set more off
 set seed 8675309
-
-*set seed 9035768
-
 timer clear
 timer on 99
 
@@ -171,10 +178,8 @@ local cla "`cla'$suffix.dta"
 /* setup storage for length structures of simulated kept and released */
 preserve
 clear
-set obs 1
-gen dum=0
-save `hla', replace
-save `cla', replace
+save `hla', replace emptyok
+save `cla', replace emptyok
 restore
 
 
@@ -185,14 +190,14 @@ do "${code_dir}/sim/prep_regs.do"
 
 levelsof scenario, local(scenario_list)
 
-
 /* Is the model running waves or months? */
 global months=12
 global waves=6
 global periods_per_year=$months
 
 /*how many years, replicates */
-global total_reps=1
+global total_reps=100
+
 global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
 
@@ -207,23 +212,24 @@ global tot_trips 494000 --> 202,000 actual trips.
 
 */
 
-
-global tot_trips 877000
-global tot_trips 893700
+global tot_trips 879000
 global scale_factor 100
 global numtrips=$tot_trips/$scale_factor
 
-global which_year=2021
+global which_year=2022
 
 
 /* read in biological data, economic data, and backround data on catch from the commercial fishery*/
 do "${code_dir}/presim/cod_hadd_bio_params.do"
 
-/* or this one */
-/*do "${code_dir}/presim/economic_parameters.do" */
-
 do "${code_dir}/presim/economic_parameters_mod.do"
 do "${code_dir}/presim/commercial_quotas.do"
+
+
+
+
+
+
 
 
 /* These globals contain the locations of the cod age-length key raw data */
@@ -233,16 +239,6 @@ do "${code_dir}/presim/commercial_quotas.do"
 global codalkey "${working_data}/cod_al_key.dta"
 global haddalkey "${working_data}/haddock_al_key9max.dta"
 
-
-global hadd_naa_sort "${source_data}/haddock agepro/haddock_beginning_sorted2022.dta"
-global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2022.dta"
-
-
-
-/*
-global hadd_naa_sort_bad "$working_data/haddock_beginning_sorted2017_low_recruits.dta"
-global cod_naa_sort_bad "$working_data/cod_beginning_sorted2017_low_recruits.dta"
-*/
 disp "Are you calibrating or running the model?  Be sure that the Initial stock conditions are properly set at bookmarks 1 and 2."
 pause
 
@@ -294,8 +290,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.27718  \ 5, 0.10032 \ 6, 0.1400 \ 7 ,0.08725 \ 8, .1288 \ 9 , .1159  \10, .00924 \ 11, .1413 \ 12,0.00)   
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.2967  \ 5, 0.0975 \ 6, 0.1365 \ 7 ,0.0846 \ 8, .1263 \ 9 , .1117 \10, .00892 \ 11, .1379 \ 12,0.00)   
+recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.2852   \ 5, 0.0971 \ 6, 0.1388 \ 7 ,0.09133 \ 8, .1255\ 9 , .0830 \10, .0370   \ 11, .1421 \ 12,0.00)   
+recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.271 \ 5, 0.0990 \ 6, 0.141 \ 7 ,0.095 \ 8, .130  \ 9 , .0846 \10, .0375 \ 11, .1420 \ 12,0.00)   
 
 
 recreational_effort_waves = J(10,1,recreational_effort_waves)
@@ -336,10 +332,8 @@ global cod_sublegal_low=.001
 global cod_sublegal_hi=.001+$cod_sublegal_low
 
 
-
-
 /* read in regulations and run the model.*/
-foreach scenario of local scenario_list{
+qui foreach scenario of local scenario_list{
 	global ws=`scenario'
 	do "${code_dir}/sim/read_in_regs.do"
 
@@ -353,7 +347,11 @@ foreach scenario of local scenario_list{
 timer on 90
 nois _dots 0, title(Loop running: scenario $ws) reps($total_reps)
 
-quietly forvalues replicate=1/$total_reps{	
+/*reset the seed for each scenario*/
+set seed 2485768
+
+
+forvalues replicate=1/$total_reps{	
 	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
@@ -411,7 +409,7 @@ These are used to set up the number of fish in the first year of fishing
 
 /* This section of code reads in an observation, performs the age--> length transformation and saves it to an auxilliary dta (haddock_length_count.dta)*/
 /* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
-
+*/
 
 use "$hadd_naa_sort", clear
 keep if year==$which_year
@@ -419,14 +417,15 @@ keep if id==`replicate'
 scalar hreplicate=replicate[1]
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*
-*/
-/*  OPTION 3: Use the median numbers at age from the the AGEPRO output.  This is very useful to calibrate*/
+assert _n==1
+
+/*  OPTION 3: Use the median numbers at age from the the AGEPRO output.  This is very useful to calibrate
 use "$hadd_naa_start", clear
 keep if year==$which_year
 collapse (median) age1-age9
 scalar hreplicate=1
+*/
 
-assert _n==1
 save "${working_data}/haddock_age_count.dta", replace
 
 
@@ -447,24 +446,25 @@ There are a few "options here"  PAY CLOSE ATTENTION.
 /* This section of code reads in an observation, "stacks" it, performs the age--> length transformation and saves it to an auxilliary dta (cod_length_count.dta)*/
 
 
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
+/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*/
 
 use "$cod_naa_sort", clear
 keep if year==$which_year
 keep if id==`replicate'
 scalar creplicate=replicate[1]
+assert _n==1
 notes: this contains the numbers at age of cod for the current replicate
 keep age*
-*/
-/*  OPTION 3: Use the median numbers at age from the AGEPRO output*/
+
+/*  OPTION 3: Use the median numbers at age from the AGEPRO output
 
 use "$cod_naa_start", clear
 keep if year==$which_year
 collapse (median) age1-age9
 scalar creplicate=[1]
 keep  age*
+*/
 
-assert _n==1
 save "${working_data}/cod_age_count.dta", replace
  
 
@@ -474,7 +474,7 @@ putmata cod_initial_counts=(age*), replace
 clear
 
 
- forvalues this_month=1/`max_months'{
+qui forvalues this_month=1/`max_months'{
 
 /*Send/Extract the commercial fishing and recreational effort to scalars
 The mata: .... end command doesn't play nicely with a forvalues loop.
@@ -548,7 +548,9 @@ scalars from mata and then sending them to globals. */
 	*/
         	global cod_relax=2 
 		global hadd_relax=2 
-	/* however, this way of doing things doesn't work when we have  zero possession (modeled with a very high minimum size , over 90") When we have a very high minimum size, we'll*/
+	/* however, this way of doing things doesn't work when we have  zero possession (modeled with a very high minimum size , over 90") When we have a very high minimum size, we'll
+	This way of coding things doesn't work if cod_min_min==cod_min_keep (aka cod is always closed).
+	*/
 
 		if $cod_min_keep>=90 {
 		global cod_relax=$cod_min_keep-scalar(cod_min_min)-1
@@ -1032,7 +1034,3 @@ shell chmod 440 `econ_out'
 timer list
 log close
 
-global file_in `rec_out' 
-/* output */
-
-dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace

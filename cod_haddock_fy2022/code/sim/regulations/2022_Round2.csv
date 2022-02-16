@@ -1,0 +1,97 @@
+Scenario,SimName,SimMonth,HaddockMin,HaddockMax,HaddockBag,CodMin,CodMax,CodBag,ClosedBehavior
+90,SLOT,1,17,100,15,98,100,5,alwaysonboth
+90,SLOT,2,17,100,15,98,100,5,alwaysonboth
+90,SLOT,3,99,100,15,98,100,5,alwaysonboth
+90,SLOT,4,17,100,15,98,100,5,alwaysonboth
+90,SLOT,5,17,100,15,98,100,5,alwaysonboth
+90,SLOT,6,17,100,15,98,100,5,alwaysonboth
+90,SLOT,7,17,100,15,98,100,5,alwaysonboth
+90,SLOT,8,17,100,15,98,100,5,alwaysonboth
+90,SLOT,9,17,100,15,22,27.9,1,alwaysonboth
+90,SLOT,10,17,100,15,98,100,5,alwaysonboth
+90,SLOT,11,17,100,15,98,100,5,alwaysonboth
+90,SLOT,12,17,100,15,98,100,5,alwaysonboth
+90,SLOT,13,17,100,15,98,100,5,alwaysonboth
+90,SLOT,14,17,100,15,98,100,5,alwaysonboth
+90,SLOT,15,99,100,15,98,100,5,alwaysonboth
+90,SLOT,16,17,100,15,22,27.9,1,alwaysonboth
+91,"SLOT, April Closed",1,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",2,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",3,99,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",4,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",5,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",6,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",7,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",8,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",9,17,100,15,22,27.9,1,alwaysonboth
+91,"SLOT, April Closed",10,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",11,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",12,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",13,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",14,17,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",15,99,100,15,98,100,5,alwaysonboth
+91,"SLOT, April Closed",16,17,100,15,98,100,5,alwaysonboth
+70,21 inch,1,17,100,15,98,100,5,alwaysonboth
+70,21 inch,2,17,100,15,98,100,5,alwaysonboth
+70,21 inch,3,99,100,15,98,100,5,alwaysonboth
+70,21 inch,4,17,100,15,21,100,1,alwaysonboth
+70,21 inch,5,17,100,15,98,100,5,alwaysonboth
+70,21 inch,6,17,100,15,98,100,5,alwaysonboth
+70,21 inch,7,17,100,15,98,100,5,alwaysonboth
+70,21 inch,8,17,100,15,98,100,5,alwaysonboth
+70,21 inch,9,17,100,15,21,100,1,alwaysonboth
+70,21 inch,10,17,100,15,98,100,5,alwaysonboth
+70,21 inch,11,17,100,15,98,100,5,alwaysonboth
+70,21 inch,12,17,100,15,98,100,5,alwaysonboth
+70,21 inch,13,17,100,15,98,100,5,alwaysonboth
+70,21 inch,14,17,100,15,98,100,5,alwaysonboth
+70,21 inch,15,99,100,15,98,100,5,alwaysonboth
+70,21 inch,16,17,100,15,21,100,1,alwaysonboth
+71,"21 inch, April Closed",1,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",2,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",3,99,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",4,17,100,15,21,100,1,alwaysonboth
+71,"21 inch, April Closed",5,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",6,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",7,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",8,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",9,17,100,15,21,100,1,alwaysonboth
+71,"21 inch, April Closed",10,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",11,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",12,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",13,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",14,17,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",15,99,100,15,98,100,5,alwaysonboth
+71,"21 inch, April Closed",16,17,100,15,98,100,5,alwaysonboth
+80,22 inch,1,17,100,15,98,100,5,alwaysonboth
+80,22 inch,2,17,100,15,98,100,5,alwaysonboth
+80,22 inch,3,99,100,15,98,100,5,alwaysonboth
+80,22 inch,4,17,100,15,21,100,1,alwaysonboth
+80,22 inch,5,17,100,15,98,100,5,alwaysonboth
+80,22 inch,6,17,100,15,98,100,5,alwaysonboth
+80,22 inch,7,17,100,15,98,100,5,alwaysonboth
+80,22 inch,8,17,100,15,98,100,5,alwaysonboth
+80,22 inch,9,17,100,15,22,100,1,alwaysonboth
+80,22 inch,10,17,100,15,98,100,5,alwaysonboth
+80,22 inch,11,17,100,15,98,100,5,alwaysonboth
+80,22 inch,12,17,100,15,98,100,5,alwaysonboth
+80,22 inch,13,17,100,15,98,100,5,alwaysonboth
+80,22 inch,14,17,100,15,98,100,5,alwaysonboth
+80,22 inch,15,99,100,15,98,100,5,alwaysonboth
+80,22 inch,16,17,100,15,22,100,1,alwaysonboth
+81,"22 inch, April Closed",1,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",2,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",3,99,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",4,17,100,15,21,100,1,alwaysonboth
+81,"22 inch, April Closed",5,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",6,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",7,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",8,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",9,17,100,15,22,100,1,alwaysonboth
+81,"22 inch, April Closed",10,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",11,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",12,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",13,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",14,17,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",15,99,100,15,98,100,5,alwaysonboth
+81,"22 inch, April Closed",16,17,100,15,98,100,5,alwaysonboth

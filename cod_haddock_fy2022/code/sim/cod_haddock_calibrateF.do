@@ -91,7 +91,7 @@ pause off
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_11_16" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
 }
 
 
@@ -208,8 +208,7 @@ global tot_trips 494000 --> 202,000 actual trips.
 */
 
 
-global tot_trips 877000
-global tot_trips 893700
+global tot_trips 879000
 global scale_factor 100
 global numtrips=$tot_trips/$scale_factor
 
@@ -234,15 +233,6 @@ global codalkey "${working_data}/cod_al_key.dta"
 global haddalkey "${working_data}/haddock_al_key9max.dta"
 
 
-global hadd_naa_sort "${source_data}/haddock agepro/haddock_beginning_sorted2022.dta"
-global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2022.dta"
-
-
-
-/*
-global hadd_naa_sort_bad "$working_data/haddock_beginning_sorted2017_low_recruits.dta"
-global cod_naa_sort_bad "$working_data/cod_beginning_sorted2017_low_recruits.dta"
-*/
 disp "Are you calibrating or running the model?  Be sure that the Initial stock conditions are properly set at bookmarks 1 and 2."
 pause
 
@@ -294,8 +284,7 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.27718  \ 5, 0.10032 \ 6, 0.1400 \ 7 ,0.08725 \ 8, .1288 \ 9 , .1159  \10, .00924 \ 11, .1413 \ 12,0.00)   
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.2967  \ 5, 0.0975 \ 6, 0.1365 \ 7 ,0.0846 \ 8, .1263 \ 9 , .1117 \10, .00892 \ 11, .1379 \ 12,0.00)   
+recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.271 \ 5, 0.0990 \ 6, 0.141 \ 7 ,0.095 \ 8, .130  \ 9 , .0846 \10, .0375 \ 11, .1420 \ 12,0.00)   
 
 
 recreational_effort_waves = J(10,1,recreational_effort_waves)
@@ -548,7 +537,9 @@ scalars from mata and then sending them to globals. */
 	*/
         	global cod_relax=2 
 		global hadd_relax=2 
-	/* however, this way of doing things doesn't work when we have  zero possession (modeled with a very high minimum size , over 90") When we have a very high minimum size, we'll*/
+	/* however, this way of doing things doesn't work when we have  zero possession (modeled with a very high minimum size , over 90") When we have a very high minimum size, 
+	This way of coding things doesn't work if cod_min_min==cod_min_keep (aka cod is always closed).
+	*/
 
 		if $cod_min_keep>=90 {
 		global cod_relax=$cod_min_keep-scalar(cod_min_min)-1
@@ -1035,4 +1026,4 @@ log close
 global file_in `rec_out' 
 /* output */
 
-dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summariesF.html) replace
