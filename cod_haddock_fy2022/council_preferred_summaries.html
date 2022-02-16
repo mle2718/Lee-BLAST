@@ -1,0 +1,159 @@
+<!---A small document to read in and display some model results ---> 
+<!---Execute this with:
+
+
+/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  DONE   */
+/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
+	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
+	could be the fact that we're using annual data. 
+		Added in the graphs about the NAA and length structures
+
+	Slot limit of 23 to 28" for GB cod --
+		With open seasons that are the same for private and for-hire.
+	
+		How to test this out
+			Run the model with a 21 to 22" slot limit. Very few fish should be kept.
+			The model is coded for \geq the minimum and leq the maximum. So if I want a 23-28" slot, I need to enter the max as 27.9 
+
+
+ageclass lines for 2020 to 2022.  Take out the age 1's.
+				
+	*/
+
+
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+}
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+dyndoc "${code_dir}/postsim/council_preferred_summaries.txt", saving(${project_dir}/council_preferred_summaries.html) replace
+---> 
+<pre><code></code></pre>
+<h1><a href="#inputs-and-background" id="inputs-and-background">Inputs and Background</a></h1>
+<h2><a href="#fishing-year-2020-and-2021-regulations" id="fishing-year-2020-and-2021-regulations">Fishing Year 2020 and 2021 Regulations</a></h2>
+<p>The same regulations were in place for FY2020 and FY2021.</p>
+<p>Haddock:</p>
+<ul>
+<li>15 fish, 17&quot;</li>
+<li>Open May1-Feb 28 and April 1- April 30</li>
+<li>No Changes from 2019</li>
+</ul>
+<p>Cod:</p>
+<ul>
+<li>1 fish, 21&quot;</li>
+<li>Open Sept 15-Sept 30 and April 1-April 14 for private anglers</li>
+<li>Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers</li>
+</ul>
+<p>FY 2020 Regulations can be found <a href="https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020">here</a>.  Since there were no changes in FY2021, there is no federal register notice.</p>
+<p>The rec sub-ACL for cod was 193mt in 2020.</p>
+<h2><a href="#fishing-year-2022-regulations" id="fishing-year-2022-regulations">Fishing Year 2022 Regulations</a></h2>
+<p>The recreational sub-ACL for GoM cod is      192 mt for FY 2022. The recreational sub-ACL for GOM haddock is    3,634 mt.</p>
+<h2><a href="#data" id="data">Data</a></h2>
+<ol>
+<li><strong>Annual</strong> length-frequencies for cod and haddock</li>
+<li><strong>Monthly</strong> catch-per-trip for cod and haddock
+<ol>
+<li>The April 2021 catch-per-trip distribution for cod has 33.5% trips with 0 cod, 64.9% of trips with 1 cod, and <strong>1.5% of trips catching 2 or more cod</strong>.  This is really similar to March, 2021 and VERY different from May, 2021 .</li>
+<li>May 2021: 39% of trips with 0 cod, 23% with 1 cod, 10.7% with 2, 7% with 3 cod, 3% with 4 cod, and there&rsquo;s a smooth decline typical of a reasonably sampled dataset.</li>
+<li>March 2021: 40% of trips with 0 cod, 52.4% with 1 cod, 1.3% with 2, 2.7% with 3 cod, 3% with 10 cod.</li>
+</ol>
+</li>
+<li>2022 numbers at age for cod and haddock from the AGEPRO projections.</li>
+<li>Bottomtrawl survey data from 2017-2019 to form the age-length keys.</li>
+<li>Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)</li>
+</ol>
+<p>MRIP data uses &ldquo;trimmed landings&rdquo; estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions.</p>
+<h1><a href="#simulations" id="simulations">Simulations</a></h1>
+<!---
+1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100". This does the same thing. 
+1.  I'm ignoring the Oct1 to Oct 7 cod opening for the for-hire fleet. But I'm also ignoring the Sept 1 to Sept 7 cod closure for the for hire fleet. So, we should look at Sept and October together.
+SQ averages scenario numbers 1 and 3.   Scenario 1 is "April open for haddock, open for cod" and Scenario 3 is "April open for haddock, closed for cod."
+Whole month of April for Cod and closed for haddock (scenario 4).
+Whole month of April for both Cod and Haddock scenario 1.
+--->
+<h2><a href="#scenario-key-and-notes" id="scenario-key-and-notes">Scenario Key and Notes</a></h2>
+<table>
+<thead>
+<tr><th align="left"> Scenario number</th><th align="left"> Short Description </th><th align="left"> Long Description</th><th align="left"> Status</th></tr>
+</thead>
+<tbody>
+<tr><td align="left"> 0</td><td align="left"> Status Quo 2022       </td><td align="left"> Same regs from 2021.   </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 552</td><td align="left">   CMTE </td><td align="left"> CMTE - 5 week fall, 2 week spring. 1 cod at 22-28&quot; </td><td align="left"> Done</td></tr>
+<tr><td align="left"> 562</td><td align="left">   RAP </td><td align="left"> RAP 5 week fall, 2 week spring. 1 cod at 21&quot; </td><td align="left"> Done</td></tr>
+</tbody>
+</table>
+<!---
+| Scenario number| Short Description | Long Description| Status|
+| :-----        |    :---------------   |          :--------------------- |   :-----|
+| 0| Status Quo 2022       | Same regs from 2021.   | Done|
+| 1| April Open        | Same regs from 2021, except April is open all month for both| Done|
+| 3| April Closed for Cod        | Same regs from 2021, except April is open all month for haddock and closed for cod | Done|
+| 5| 1Cod_20        |  April is open for both all month.1 cod at 20" | Done|
+| 11| 1Cod_19 |   April is open for both all month. 1 cod at 19" | Done|
+| 13| Slot 21-23		|  1 Cod slot at 21-23" for testing  | Done|
+| 14| Slot 22-28		|  1 Cod slot at 22-28" | Done|
+| 16| Slot 22-28 Sept	|  1 Cod slot at 22-28" Sept open| Done|
+| 21| April and Sept | April and sept open for everyone| Done|
+| 23| Sept    | April closed for cod, sept open for everyone| Done|
+| 25| April and Sept 20 | April and sept open for everyone. 1 cod at 20" | Done|
+| 470|   21in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 21" | Done|
+| 471| 21in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 21" | Done|
+| 472|   21in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 21" | Done|
+| 480|   22 in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 22" | Done|
+| 481|   22 in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22" | Done|
+| 482|   22 in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 22" | Done|
+| 490|   Slot Fall 4,  spring 0| 4 week fall, April closed. 1 cod at 22-28" | Done|
+| 491|   Slot in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22-28" | Done|
+| 492|   Slot in, Fall 4 spring 2| 4 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 570|   21in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 21" | Done|
+| 571|   21in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 21" | Done|
+| 572|   21in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 21" | Done|
+| 580|   22 in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 22" | Done|
+| 581|   22 in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22" | Done|
+| 582|   22 in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 22" | Done|
+| 590|   Slot Fall 5,  spring 0| 5 week fall, April closed. 1 cod at 22-28" | Done|
+| 591|   Slot in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22-28" | Done|
+| 592|   Slot in, Fall 5 spring 2| 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 670|   21in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 21" | Done|
+| 671|   21in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 21" | Done|
+| 672|   21in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 21" | Done|
+| 680|   22 in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 22" | Done|
+| 681|   22 in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22" | Done|
+| 682|   22 in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 22" | Done|
+| 690|   Slot Fall 6,  spring 0| 6 week fall, April closed. 1 cod at 22-28" | Done|
+| 691|   Slot in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22-28" | Done|
+| 692|   Slot in, Fall 6 spring 2| 6 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 552|   CMTE | CMTE - 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
+| 562|   RAP | RAP 5 week fall, 2 week spring. 1 cod at 21" | Done|
+
+We are running the status quo and 3 sets of regulations under varying "fall scenarios"
+
+The scenarios numbers are ABC
+1 cod at 21": B=7
+1 cod at 22": B=8
+1 cod at 22-28": B=9
+
+Fall season of "1 month": A=4
+fall season of 5 weeks: A=5
+fall season of 6 weeks A=6
+
+April open: C=0
+April closed: C=1
+April partially open:C=2
+
+I have to run 3 separate calling files -- 
+_OpenSept
+_OpenSept5
+_OpenSept6
+ ---> 
+<h1><a href="#annual-results" id="annual-results">Annual Results</a></h1>
+<p>Here are some results.  In this section, I first compute the annual totals for every replicate. Then I report out on the medians.</p>
+<pre><code></code></pre>
