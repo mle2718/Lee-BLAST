@@ -1,0 +1,248 @@
+<!---A small document to examine how well the model is calibrated ---> 
+<!---Execute this with:
+
+
+
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+}
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+
+
+/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  
+		After changing to 1-3, I have to recalibrate slightly, but it shouldn't take more than 1-2 tries.
+
+ */
+/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
+	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
+	could be the fact that we're using annual data. 
+	
+	
+	Scott to send the number of trips that are private in September. We are going to model opening up September for the private by doubling their number of trips.
+	*/
+
+
+
+ ---> 
+<h1><a href="#fishing-year-2020-and-2021-regulations" id="fishing-year-2020-and-2021-regulations">Fishing Year 2020 and 2021 Regulations</a></h1>
+<p>The same regulations were in place for FY2020 and FY2021.</p>
+<p>Haddock:</p>
+<ul>
+<li>15 fish, 17&quot;</li>
+<li>Open May1-Feb 28 and April 1- April 30</li>
+<li>No Changes from 2019</li>
+</ul>
+<p>Cod:</p>
+<ul>
+<li>1 fish, 21&quot;</li>
+<li>Open Sept 15-Sept 30 and April 1-April 14 for private anglers</li>
+<li>Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers</li>
+</ul>
+<p>FY 2020 Regulations can be found <a href="https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020">here</a>.  Since there were no changes in FY2021, there is no federal register notice.</p>
+<p>The rec sub-ACL for cod was 193mt in 2020.</p>
+<h1><a href="#fishing-year-2022-regulations" id="fishing-year-2022-regulations">Fishing Year 2022 Regulations</a></h1>
+<p>Rec sub-ACL for GoM cod is</p>
+<h1><a href="#input-data" id="input-data">Input data</a></h1>
+<ol>
+<li><strong>Annual</strong> length-frequencies for cod and haddock</li>
+<li><strong>Monthly</strong> catch-per-trip for cod and haddock</li>
+<li>2021 numbers at age for cod and haddock from the AGEPRO projections.</li>
+<li>Bottomtrawl survey data from 2017-2019 to form the age-length keys.</li>
+<li>Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)</li>
+</ol>
+<p>MRIP data uses &ldquo;trimmed landings&rdquo; estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions.</p>
+<h1><a href="#calibration" id="calibration">Calibration</a></h1>
+<ol>
+<li>I&rsquo;m using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.</li>
+<li>I&rsquo;m using the &ldquo;always on&rdquo; behavior &ndash; if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100&quot; &ndash; this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100&quot;. This does the same thing.</li>
+<li>I&rsquo;m ignoring the Oct1 to Oct 7 cod opening for the for-hire fleet. But I&rsquo;m also ignoring the Sept 1 to Sept 7 cod closure for the for hire fleet. So, we should look at Sept and October together.</li>
+</ol>
+<!---With stata's list, you can also use the 'sum' option to create a group sum. This avoids having to create and append a summation row . 
+
+	list group costs profits, sum(costs profits) labvar(group)
+
+	will add an extra line with group=sum containing the total cost and profits.
+	
+ ---> 
+<pre><code></code></pre>
+<p>This table has my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I&rsquo;m using to calibrate the model.</p>
+<pre><code>
+     +---------------------------------------------------------------------------------------------------------------------------------+
+     | fishing_year   month   actual_trips   sim_total_trips       error      yield   needed_choice_~s   needed_total_co   needed_frac |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+  1. |         2021       5         44,041            44,240   -.0045179      .5085           86608.71          877351.1      .0987161 |
+  2. |         2021       6         49,188            50,030   -.0171093   .4037934           121815.8          877351.1       .138845 |
+  3. |         2021       7         33,166            33,286   -.0036006   .3986287           83200.43          877351.1      .0948314 |
+  4. |         2021       8         41,789            41,866   -.0018376   .3665981           113990.5          877351.1      .1299258 |
+  5. |         2021       9         34,161            33,951    .0061659   .4569381           74760.97          877351.1      .0852121 |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+  6. |         2021      10         12,851            12,348    .0392146    .375304           34242.82          877351.1      .0390298 |
+  7. |         2021      11         32,024            31,909    .0035969   .2556811           125250.5          877351.1      .1427598 |
+  8. |         2021      12              .                 0           .          .                  .          877351.1             . |
+  9. |         2021       1              .                 0           .          .                  .          877351.1             . |
+ 10. |         2021       2              .                 0           .          .                  .          877351.1             . |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+ 11. |         2021       3              .                 0           .          .                  .          877351.1             . |
+ 12. |         2021       4         73,925            74,149   -.0030262   .3112888           237481.3          877351.1      .2706799 |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+     |                  Sum        321,146           321,777                                  877351.1                                 |
+     +---------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>The number of trips is accurate, usually to 1-2%.  As expected.</p>
+<!---
+
+The following table has the calibration target and the number of simulated trips for 4 calibrations model runs:
+
+1. April open for cod and haddock 
+2. April closed for cod and haddock 
+3. April open for haddock, closed for cod 
+4. April closed for haddock, open for cod
+
+I think #2 and #4 are irrelevant.  I am using an average #1 of #3.
+--->
+<pre><code>
+</code></pre>
+<h1><a href="#catch-statistics-for-cod" id="catch-statistics-for-cod">Catch Statistics for Cod</a></h1>
+<p>Here are the cod numbers (a, b1, b2) for actual and calibration results for Fishing Year 2021.</p>
+<ol>
+<li>Total catch matches very well, except for June (129,800 caught vs 140,000 simulated) and  April (38,900 caught vs 54,400 simulated).</li>
+<li>The number of landed cod matches very well, especially when we group September and October together.</li>
+<li>The released cod caught matches well, except for June  (129,300 released vs 139,700 simulated) and April (39,000 released vs 53,400 simulated).  This difference is mostly due the simulation model over predicting caught cod.</li>
+</ol>
+<pre><code>
+
+
+     +----------------------------------------------------------------------------------------------------------------+
+     | fishing_year   month   actual_cat   sim_tot_cat_cod   landings   sim_cod_num_kept        b2   sim_cod_num_re~d |
+     |----------------------------------------------------------------------------------------------------------------|
+  1. |         2021       5       83,270            85,170         10                309    83,260             84,861 |
+  2. |         2021       6      129,865           130,205        517                 94   129,348            130,111 |
+  3. |         2021       7       94,291            97,519         65                  0    94,225             97,519 |
+  4. |         2021       8       51,165            51,747        258                 33    50,908             51,715 |
+  5. |         2021       9       61,601            56,134      8,835             10,240    52,765             45,894 |
+     |----------------------------------------------------------------------------------------------------------------|
+  6. |         2021      10       33,927            34,095      1,098                  0    32,829             34,095 |
+  7. |         2021      11       63,682            67,900          0                 87    63,682             67,812 |
+  8. |         2021      12            .                 0          .                  0         .                  0 |
+  9. |         2021       1            .                 0          .                  0         .                  0 |
+ 10. |         2021       2            .                 0          .                  0         .                  0 |
+     |----------------------------------------------------------------------------------------------------------------|
+ 11. |         2021       3            .                 0          .                  0         .                  0 |
+ 12. |         2021       4       40,426            53,301      1,434              4,636    38,992             48,665 |
+     |----------------------------------------------------------------------------------------------------------------|
+     |                  Sum      558,226           576,071     12,216             15,399   546,010            560,672 |
+     +----------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>Here are the cod weights (a, b1, b2) for actual and calibration results for Fishing Year 2021. Over the entire year, the kept numbers are too high (28.4 mt actual vs 37.3 mt simulated). The weights of released cod are also a bit high (655 mt actual vs 698 mt simulated). I think this is being caused by using annual Length frequencies. For example in the september actual data, cod over 21&quot; are either going to be 23&quot; or 29&quot;. But when we apply the annual length-frequency, it&rsquo;s there&rsquo;s a smoother mix. There&rsquo;s also some larger fish.  The data are just so sparse.</p>
+<pre><code>
+
+
+     +---------------------------------------------------------------------------------------------+
+     | fishing_year   month   ab1mt    b2mt   sim_cod_kept_mt   sim_cod_re~ed_mt   sim_cod_mort_mt |
+     |---------------------------------------------------------------------------------------------|
+  1. |         2021       5     0.0   166.6               0.4              117.8              18.0 |
+  2. |         2021       6     0.4   223.8               0.0              176.9              26.6 |
+  3. |         2021       7     0.1    83.8               0.0              131.2              19.7 |
+  4. |         2021       8     0.6    60.9               0.0               68.4              10.3 |
+  5. |         2021       9    21.8    34.0              30.2               40.9              36.4 |
+     |---------------------------------------------------------------------------------------------|
+  6. |         2021      10     4.8    27.9               0.0               40.1               6.0 |
+  7. |         2021      11     0.0     0.0               0.3               80.5              12.3 |
+  8. |         2021      12       .       .               0.0                0.0               0.0 |
+  9. |         2021       1       .       .               0.0                0.0               0.0 |
+ 10. |         2021       2       .       .               0.0                0.0               0.0 |
+     |---------------------------------------------------------------------------------------------|
+ 11. |         2021       3       .       .               0.0                0.0               0.0 |
+ 12. |         2021       4     0.7    58.5              11.8               43.9              18.4 |
+     |---------------------------------------------------------------------------------------------|
+     |                  Sum    28.4   655.6              42.7              699.6             147.7 |
+     +---------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h1><a href="#catch-statistics-for-haddock" id="catch-statistics-for-haddock">Catch Statistics for Haddock</a></h1>
+<p>Here are the haddock (a, b1, b2) in numbers for Fishing Year 2021 that we are calibrating to.</p>
+<ol>
+<li>Total catch matches very well, except for April  (140,400 caught vs 90,000 simulated).</li>
+<li>It looks like I&rsquo;m having problems sorting catch into kept and released fish.  I am overpredicting catch and under predicting releases in June, July, August, Sept.  And the opposite in April and May.</li>
+</ol>
+<pre><code>
+
+
+     +------------------------------------------------------------------------------------------------------------------------------------+
+     | fishing_year   month   actual_cat   sim_tot_cat_ha~k   landings   sim_haddock_nu~t        b2   sim_haddock_nu~d   sim_hadd_mort_mt |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+  1. |         2021       5      377,930            390,029    270,697            239,952   107,233            150,078                278 |
+  2. |         2021       6      214,119            215,954    109,015            137,329   105,104             78,625                157 |
+  3. |         2021       7      151,835            140,762     91,215             94,507    60,620             46,256                119 |
+  4. |         2021       8      158,182            160,025     69,933            103,187    88,249             56,839                133 |
+  5. |         2021       9      128,196            131,079     56,453             86,866    71,744             44,213                110 |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+  6. |         2021      10       52,177             47,408     35,617             31,144    16,560             16,264                 40 |
+  7. |         2021      11        9,187              8,660          0              5,753     9,187              2,907                  7 |
+  8. |         2021      12            .                  0          .                  0         .                  0                  0 |
+  9. |         2021       1            .                  0          .                  0         .                  0                  0 |
+ 10. |         2021       2            .                  0          .                  0         .                  0                  0 |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+ 11. |         2021       3            .                  0          .                  0         .                  0                  0 |
+ 12. |         2021       4      140,421             85,555    124,352             57,798    16,069             27,758                 66 |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+     |                  Sum    1,232,048          1,179,473    757,282            756,535   474,766            422,939                910 |
+     +------------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>Here are the haddock (a+b1 and b2) in weights and numbers for Fishing Year 2021 that we are calibrating to. This uses the 2b95 method.</p>
+<pre><code>
+
+
+     +-----------------------------------------------------------------------------------------------+
+     | fishing_year   month   ab1mt    b2mt   sim_hadd_kept_mt   sim_hadd_r~ed_mt   sim_hadd_mort_mt |
+     |-----------------------------------------------------------------------------------------------|
+  1. |         2021       5   258.2    67.0              245.5              103.1              278.2 |
+  2. |         2021       6    97.9    57.5              140.8               52.3              157.4 |
+  3. |         2021       7    84.4    27.8               97.2               29.6              119.2 |
+  4. |         2021       8    65.0    45.6              105.6               37.2              133.1 |
+  5. |         2021       9    52.7    32.9               88.8               27.9              109.5 |
+     |-----------------------------------------------------------------------------------------------|
+  6. |         2021      10    31.6     8.7               32.0               10.5               39.8 |
+  7. |         2021      11     0.0     0.0                5.9                1.8                7.2 |
+  8. |         2021      12       .       .                0.0                0.0                0.0 |
+  9. |         2021       1       .       .                0.0                0.0                0.0 |
+ 10. |         2021       2       .       .                0.0                0.0                0.0 |
+     |-----------------------------------------------------------------------------------------------|
+ 11. |         2021       3       .       .                0.0                0.0                0.0 |
+ 12. |         2021       4   119.4    11.1               59.9               17.8               65.5 |
+     |-----------------------------------------------------------------------------------------------|
+     |                  Sum   709.0   250.6              775.7              280.2              910.0 |
+     +-----------------------------------------------------------------------------------------------+
+
+</code></pre>
+<!---
+
+This is the monthly number of a+b1s of Cod, after we apply the 2b95 method. I don't know how to do the 2b95 method.  I'll just have to read it in when I'm assembling those data.
+
+| Year | Month |Trimmed_Landings|
+| :------ | :---- | ------- :|
+|2020| 	5 |63|
+|2020 |	6 |2,267|
+|2020 |	7 |1,465|
+|2020 |	8 |3,912|
+|2020 |	9 |7,829|
+|2020 |	10 |955|
+|2020 |	11 |0  |
+|2021 |	4 | 1,434|
+|2021 |	5  |10|
+|2021 |	6  |517|
+|2021 |	7  |61|
+|2021 |	8  |258 |
+--->
