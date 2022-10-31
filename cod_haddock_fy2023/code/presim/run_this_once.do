@@ -5,16 +5,6 @@ scalar drop _all
 matrix drop _all
 
 set seed  4160
-/*
-global my_wd "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock_fy2019"
-global my_data_dir "$my_wd/sourc "/home/mlee/Documents/Workspace/recreational_simulations/cod_haddock_fy2019/e_data"
-global project_dir "/home/mlee/Documents/Workspace/recreational_simulations/cod_haddock_fy2019"
-
-*/
-
-
-
-
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
@@ -124,9 +114,7 @@ do "${code_dir}/presim/construct_historical_haddock_NAA.do"
 
 
 
-
-
-/*Fetch the  MRIP data*/
+/******************MONTHLY  length and catch distributions **********************/
 /*global for the cod and haddock catch-at-length distributions (MRIP) */
 global cod_historical_sizeclass `""${source_data}/cod_size_class2021.dta""'  
 global haddock_historical_sizeclass `""${source_data}/haddock_size_class2021.dta""' 
@@ -137,6 +125,8 @@ global haddock_catch_class `""${source_data}/haddock_catch_class2021.dta""'
 
 
 /* If you want to use ANNUAL data, then uncomment this
+
+/******************ANNUAL length and catch distributions ******************** */
 global cod_historical_sizeclass `""${source_data}/cod_size_class_ANNUAL2021.dta""'  
 global haddock_historical_sizeclass `""${source_data}/haddock_size_class_ANNUAL2021.dta""' 
 
@@ -147,10 +137,6 @@ global haddock_catch_class `""${source_data}/haddock_catch_class_ANNUAL2021.dta"
  */
 
 
-
-
-*global MRIP_dir "/home/mlee/Documents/Workspace/MRIP_working/outputs/2017"
-/* Don't fetch the MRIP data, push it over using "subset_mrip_2018.do"*/
 
 
 /*****************************Initial Conditions ******************************/
@@ -247,16 +233,12 @@ do "${code_dir}/presim/recruit_helper.do"
  
 /* Get the age-length data from the survey */
 
-/*
 do "${code_dir}/presim/extract_length_age_data.do"
-*/
 
 
 
 
-
-
-/* commercial monhtly catch
+/* commercial monthly catch
 do "${code_dir}/presim/commercial_helper.do" */
 do "${code_dir}/presim/commercial_monthly_helper.do"
 
