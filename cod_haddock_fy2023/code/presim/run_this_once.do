@@ -55,8 +55,8 @@ global rec_month_starter=$periods_per_year*($which_year-$rec_junk)+1
 /* set calendar years for age-length keys */
 
 /* Age-length key years*/
- global lcalibration_start 2018
- global lcalibration_end 2021	
+ global lcalibration_start 2021
+ global lcalibration_end 2022	
 
 /* set years for historical effort calibration params*/
  global rec_cal_start=$calibration_end
@@ -73,26 +73,70 @@ The commercial helper is set up to extract the 2016 FISHING YEAR */
 
  /* updated to this point in October 27, 2022 */
  
+ 
+ /* there are lots of things to keep track of here 
+1.  Datasets that contain the historical mean numbers at age in each year. These are used to construct historical recreational selectivities
+2.  We need projected NAA to initialize the simulation. These come  from the AGEPRO simulations runs.  
+3.  We need to patch in mean projected NAA to the historical mean NAA because we need mean NAA in the bridge - and out- years 
+4. We need to setup the NAA for the simulation in a way that is repeatable  
+*/ 
 
-/*historical numbers at age. I can never remember where I get this from -- It might be a copy/paste job.  Probably is.  For haddock, I can pull in the 2019 ones, and then./
-You have a pair of do files in the 2020 data that create these.  */
-global cod_naa "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
-global hadd_naa "${source_data}/haddock agepro/NAA_GOM_HADDOCK_2019_FMSY.dta"
+/*1.  Datasets that contain the historical mean numbers at age in each year. These are copy/paste jobs from stock assessments. I am using a place holder for haddock, until I get the updated number from Charles Peretti
+ */
+global historical_cod_naaA "${source_data}/cod agepro/codagepro2021/GOM_COD_2019_M02_NAA.dta"
+global historical_cod_naaB "${source_data}/cod agepro/codagepro2021/GOM_COD_2019_MRAMP_NAA.dta"
+global historical_cod_naaBoth "${source_data}/cod agepro/codagepro2021/GOM_COD_2019_BOTH_NAA.dta"
+
+global historical_hadd_naa "${source_data}/haddock agepro/haddock_agepro_2019/GOM_HADDOCK_2019_NAA.dta"
+
+
+
+/*2.  projected NAA to initialize the simulation. These come  from the AGEPRO simulations runs.   */
+global cod_naaProj "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
+global hadd_naaProj "${source_data}/haddock agepro/NAA_GOM_HADDOCK_2022_FMSY.dta"
+
+/* globals for the location of the xx1 AgePro output. Leave off the xx1, because I'm going to recycle this global to construct a .dta*/
+global GOM_COD_A_xx1 "${source_data}/cod agepro/codagepro2021/GOM_COD_2021_UPDATE_M02RETROADJUST_PROJECT_75FMSY222/GOM_COD_2021_UPDATE_M02RETROADJUST_PROJECT_75FMSY222"
+global GOM_COD_B_xx1 "${source_data}/cod agepro/codagepro2021/GOM_COD_2021_UPDATE_MRAMP_M04_PROJECT_75FMSY222/GOM_COD_2021_UPDATE_MRAMP_M04_PROJECT_75FMSY222"
+global GOM_Haddock_xx1 "${source_data}/haddock agepro/2022_HAD_GM/GOM_HADDOCK_2022_GROWTH_PROJECTIONS"
+
+/* number of years in Cod and haddock projections  -- lift this from agepro */
+global codProjyears 12 
+global haddProjyears 6
+
+
+/* first year in Cod and haddock projections  -- lift this from agepro */
+global cod_start_Proj 2020 
+global hadd_start_Proj 2022
+
+
+do "${code_dir}/presim/process_xx1.do"
+
+
+
+
+/*3.  We need to patch in mean projected NAA to the historical mean NAA.  */
+
+
+global cod_naaProj_and_Hist "${source_data}/cod agepro/historical_and_mean_projected_Cod_NAA.dta"
+global hadd_naaProj_and_Hist "${source_data}/haddock agepro/historical_and_mean_projected_Haddock_NAA.dta"
+
+ 
+/* Construct historical NAA from a combination of the stock assessments and the projections. */
+do "${code_dir}/presim/construct_historical_cod_NAA.do"
+
+
+/* Construct historical NAA from a combination of the stock assessments and the projections. */
+do "${code_dir}/presim/construct_historical_haddock_NAA.do"
+
 
 
 
 
 /* Initial conditions for NAA. Also, a version that is sorted (randomly) in a consistent way */
 
-global hadd_naa_start "${source_data}/haddock agepro/GOM_HADDOCK_2019_FMSY_RETROADJUSTED_PROJECTIONS.dta"
-global cod_naa_start "${source_data}/cod agepro/GOM_COD_2021_UPDATE_BOTH.dta"
-
 global hadd_naa_sort "${source_data}/haddock agepro/haddock_beginning_sorted2022.dta"
 global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2022.dta"
-
-
-
-
 
 global cod_naa_start_bad  "${source_data}/cod agepro/GOM_COD_2017_UPDATE_BOTH_low_recruits.dta"
 global cod_naa_sort_bad  "${source_data}/cod agepro/cod_beginning_sorted2017_low_recruits.dta"
@@ -104,24 +148,21 @@ global hadd_naa_sort_bad "${source_data}/haddock agepro/haddock_beginning_sorted
 
 
 
- 
-/* Construct historical NAA from a combination of the stock assessments and the projections. */
-do "${code_dir}/presim/construct_historical_cod_NAA.do"
 
-/* Construct historical NAA from a combination of the stock assessments and the projections. */
-do "${code_dir}/presim/construct_historical_haddock_NAA.do"
+
+
 
 
 
 
 /******************MONTHLY  length and catch distributions **********************/
 /*global for the cod and haddock catch-at-length distributions (MRIP) */
-global cod_historical_sizeclass `""${source_data}/cod_size_class2021.dta""'  
-global haddock_historical_sizeclass `""${source_data}/haddock_size_class2021.dta""' 
+global cod_historical_sizeclass `""${source_data}/cod_size_class2022.dta""'  
+global haddock_historical_sizeclass `""${source_data}/haddock_size_class2022.dta""' 
 
 /*global for the cod and haddock catch-class distributions (MRIP)*/
-global cod_catch_class `""${source_data}/cod_catch_class2021.dta""' 
-global haddock_catch_class `""${source_data}/haddock_catch_class2021.dta""' 
+global cod_catch_class `""${source_data}/cod_catch_class2022.dta""' 
+global haddock_catch_class `""${source_data}/haddock_catch_class2022.dta""' 
 
 
 /* If you want to use ANNUAL data, then uncomment this
@@ -144,7 +185,7 @@ global haddock_catch_class `""${source_data}/haddock_catch_class_ANNUAL2021.dta"
 THIS IS USEFUL FOR OPTION 2 in which I draw from variable starting conditions*/
 
 /* cod and haddock beginning age structures */
-use "$cod_naa_start", clear
+use "$cod_naaProj", clear
 gen u1=runiform()
 gen u2=runiform()
 sort u2 u1
@@ -162,7 +203,7 @@ save "$cod_naa_sort", replace
 
 
 
-use "$hadd_naa_start", clear
+use "$hadd_naaProj", clear
 gen u1=runiform()
 gen u2=runiform()
 sort u2 u1
