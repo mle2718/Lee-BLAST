@@ -1,6 +1,11 @@
 
 clear
 
+use "${historical_hadd_naa}", clear
+destring, replace
+tempfile hist_hadd
+save "${historical_hadd_naa}", replace
+
 
 /* read in the age  structures 
 
@@ -21,6 +26,8 @@ keep if inlist(year,2019,2020,2021)
 foreach var of varlist age1-age9{
 replace `var'=`var'/1000
 }
+destring, replace
+
 append using "${historical_hadd_naa}"
 sort year
 notes: Constructed with "construct_historical_haddock_NAA.do"

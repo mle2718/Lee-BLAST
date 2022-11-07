@@ -6,6 +6,7 @@ clear
 use "${historical_cod_naaA}", replace
 append using "${historical_cod_naaB}"
 collapse (mean) age1-age9, by(year)
+destring, replace
 save "${historical_cod_naaBoth}", replace
 
 

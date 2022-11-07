@@ -11,7 +11,7 @@ The Presim folder contains code to get the simulation set up.  This is mostly co
 2. Which years we are calibrating to? 
 3. Which years are we using for the Age-Length key?
 4. Where do we get the historical NAA? These will have 1 vector per year.  These are usually taken from the most recent stock assessment, although sometimes the bridge year numbers have to get filled in with the mean of an AGEPRO projection.
-5. Where do we get initial conditions for NAA. These will have many vectors (a bootstrapped population generated from AGEPRO).  Recently, for Cod there have been multiple projections models.
+5. Where do we get initial conditions for NAA. These will have many vectors (a bootstrapped population generated from AGEPRO).  Recently, for Cod there have been multiple projections models.  The stock assesment folks save the NAA and other assessment details in an .rdat file and I've written a R little code to pull out the matrices that I need.
 6. Once you have updated projections, update their locations in the ``run_this_once.do`` wrapper.  You should not have to edit the do files that are called by this wrapper.
 
 # Sim

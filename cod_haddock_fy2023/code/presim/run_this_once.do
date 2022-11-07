@@ -83,11 +83,11 @@ The commercial helper is set up to extract the 2016 FISHING YEAR */
 
 /*1.  Datasets that contain the historical mean numbers at age in each year. These are copy/paste jobs from stock assessments. I am using a place holder for haddock, until I get the updated number from Charles Peretti
  */
-global historical_cod_naaA "${source_data}/cod agepro/codagepro2021/GOM_COD_2019_M02_NAA.dta"
-global historical_cod_naaB "${source_data}/cod agepro/codagepro2021/GOM_COD_2019_MRAMP_NAA.dta"
+global historical_cod_naaA "${source_data}/cod agepro/codagepro2021/gomcod_M02_2021MT.dta"
+global historical_cod_naaB "${source_data}/cod agepro/codagepro2021/gomcod_MRAMP_2021MT.dta"
 global historical_cod_naaBoth "${source_data}/cod agepro/codagepro2021/GOM_COD_2019_BOTH_NAA.dta"
 
-global historical_hadd_naa "${source_data}/haddock agepro/haddock_agepro_2019/GOM_HADDOCK_2019_NAA.dta"
+global historical_hadd_naa "${source_data}/haddock agepro/2022_HAD_GM/gomhaddock_BASE_2022MT.dta"
 
 
 
