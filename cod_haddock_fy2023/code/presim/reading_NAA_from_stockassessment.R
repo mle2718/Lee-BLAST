@@ -36,4 +36,4 @@ haddockA_NAA<-haddockA_NAA %>%
 
 write_dta(codA_NAA,here("cod_haddock_fy2023","source_data","cod agepro","codagepro2021", paste0(codA,".dta")))
 write_dta(codB_NAA,here("cod_haddock_fy2023","source_data","cod agepro","codagepro2021",paste0(codB,".dta")))
-write_dta(haddockA_NAA,here("cod_haddock_fy2023","source_data","haddock agepro","2022_HAD_GM",paste0(haddockA,"dta")))
+write_dta(haddockA_NAA,here("cod_haddock_fy2023","source_data","haddock agepro","2022_HAD_GM",paste0(haddockA,".dta")))
