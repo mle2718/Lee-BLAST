@@ -20,6 +20,8 @@ if strmatch("$user","minyangWin"){
 
 global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
+global mrip_source_data "${project_dir}/mrip"
+
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
 
@@ -157,26 +159,30 @@ global hadd_naa_sort_bad "${source_data}/haddock agepro/haddock_beginning_sorted
 
 /******************MONTHLY  length and catch distributions **********************/
 /*global for the cod and haddock catch-at-length distributions (MRIP) */
-global cod_historical_sizeclass `""${source_data}/cod_size_class2022.dta""'  
-global haddock_historical_sizeclass `""${source_data}/haddock_size_class2022.dta""' 
+global cod_historical_sizeclass `""${mrip_source_data}/cod_size_class2022.dta""'  
+global haddock_historical_sizeclass `""${mrip_source_data}/haddock_size_class2022.dta""' 
 
 /*global for the cod and haddock catch-class distributions (MRIP)*/
-global cod_catch_class `""${source_data}/cod_catch_class2022.dta""' 
-global haddock_catch_class `""${source_data}/haddock_catch_class2022.dta""' 
+global cod_catch_class `""${mrip_source_data}/cod_catch_class2022.dta""' 
+global haddock_catch_class `""${mrip_source_data}/haddock_catch_class2022.dta""' 
 
 
 /* If you want to use ANNUAL data, then uncomment this
 
 /******************ANNUAL length and catch distributions ******************** */
-global cod_historical_sizeclass `""${source_data}/cod_size_class_ANNUAL2021.dta""'  
-global haddock_historical_sizeclass `""${source_data}/haddock_size_class_ANNUAL2021.dta""' 
+global cod_historical_sizeclass `""${mrip_source_data}/cod_size_class_ANNUAL2021.dta""'  
+global haddock_historical_sizeclass `""${mrip_source_data}/haddock_size_class_ANNUAL2021.dta""' 
 
 /*global for the cod and haddock catch-class distributions (MRIP)*/
-global cod_catch_class `""${source_data}/cod_catch_class_ANNUAL2021.dta""' 
-global haddock_catch_class `""${source_data}/haddock_catch_class_ANNUAL2021.dta""' 
+global cod_catch_class `""${mrip_source_data}/cod_catch_class_ANNUAL2021.dta""' 
+global haddock_catch_class `""${mrip_source_data}/haddock_catch_class_ANNUAL2021.dta""' 
 
  */
 
+/*Names for recruit savefiles  */
+
+global haddock_recruitfile "${source_data}/haddock agepro/haddock_recruits_2022base.dta"
+global cod_recruitfile "${source_data}/cod agepro/cod_recruits_2022both.dta"
 
 
 
@@ -261,6 +267,7 @@ save $hadd_naa_sort_bad, replace
 
 
 */
+
 
 
 

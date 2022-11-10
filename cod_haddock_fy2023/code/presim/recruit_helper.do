@@ -59,7 +59,7 @@ replace cdf=cdf-pdf
 
 replace recruit=recruit*1000
 
-save "${source_data}/haddock agepro/haddock_recruits_2021base.dta", replace
+save "${haddock_recruitfile}", replace
 
 /*these are from the 2020 AGEPRO FILE */
 clear
@@ -151,5 +151,5 @@ replace cdf=cdf-pdf
 replace recruit=recruit*1000
 
 
-save "${source_data}/cod agepro/cod_recruits_2021both.dta", replace
+save "${cod_recruitfile}", replace
 
