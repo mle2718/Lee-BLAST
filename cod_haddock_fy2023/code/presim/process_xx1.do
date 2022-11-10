@@ -24,7 +24,7 @@ seq year, from(1) to ($codProjyears)
 order replicate year
 summ 
 /* 2017 to 2019*/
-replace year=year+$cod_start_Proj
+replace year=year+$cod_start_Proj-1
 
 rename v1 age1
 rename v3 age2
@@ -65,7 +65,7 @@ seq year, from(1) to ($codProjyears)
 order replicate year
 summ 
 /* 2017 to 2019*/
-replace year=year+$cod_start_Proj
+replace year=year+$cod_start_Proj-1
 
 rename v1 age1
 rename v3 age2
@@ -109,7 +109,7 @@ seq year, from(1) to ($haddProjyears)
 order replicate year
 summ 
 /* finagle the years*/
-replace year=year+$hadd_start_Proj
+replace year=year+$hadd_start_Proj-1
 
 rename v1 age1
 rename v3 age2
