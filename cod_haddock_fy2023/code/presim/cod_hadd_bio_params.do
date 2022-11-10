@@ -96,7 +96,7 @@ global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2022.dta"
 
 
 global haddock_recruits_file "${source_data}/haddock agepro/haddock_recruits_2022base.dta"
-global cod_recruits_file "${source_data}/cod agepro/cod_recruits_2022.dta"
+global cod_recruits_file "${source_data}/cod agepro/cod_recruits_2022both.dta"
 
 
 
