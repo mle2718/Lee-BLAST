@@ -48,25 +48,29 @@ global lngcat_offset_haddock 0.5
 
  
  
+
+
+
+
 /*global for the cod and haddock catch-at-length distributions (MRIP) */
-global cod_historical_sizeclass "${source_data}/mrip/cod_size_class2021.dta"  
-global haddock_historical_sizeclass "${source_data}/mrip/haddock_size_class2021.dta" 
+global cod_historical_sizeclass "${mrip_source_data}/cod_size_class2022.dta"  
+global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class2022.dta" 
 
 /*global for the cod and haddock catch-class distributions (MRIP)*/
-global cod_catch_class "${source_data}/mrip/cod_catch_class2021.dta" 
-global haddock_catch_class "${source_data}/mrip/haddock_catch_class2021.dta" 
+global cod_catch_class "${mrip_source_data}/cod_catch_class2022.dta" 
+global haddock_catch_class "${mrip_source_data}/haddock_catch_class2022.dta" 
 
 /*********************************/
 
  
- /* If you want to use ANNUAL length-frequency data uncomment this  */
- global cod_historical_sizeclass "${source_data}/mrip/cod_size_class_ANNUAL2021.dta"  
- global haddock_historical_sizeclass "${source_data}/mrip/haddock_size_class_ANNUAL2021.dta" 
-
+ /* If you want to use ANNUAL length-frequency data uncomment this  
+ global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2021.dta"  
+ global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class_ANNUAL2021.dta" 
+*/
  /* If you want to use ANNUAL catch-class data uncomment this 
 
-global cod_catch_class "${source_data}/mrip/cod_catch_class_ANNUAL2021.dta" 
-global haddock_catch_class "${source_data}/mrip/haddock_catch_class_ANNUAL2021.dta" 
+global cod_catch_class "${mrip_source_data}/cod_catch_class_ANNUAL2021.dta" 
+global haddock_catch_class "${mrip_source_data}/haddock_catch_class_ANNUAL2021.dta" 
 */
 
 
@@ -75,22 +79,24 @@ global haddock_catch_class "${source_data}/mrip/haddock_catch_class_ANNUAL2021.d
 
 
 /* This should contain the historical time series of NAA. There should be 1 observation per year */
-global cod_naa "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
-global hadd_naa "${source_data}/haddock agepro/NAA_GOM_HADDOCK_2019_FMSY.dta"
+
+global cod_naa "${source_data}/cod agepro/historical_and_mean_projected_Cod_NAA.dta"
+global hadd_naa "${source_data}/haddock agepro/historical_and_mean_projected_Haddock_NAA.dta"
 
 
+/* this is a dataset that has the output of the AGEPRO in it. I don't think  i always use this.*/ 
+global hadd_naa_start "${source_data}/haddock agepro/NAA_GOM_HADDOCK_2022_FMSY.dta"
+global cod_naa_start "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
 
 
-/* this is a dataset that has the output of the AGEPRO in it.  */ 
-global hadd_naa_start "${source_data}/haddock agepro/GOM_HADDOCK_2019_FMSY_RETROADJUSTED_PROJECTIONS.dta"
-global cod_naa_start "${source_data}/cod agepro/GOM_COD_2021_UPDATE_BOTH.dta"
 
 
 global hadd_naa_sort "${source_data}/haddock agepro/haddock_beginning_sorted2022.dta"
 global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2022.dta"
 
-global haddock_recruits_file "${source_data}/haddock agepro/haddock_recruits_2021base.dta"
-global cod_recruits_file "${source_data}/cod agepro/cod_recruits_2021both.dta"
+
+global haddock_recruits_file "${source_data}/haddock agepro/haddock_recruits_2022base.dta"
+global cod_recruits_file "${source_data}/cod agepro/cod_recruits_2022.dta"
 
 
 
