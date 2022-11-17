@@ -29,4 +29,4 @@ Set the regulations in the ``sim/regulations`` folder and pass names in using th
 The ``/presim/cod_hadd_bio_params.do`` file must be updated with the locations of the input data. That input data is created in the Presim section.  So, all you need to do is copy the globals in from the ``run_this_once.do`` file
 
 ## Postsim
-You will need to use stata's dyndoc to make outputs. You will have to fiddle with the input files and folders in the ``postsim/calibration_summaries.txt"  
+You will need to use stata's dyndoc to make outputs. You will have to fiddle with the input files and folders in the ``postsim/calibration_summaries.txt.'' In particular, you'll have to point this file to the updated MRIP data.  
