@@ -309,7 +309,6 @@ Catch Statistics for Cod
 ===============================================================
 Here are the cod numbers (a, b1, b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.
 
-Something is wrong with the way I'm pulling in catch numbers, I think for  <<dd_display: %4.0f $working_year>>.  But haddock seems to be constructed properly.  The file I need to look at is atlanticcod_landings_2022
 
 
 
@@ -329,9 +328,9 @@ replace year=$working_year+1 if month<=4 & year==.
 replace year=$working_year if month>4 & year==.
 gen sim_tot_cat_cod =sim_cod_num_kept+sim_cod_num_released
 
-format tot_cat a b1 b2 landings sim_tot_cat_cod sim_cod_mort_mt %10.0fc
+format tot_cat* a b1 b2 landings sim_tot_cat_cod sim_cod_mort_mt %10.0fc
 
-rename tot_cat actual_cat
+rename tot_catch actual_cat
 
 
 replace year=1 if month==0
@@ -429,11 +428,11 @@ replace year=$working_year if month>4 & year==.
 
 gen sim_tot_cat_haddock=sim_haddock_num_kept+sim_haddock_num_released
 
-format tot_cat a b1 b2 landings sim_tot_cat_haddock sim_hadd_mort_mt %10.0fc
+format tot_cat* a b1 b2 landings sim_tot_cat_haddock sim_hadd_mort_mt %10.0fc
 
 replace year=1 if month==0
 sort fishing_year year month 
-rename tot_cat actual_cat
+rename tot_catch actual_cat
 
 <</dd_do>>
 
