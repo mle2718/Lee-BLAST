@@ -95,8 +95,7 @@ Calibration
 
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
 1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100". This does the same thing. 
-1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  For September-October, we will just have to try to get Sept+october to 'match'
-  
+1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  For September-October, we will just have to try to get Sept+october to 'match'. September and october are not matching well right now. We need a little more effort in those months, but there's also something squirrly about the number of kept fish. This will probably change with the new data, but right now almost all of the catch distribution from September of 2021 is below the 22" size limit.
 
 
 
@@ -136,7 +135,6 @@ local myfile: word count `list'
 local myfile: word `myfile' of `list'
 
 local sim_results_in "${output_dir}/`myfile'"
-
 
 
 use "`sim_results_in'", clear
@@ -252,7 +250,7 @@ sort fishing_year year month
 <</dd_do>>
 ~~~~
 
-This table has my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I'm using to calibrate the model. 
+The results file you are using is  <<dd_display: "`myfile'">> This table has my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I'm using to calibrate the model. 
 ~~~~
 <<dd_do:nocommands>>
 
