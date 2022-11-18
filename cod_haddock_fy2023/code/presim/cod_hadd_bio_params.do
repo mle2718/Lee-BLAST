@@ -51,7 +51,7 @@ global lngcat_offset_haddock 0.5
 
 
 
-
+/***
 /*global for the cod and haddock catch-at-length distributions (MRIP) */
 global cod_historical_sizeclass "${mrip_source_data}/cod_size_class2022.dta"  
 global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class2022.dta" 
@@ -60,18 +60,18 @@ global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class2022.
 global cod_catch_class "${mrip_source_data}/cod_catch_class2022.dta" 
 global haddock_catch_class "${mrip_source_data}/haddock_catch_class2022.dta" 
 
-/*********************************/
+******************************/
 
  
- /* If you want to use ANNUAL length-frequency data uncomment this  
- global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2021.dta"  
- global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class_ANNUAL2021.dta" 
-*/
- /* If you want to use ANNUAL catch-class data uncomment this 
+ /* If you want to use ANNUAL length-frequency data uncomment this  */
+ global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2022.dta"  
+ global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class_ANNUAL2022.dta" 
 
-global cod_catch_class "${mrip_source_data}/cod_catch_class_ANNUAL2021.dta" 
-global haddock_catch_class "${mrip_source_data}/haddock_catch_class_ANNUAL2021.dta" 
-*/
+ /* If you want to use ANNUAL catch-class data uncomment this */
+
+global cod_catch_class "${mrip_source_data}/cod_catch_class_ANNUAL2022.dta" 
+global haddock_catch_class "${mrip_source_data}/haddock_catch_class_ANNUAL2022.dta" 
+
 
 
 
