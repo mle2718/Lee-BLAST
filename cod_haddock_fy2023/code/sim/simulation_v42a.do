@@ -152,6 +152,13 @@ replace tripcost=15+`temp1'*c_chart*triplength if mode==4
 
 
 mata:
+
+
+
+/* Draw 2 random variables that represents the individual's trip's propensity to keep sub-legal cod or haddock. */
+wcodt=runiform(`wave_obs',1)
+whaddt=runiform(`wave_obs',1)
+
 /* This code gets the number of linedrops for haddock. I wrote it in two lines to make it explicit:
 		temp1=rdiscrete($wave_numtrips,1 ,hadd_catch_class_by_month[.,$wave_of_cy+1])
  THE FIRST LINE creates a Nx1 vector of "index positions" based on the values of the pdf in the $current_wave+1 position in the catch-class-distribution matrix. 
@@ -195,13 +202,8 @@ cod_lengths=rowshape(matacodlength_pdf[rdiscrete(`wave_obs'*$cod_upper_bound,1 ,
 /* We assume that there are two different classes of sublegal fish.  One is "small". These are fish that are a "little bit" smaller than legal sized fish.  
 The other is "tiny."  These are smaller than small. */
 
-
-/* Draw 2 random variables that represents the individual's trip's propensity to keep sub-legal cod or haddock.  Then concatenate this into a matrix.*/
-wcodt=runiform(`wave_obs',1)
+/* Take the 2 random variables that represents the individual's trip's propensity to keep sub-legal cod or haddock and convert them into a matrix that conforms to the cod_lengths and haddock_lengths.*/
 wcod=mm_expand(wcodt,1,cols(cod_lengths))
-whaddt=runiform(`wave_obs',1)
-
-
 /* SL1 To set trips to have the different underlying propensity, do:*/
 whadd=mm_expand(whaddt,1,cols(haddock_lengths))
 /* SL1 To set trips to have the same underlying propensity, do:
