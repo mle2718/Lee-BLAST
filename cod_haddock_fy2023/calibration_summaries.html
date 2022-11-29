@@ -1,0 +1,255 @@
+<!---A small document to examine how well the model is calibrated ---> 
+<!---Execute this with:
+
+
+
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
+}
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+
+
+/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  
+		After changing to 1-3, I have to recalibrate slightly, but it shouldn't take more than 1-2 tries.
+
+ */
+/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
+	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
+	could be the fact that we're using annual data. 
+	
+	
+	Scott to send the number of trips that are private in September. We are going to model opening up September for the private by doubling their number of trips.
+	*/
+
+
+
+ ---> 
+<h1><a href="#fishing-year-2020-and-2021-regulations" id="fishing-year-2020-and-2021-regulations">Fishing Year 2020 and 2021 Regulations</a></h1>
+<p>The same regulations were in place for FY2020 and FY2021.</p>
+<p>Haddock:</p>
+<ul>
+<li>15 fish, 17&quot;</li>
+<li>Open May1-Feb 28 and April 1- April 30</li>
+<li>No Changes from 2019</li>
+</ul>
+<p>Cod:</p>
+<ul>
+<li>1 fish, 21&quot;</li>
+<li>Open Sept 15-Sept 30 and April 1-April 14 for private anglers</li>
+<li>Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers</li>
+</ul>
+<p>FY 2020 Regulations can be found <a href="https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020">here</a>.  Since there were no changes in FY2021, there is no federal register notice.</p>
+<p>The rec sub-ACL for cod was 193mt in 2020.</p>
+<p>MRIP data uses &ldquo;trimmed landings&rdquo; estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions.</p>
+<h1><a href="#fishing-year-2022-regulations" id="fishing-year-2022-regulations">Fishing Year 2022 Regulations</a></h1>
+<p>The recreational sub-ACL for GoM cod is 192 mt for FY 2022. The recreational sub-ACL for GOM haddock is 3,634 mt.</p>
+<p>Haddock:</p>
+<ul>
+<li>20 fish, 17&quot;</li>
+<li>Open May1-Feb 28 and April 1- April 30</li>
+<li>The change from 2021 is to increase the possession limit from 15 to 20 haddock</li>
+</ul>
+<p>Cod:</p>
+<ul>
+<li>1 fish, 22&quot;</li>
+<li>Open Sept 1-October 7 and April 1-April 14 for private anglers</li>
+<li>Open Sept 1-October 7 and April 1-April 14 for the for-hire anglers</li>
+</ul>
+<h1><a href="#input-data" id="input-data">Input data</a></h1>
+<ol>
+<li><strong>Monthly</strong> length-frequencies for cod and haddock</li>
+<li><strong>Monthly</strong> catch-per-trip for cod and haddock</li>
+<li>2022 numbers at age for cod and haddock from the AGEPRO projections.</li>
+<li>Bottomtrawl survey data from 2021-2022 to form the age-length keys.</li>
+<li>Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)</li>
+</ol>
+<h1><a href="#calibration" id="calibration">Calibration</a></h1>
+<ol>
+<li>I&rsquo;m using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.</li>
+<li>I&rsquo;m using the &ldquo;always on&rdquo; behavior &ndash; if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100&quot; &ndash; this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100&quot;. This does the same thing.</li>
+<li>The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  For September-October, we will just have to try to get Sept+october to &lsquo;match&rsquo;. September and october are not matching well right now. We need a little more effort in those months, but there&rsquo;s also something squirrly about the number of kept fish. This will probably change with the new data, but right now almost all of the catch distribution from September of 2021 is below the 22&quot; size limit.</li>
+</ol>
+<!---With stata's list, you can also use the 'sum' option to create a group sum. This avoids having to create and append a summation row . 
+
+	list group costs profits, sum(costs profits) labvar(group)
+
+	will add an extra line with group=sum containing the total cost and profits.
+	
+ ---> 
+<pre><code></code></pre>
+<p>The results file you are using is  recreational_catches_2022_calibrate_2022_11_18_13.dta This table has my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I&rsquo;m using to calibrate the model.</p>
+<pre><code>
+     +---------------------------------------------------------------------------------------------------------------------------------+
+     | fishing_year   month   actual_trips   sim_total_trips       error      yield   needed_choice_~s   needed_total_co   needed_frac |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+  1. |         2022       5         31,371            30,153    .0388184   .3624159           86560.13          616104.8      .1404958 |
+  2. |         2022       6         16,390            15,764     .038191   .3599087           45539.19          616104.8      .0739147 |
+  3. |         2022       7         20,824            16,039    .2297741   .3383755           61540.39          616104.8      .0998862 |
+  4. |         2022       8         24,686            22,597    .0846304   .3476385           71009.57          616104.8      .1152557 |
+  5. |         2022       9         34,161            39,813   -.1654473   .3880409           88034.87          616104.8      .1428894 |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+  6. |         2022      10         12,851            13,316   -.0361465   .3495013           36770.86          616104.8      .0596828 |
+  7. |         2022      11              .                 0           .          .                  .          616104.8             . |
+  8. |         2022      12              .                 0           .          .                  .          616104.8             . |
+  9. |         2022       1              .                 0           .          .                  .          616104.8             . |
+ 10. |         2022       2              .                 0           .          .                  .          616104.8             . |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+ 11. |         2022       3              .                 0           .          .                  .          616104.8             . |
+ 12. |         2022       4         82,577            93,890   -.1369966   .3643384           226649.8          616104.8      .3678754 |
+     |---------------------------------------------------------------------------------------------------------------------------------|
+     |                  Sum        222,860           231,572                                  616104.8                                 |
+     +---------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>The number of trips is accurate, usually to 1-2%.  As expected.</p>
+<!---
+
+The following table has the calibration target and the number of simulated trips for 4 calibrations model runs:
+
+1. April open for cod and haddock 
+2. April closed for cod and haddock 
+3. April open for haddock, closed for cod 
+4. April closed for haddock, open for cod
+
+I think #2 and #4 are irrelevant.  I am using an average #1 of #3.
+--->
+<pre><code>
+</code></pre>
+<h1><a href="#catch-statistics-for-cod" id="catch-statistics-for-cod">Catch Statistics for Cod</a></h1>
+<p>Here are the cod numbers (a, b1, b2) for actual and calibration results for Fishing Year 2022.</p>
+<pre><code>
+
+
+     +----------------------------------------------------------------------------------------------------------------+
+     | fishing_year   month   actual_cat   sim_tot_cat_cod   landings   sim_cod_num_kept        b2   sim_cod_num_re~d |
+     |----------------------------------------------------------------------------------------------------------------|
+  1. |         2022       5      138,704            68,005        120                  0   138,584             68,005 |
+  2. |         2022       6      130,018            36,289      1,009                  0   129,010             36,289 |
+  3. |         2022       7       20,074            21,539        194                  0    19,880             21,539 |
+  4. |         2022       8       44,000            42,405        250                  0    43,750             42,405 |
+  5. |         2022       9       61,601            90,179      8,835             11,887    52,765             78,292 |
+     |----------------------------------------------------------------------------------------------------------------|
+  6. |         2022      10       33,927            27,789      1,098                  0    32,829             27,789 |
+  7. |         2022      11            .                 0          .                  0         .                  0 |
+  8. |         2022      12            .                 0          .                  0         .                  0 |
+  9. |         2022       1            .                 0          .                  0         .                  0 |
+ 10. |         2022       2            .                 0          .                  0         .                  0 |
+     |----------------------------------------------------------------------------------------------------------------|
+ 11. |         2022       3            .                 0          .                  0         .                  0 |
+ 12. |         2022       4       22,752           203,585     18,841              5,500     3,911            198,085 |
+     |----------------------------------------------------------------------------------------------------------------|
+     |                  Sum      451,076           489,791     30,346             17,387   420,730            472,404 |
+     +----------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>Here are the cod weights (a, b1, b2) for actual and calibration results for Fishing Year 2021. Over the entire year, the kept numbers are too high (28.4 mt actual vs 37.3 mt simulated). The weights of released cod are also a bit high (655 mt actual vs 698 mt simulated). I think this is being caused by using annual Length frequencies. For example in the september actual data, cod over 21&quot; are either going to be 23&quot; or 29&quot;. But when we apply the annual length-frequency, it&rsquo;s there&rsquo;s a smoother mix. There&rsquo;s also some larger fish.  The data are just so sparse.</p>
+<pre><code>
+
+
+     +---------------------------------------------------------------------------------------------+
+     | fishing_year   month   ab1mt    b2mt   sim_cod_kept_mt   sim_cod_re~ed_mt   sim_cod_mort_mt |
+     |---------------------------------------------------------------------------------------------|
+  1. |         2022       5     0.3   211.3               0.0               92.1              13.8 |
+  2. |         2022       6     1.2   165.4               0.0               47.0               7.0 |
+  3. |         2022       7     0.4     8.5               0.0               27.8               4.2 |
+  4. |         2022       8     0.6    39.3               0.0               56.4               8.5 |
+  5. |         2022       9     0.0    34.0              32.6               81.7              44.9 |
+     |---------------------------------------------------------------------------------------------|
+  6. |         2022      10     0.0    27.9               0.0               32.6               4.9 |
+  7. |         2022      11       .       .               0.0                0.0               0.0 |
+  8. |         2022      12       .       .               0.0                0.0               0.0 |
+  9. |         2022       1       .       .               0.0                0.0               0.0 |
+ 10. |         2022       2       .       .               0.0                0.0               0.0 |
+     |---------------------------------------------------------------------------------------------|
+ 11. |         2022       3       .       .               0.0                0.0               0.0 |
+ 12. |         2022       4    29.0     0.0              14.5              106.4              30.4 |
+     |---------------------------------------------------------------------------------------------|
+     |                  Sum    31.4   486.4              47.1              444.0             113.7 |
+     +---------------------------------------------------------------------------------------------+
+
+</code></pre>
+<h1><a href="#catch-statistics-for-haddock" id="catch-statistics-for-haddock">Catch Statistics for Haddock</a></h1>
+<p>Here are the haddock (a, b1, b2) in numbers for Fishing Year 2021 that we are calibrating to.</p>
+<ol>
+<li>Total catch matches very well, except for April  (140,400 caught vs 90,000 simulated).</li>
+<li>It looks like I&rsquo;m having problems sorting catch into kept and released fish.  I am overpredicting catch and under predicting releases in June, July, August, Sept.  And the opposite in April and May.</li>
+</ol>
+<pre><code>
+
+
+     +------------------------------------------------------------------------------------------------------------------------------------+
+     | fishing_year   month   actual_cat   sim_tot_cat_ha~k   landings   sim_haddock_nu~t        b2   sim_haddock_nu~d   sim_hadd_mort_mt |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+  1. |         2022       5      138,876            120,640    102,904             84,313    35,972             36,326                 93 |
+  2. |         2022       6       60,102             52,387     39,751             36,192    20,350             16,195                 40 |
+  3. |         2022       7      112,780             48,317     84,742             33,785    28,038             14,532                 41 |
+  4. |         2022       8       94,600             66,776     42,983             45,911    51,618             20,866                 56 |
+  5. |         2022       9      128,196            140,247     56,453             94,642    71,744             45,605                116 |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+  6. |         2022      10       52,177             49,425     35,617             32,824    16,560             16,601                 41 |
+  7. |         2022      11            .                  0          .                  0         .                  0                  0 |
+  8. |         2022      12            .                  0          .                  0         .                  0                  0 |
+  9. |         2022       1            .                  0          .                  0         .                  0                  0 |
+ 10. |         2022       2            .                  0          .                  0         .                  0                  0 |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+ 11. |         2022       3            .                  0          .                  0         .                  0                  0 |
+ 12. |         2022       4      199,422            325,930    199,422            248,229         0             77,701                266 |
+     |------------------------------------------------------------------------------------------------------------------------------------|
+     |                  Sum      786,153            803,723    561,872            575,897   224,281            227,825                652 |
+     +------------------------------------------------------------------------------------------------------------------------------------+
+
+</code></pre>
+<p>Here are the haddock (a+b1 and b2) in weights and numbers for Fishing Year 2021 that we are calibrating to. This uses the 2b95 method.</p>
+<pre><code>
+
+
+     +----------------------------------------------------------------------------------------------+
+     | fishing_year   month   ab1mt   b2mt   sim_hadd_kept_mt   sim_hadd_r~ed_mt   sim_hadd_mort_mt |
+     |----------------------------------------------------------------------------------------------|
+  1. |         2022       5   104.5   18.4               87.2               18.9               93.2 |
+  2. |         2022       6    39.6   11.6               37.4                8.5               40.1 |
+  3. |         2022       7    89.4    0.0               34.9                7.6               40.5 |
+  4. |         2022       8    41.1    0.0               47.7               11.0               55.8 |
+  5. |         2022       9     0.0   32.9               97.7               24.0              115.5 |
+     |----------------------------------------------------------------------------------------------|
+  6. |         2022      10     0.0    8.7               34.3                8.6               40.7 |
+  7. |         2022      11       .      .                0.0                0.0                0.0 |
+  8. |         2022      12       .      .                0.0                0.0                0.0 |
+  9. |         2022       1       .      .                0.0                0.0                0.0 |
+ 10. |         2022       2       .      .                0.0                0.0                0.0 |
+     |----------------------------------------------------------------------------------------------|
+ 11. |         2022       3       .      .                0.0                0.0                0.0 |
+ 12. |         2022       4   210.5    0.0              250.9               47.3              266.0 |
+     |----------------------------------------------------------------------------------------------|
+     |                  Sum   485.1   71.6              590.1              126.0              651.9 |
+     +----------------------------------------------------------------------------------------------+
+
+</code></pre>
+<!---
+
+This is the monthly number of a+b1s of Cod, after we apply the 2b95 method. I don't know how to do the 2b95 method.  I'll just have to read it in when I'm assembling those data.
+
+| Year | Month |Trimmed_Landings|
+| :------ | :---- | ------- :|
+|2020| 	5 |63|
+|2020 |	6 |2,267|
+|2020 |	7 |1,465|
+|2020 |	8 |3,912|
+|2020 |	9 |7,829|
+|2020 |	10 |955|
+|2020 |	11 |0  |
+|2021 |	4 | 1,434|
+|2021 |	5  |10|
+|2021 |	6  |517|
+|2021 |	7  |61|
+|2021 |	8  |258 |
+--->
