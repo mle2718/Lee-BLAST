@@ -339,35 +339,36 @@ else{
 }
 
 
-/*BEGIN COMMENT OUT 
-THIS SECTION OF CODE WILL FORCE ANGLERS TO STOP FISHING ONCE THE BAG LIMIT IS HIT.
+
+/* Control whether anglers stop fishing once their cod bag limit is hit */
 
 
-/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
-eccaught1=ecbagopen:*ec_encountered
+
+	if ("$closedbehavior" == "alwaysonboth" | "$closedbehavior" == "alwaysoncod") {
+		/*Legal sized fish (ckeepable) that are encountered while the bag is open are retained*/
+		ecod_kept=ecbagopen:*ec_encountered:*eckeepable
+
+		/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
+		/*All sublegal sized fish (creleasable) are released*/
+		ecbagclosed=J(rows(ecbagopen),cols(ecbagopen),1)-ecbagopen
+		ecod_released=ec_encountered:*ecreleasable+ ec_encountered:*eckeepable:*ecbagclosed 
+	 
+	}
+	else if ("$closedbehavior" == "stopfishingboth" | "$closedbehavior" == "alwaysonhaddock") {
+		/*Fish are actually caught if cbagopen==1 and c_encountered==1*/
+		eccaught1=ecbagopen:*ec_encountered
+		ecod_kept=eccaught1:*eckeepable 
+		ecod_released=eccaught1:*ecreleasable
+
+	}
+	else  {
+		5
+	}
 
 
-ecod_kept=eccaught1:*eckeepable 
-ecod_released=eccaught1:*ecreleasable
-
-END COMMENT OUT */
-
-
-/* THIS SECTION OF CODE WILL ALLOW ANGLERS TO CONTINUE FISHING IF THE BAG LIMIT IS HIT.
-END COMMENT OUT
-*/
-
-/*Legal sized fish (ckeepable) that are encountered while the bag is open are retained*/
-ecod_kept=ecbagopen:*ec_encountered:*eckeepable
-
-/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
-/*All sublegal sized fish (creleasable) are released*/
-ecbagclosed=J(rows(ecbagopen),cols(ecbagopen),1)-ecbagopen
-ecod_released=ec_encountered:*ecreleasable+ ec_encountered:*eckeepable:*ecbagclosed 
 
 eckeep=rowsum(ecod_kept)
 ecrel=rowsum(ecod_released)
-
 
 
 
@@ -488,41 +489,35 @@ for (k=1; k<=rows(hbag_noncomply); k++) {
 else{
 }
 
+/* Control whether anglers stop fishing once their cod bag limit is hit */
+
+	if ("$closedbehavior" == "alwaysonboth" | "$closedbehavior" == "alwaysonhaddock") {
+	 
+	/*Legal sized fish (ckeepable) that are encountered while the bag is open are retained*/
+	ehadd_kept=ehbagopen:*eh_encountered:*ehkeepable
 
 
+	/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
+	/*All sublegal sized fish (creleasable) are released*/
+	ehbagclosed=J(rows(ehbagopen),cols(ehbagopen),1)-ehbagopen
+	ehadd_released=eh_encountered:*ehreleasable+ eh_encountered:*ehkeepable:*ehbagclosed 
+
+	}
+	else if ("$closedbehavior" == "stopfishingboth" | "$closedbehavior" == "alwaysoncod") {
+		/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
+		ehcaught1=ehbagopen:*eh_encountered
 
 
-/*BEGIN COMMENT OUT 
-THIS SECTION OF CODE WILL FORCE ANGLERS TO STOP FISHING ONCE THE BAG LIMIT IS HIT.*/
+		/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
 
-/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
-ehcaught1=ehbagopen:*eh_encountered
+		ehadd_kept=ehcaught1:*ehkeepable 
+		ehadd_released=ehcaught1:*ehreleasable
 
+	}
+	else  {
+		5
+	}
 
-/*Fish are actually caught if hbagopen==1 and h_encountered==1
-This could be coded in 1 line with:
-ehadd_kept=ehbagopen:*eh_encountered:*ehkeepable 
-ehadd_released=ehbagopen:*eh_encountered:*ehreleasable*/
-
-ehadd_kept=ehcaught1:*ehkeepable 
-ehadd_released=ehcaught1:*ehreleasable
-
-
-
-ehbagclosed=J(rows(ehbagopen),cols(ehbagopen),1)-ehbagopen
-
-/* THIS SECTION OF CODE WILL ALLOW ANGLERS TO CONTINUE FISHING IF THE BAG LIMIT IS HIT.
-
-
-/*Legal sized fish (ckeepable) that are encountered while the bag is open are retained*/
-ehadd_kept=ehbagopen:*eh_encountered:*ehkeepable
-
-
-/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
-/*All sublegal sized fish (creleasable) are released*/
-ehbagclosed=J(rows(ehbagopen),cols(ehbagopen),1)-ehbagopen
-ehadd_released=eh_encountered:*ehreleasable+ eh_encountered:*ehkeepable:*ehbagclosed 
-*/
 ehkeep=rowsum(ehadd_kept)
 ehrel=rowsum(ehadd_released)
 
@@ -535,7 +530,8 @@ getmata ehkeep ehrel ehrand eckeep ecrel ecrand
 
 
 
-/* This aux do file generates and regenerates probability of a trip occurring  */
+/* This aux do file generates and regenerates probability of a trip occurring.  
+It also rescales the probability, multipliying by the scale factor. */
 do "$code_dir/sim/aux_prob.do"
 
 putmata prob, replace
@@ -689,54 +685,41 @@ else{
 
 
 
-/*BEGIN COMMENT OUT 
-THIS SECTION OF CODE WILL FORCE ANGLERS TO STOP FISHING ONCE THE BAG LIMIT IS HIT.
-/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
-ccaught1=cbagopen:*c_encountered
+
+/* Control whether anglers stop fishing once their cod bag limit is hit */
+
+	if ("$closedbehavior" == "alwaysonboth" | "$closedbehavior" == "alwaysoncod") {
+		/*Legal sized fish (ckeepable) that are encountered while the bag is open are retained*/
+		cod_kept=cbagopen:*c_encountered:*ckeepable
 
 
-/*Fish are actually caught if hbagopen==1 and h_encountered==1
-This could be coded in 1 line with:
-hadd_kept=hbagopen:*h_encountered:*hkeepable 
-hadd_released=hbagopen:*h_encountered:*hreleasable*/
-
-cod_kept=ccaught1:*ckeepable 
-cod_released=ccaught1:*creleasable
-
-
-END COMMENT OUT */
-
+		/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
+		/*All sublegal sized fish (creleasable) are released*/
+		cbagclosed=J(rows(cbagopen),cols(cbagopen),1)-cbagopen
+		cod_released=c_encountered:*creleasable+ c_encountered:*ckeepable:*cbagclosed 
+	 
+	}
+	else if ("$closedbehavior" == "stopfishingboth" | "$closedbehavior" == "alwaysonhaddock") {
+		/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
+		ccaught1=cbagopen:*c_encountered
 
 
+		/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
+
+		cod_kept=ccaught1:*ckeepable 
+		cod_released=ccaught1:*creleasable
 
 
-/* THIS SECTION OF CODE WILL ALLOW ANGLERS TO  CONTINUE FISHING IF THE BAG LIMIT IS HIT.
-*/
-/*Legal sized fish (ckeepable) that are encountered while the bag is open are retained*/
-cod_kept=cbagopen:*c_encountered:*ckeepable
-
-
-/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
-/*All sublegal sized fish (creleasable) are released*/
-cbagclosed=J(rows(cbagopen),cols(cbagopen),1)-cbagopen
-cod_released=c_encountered:*creleasable+ c_encountered:*ckeepable:*cbagclosed 
-
-
-
-
-
-
-
-
-
-
-
+	}
+	else  {
+		5
+	}
 
 /*count of kept and released per trip */
 ckeep=rowsum(cod_kept)
 crel=rowsum(cod_released)
 
-/* these are the probability weighted counts of kept and released cod */
+/* these are the probability weighted counts of kept and released cod (also rescaled by multiplying by the scale factor) */
 pw_ckeep=ckeep'*prob
 pw_crel=crel'*prob
 
@@ -965,39 +948,37 @@ else{
 
 
 
+/* Control whether anglers stop fishing once their haddock bag limit is hit */
 
-/*BEGIN COMMENT OUT 
-THIS SECTION OF CODE WILL FORCE ANGLERS TO STOP FISHING ONCE THE BAG LIMIT IS HIT.
-*/
-/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
-hcaught1=hbagopen:*h_encountered
+	if ("$closedbehavior" == "alwaysonboth" | "$closedbehavior" == "alwaysonhaddock") {
+	 
 
-
-/*Fish are actually caught if hbagopen==1 and h_encountered==1
-This could be coded in 1 line with:
-hadd_kept=hbagopen:*h_encountered:*hkeepable 
-hadd_released=hbagopen:*h_encountered:*hreleasable*/
-
-hadd_kept=hcaught1:*hkeepable 
-hadd_released=hcaught1:*hreleasable
+		/*Legal sized fish (hkeepable) that are encountered while the bag is open are retained*/
+		hadd_kept=hbagopen:*h_encountered:*hkeepable
 
 
+		/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
+		/*All sublegal sized fish (creleasable) are released*/
+		hbagclosed=J(rows(hbagopen),cols(hbagopen),1)-hbagopen
+		hadd_released=h_encountered:*hreleasable+ h_encountered:*hkeepable:*hbagclosed 
 
-hbagclosed=J(rows(hbagopen),cols(hbagopen),1)-hbagopen
+	}
+	else if ("$closedbehavior" == "stopfishingboth" | "$closedbehavior" == "alwaysoncod") {
 
-/* THIS SECTION OF CODE WILL ALLOW ANGLERS TO CONTINUE FISHING IF THE BAG LIMIT IS HIT.
-
-
-/*Legal sized fish (ckeepable) that are encountered while the bag is open are retained*/
-hadd_kept=hbagopen:*h_encountered:*hkeepable
+		/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
+		hcaught1=hbagopen:*h_encountered
 
 
-/*Legal sized fish (ckeepable) that are encountered while the bag is CLOSED are released*/
-/*All sublegal sized fish (creleasable) are released*/
-hbagclosed=J(rows(hbagopen),cols(hbagopen),1)-hbagopen
-hadd_released=h_encountered:*hreleasable+ h_encountered:*hkeepable:*hbagclosed 
+		/*Fish are actually caught if hbagopen==1 and h_encountered==1*/
 
-*/
+		hadd_kept=hcaught1:*hkeepable 
+		hadd_released=hcaught1:*hreleasable
+
+	}
+	else  {
+		5
+	}
+
 
 
 
@@ -1009,7 +990,6 @@ hadd_released=h_encountered:*hreleasable+ h_encountered:*hkeepable:*hbagclosed
 
 hkeep=rowsum(hadd_kept)
 hrel=rowsum(hadd_released)
-
 
 /* these are the probability weighted counts of kept and released cod */
 pw_hkeep=hkeep'*prob
