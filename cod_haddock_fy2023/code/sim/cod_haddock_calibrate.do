@@ -96,7 +96,7 @@ pause off
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_10_27" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
 }
 
 
@@ -105,6 +105,7 @@ global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
+global mrip_source_data "${source_data}/mrip"
 
 /* setup date/time for file logging */
 local date: display %td_CCYY_NN_DD date(c(current_date), "DMY")
@@ -119,7 +120,7 @@ local mins=substr("`time'",4,2)
 2022SQ is a copy of the 2021calibrate.
 */
 
-global rec_management "2023_SQ"
+global rec_management "2022_calibrate"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
@@ -136,16 +137,16 @@ timer on 99
 /* specify names of save files */
 
 /*These save files are used by post with the replace option. */
-local econ_out "${output_dir}/economic_data5_`poststub'"
-local rec_out  "${output_dir}/recreational_catches5_`poststub'"
-local sp1_out  "${output_dir}/cod_end_of_wave5_`poststub'"
-local sp2_out  "${output_dir}/haddock_end_of_wave5_`poststub'"
-local cod_catch_class  "${output_dir}/cod_catch_class_dist5_`poststub'"
-local haddock_catch_class  "${output_dir}/haddock_catch_class5_`poststub'"
-local cod_land_class  "${output_dir}/cod_land_class_dist5_`poststub'"
-local haddock_land_class  "${output_dir}/haddock_land_class5_`poststub'"
-local hla  "${output_dir}/haddock_length_class5_`poststub'"
-local cla  "${output_dir}/cod_length_class5_`poststub'"
+local econ_out "${output_dir}/economic_data_`poststub'"
+local rec_out  "${output_dir}/recreational_catches_`poststub'"
+local sp1_out  "${output_dir}/cod_end_of_wave_`poststub'"
+local sp2_out  "${output_dir}/haddock_end_of_wave_`poststub'"
+local cod_catch_class  "${output_dir}/cod_catch_class_dist_`poststub'"
+local haddock_catch_class  "${output_dir}/haddock_catch_class_`poststub'"
+local cod_land_class  "${output_dir}/cod_land_class_dist_`poststub'"
+local haddock_land_class  "${output_dir}/haddock_land_class_`poststub'"
+local hla  "${output_dir}/haddock_length_class_`poststub'"
+local cla  "${output_dir}/cod_length_class_`poststub'"
 
 /*These save files are used by post with the replace option. 
 If they already exist, I can either overwrite (by passing a NULL suffix with <ENTER>) or I can make new files by passing in suffix*/
@@ -196,7 +197,7 @@ global waves=6
 global periods_per_year=$months
 
 /*how many years, replicates */
-global total_reps=10
+global total_reps=1
 
 global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
@@ -212,7 +213,7 @@ global tot_trips 494000 --> 202,000 actual trips.
 
 */
 
-global tot_trips 879000
+global tot_trips 638116
 global scale_factor 100
 global numtrips=$tot_trips/$scale_factor
 
@@ -291,9 +292,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 /* to open september to the private fleet, increase the september number of trips by 80% */
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.271 \ 5, 0.0990 \ 6, 0.141 \ 7 ,0.095 \ 8, .130  \ 9 , .0846 \10, .0375 \ 11, .1420 \ 12,0.00)   
 
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.271 \ 5, 0.0990 \ 6, 0.141 \ 7 ,0.095 \ 8, .130  \ 9 , .1904  \10, .0375 \ 11, .1420 \ 12,0.00)   
+recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4039 \ 5, 0.1305 \ 6, 0.0687 \ 7 ,0.07431  \ 8, 0.1019 \ 9 , 0.1609 \10, .05977 \ 11, 0.0  \ 12,0.00)   
 
 recreational_effort_waves = J(10,1,recreational_effort_waves)
 recreational_effort_monthly = J(10,1,recreational_effort_months) 
@@ -338,7 +338,7 @@ qui foreach scenario of local scenario_list{
 	do "${code_dir}/sim/read_in_regs.do"
 
 
-global scenario_num=$scenario_num+500
+*global scenario_num=$scenario_num+500
 
 
 
@@ -1034,6 +1034,7 @@ shell chmod 440 `econ_out'
 
 timer list
 
-di "This is two simulations.  One with October open the other with october closed.  "
+di "This is two simulations.  One with October open the other with october closed."
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
 log close
 

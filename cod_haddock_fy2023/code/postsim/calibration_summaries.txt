@@ -1,0 +1,522 @@
+<<dd_version: 2>>
+<!---A small document to examine how well the model is calibrated ---> 
+
+<!---Execute this with:
+
+
+
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
+}
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+
+
+/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  
+		After changing to 1-3, I have to recalibrate slightly, but it shouldn't take more than 1-2 tries.
+
+ */
+/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
+	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
+	could be the fact that we're using annual data. 
+	
+	
+	Scott to send the number of trips that are private in September. We are going to model opening up September for the private by doubling their number of trips.
+	*/
+
+
+
+ ---> 
+
+
+
+
+Fishing Year 2020 and 2021 Regulations
+==============================================================
+
+The same regulations were in place for FY2020 and FY2021.
+
+Haddock:
+
+*    15 fish, 17"
+*    Open May1-Feb 28 and April 1- April 30
+*    No Changes from 2019
+
+Cod: 
+
+*   1 fish, 21"
+*   Open Sept 15-Sept 30 and April 1-April 14 for private anglers
+*   Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers
+
+FY 2020 Regulations can be found [here](https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020).  Since there were no changes in FY2021, there is no federal register notice.
+
+The rec sub-ACL for cod was 193mt in 2020.  
+
+MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions. 
+
+Fishing Year 2022 Regulations
+==============================================================
+The recreational sub-ACL for GoM cod is 192 mt for FY 2022. The recreational sub-ACL for GOM haddock is 3,634 mt.
+
+Haddock:
+
+*    20 fish, 17"
+*    Open May1-Feb 28 and April 1- April 30
+*    The change from 2021 is to increase the possession limit from 15 to 20 haddock
+
+Cod: 
+
+*   1 fish, 22"
+*   Open Sept 1-October 7 and April 1-April 14 for private anglers
+*   Open Sept 1-October 7 and April 1-April 14 for the for-hire anglers
+
+
+Input data
+==============================================================
+
+1.  **Monthly** length-frequencies for cod and haddock
+1.  **Monthly** catch-per-trip for cod and haddock
+1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
+1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
+1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)
+
+
+
+Calibration 
+===============================================================
+
+1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100". This does the same thing. 
+1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  For September-October, we will just have to try to get Sept+october to 'match'. September and october are not matching well right now. We need a little more effort in those months, but there's also something squirrly about the number of kept fish. This will probably change with the new data, but right now almost all of the catch distribution from September of 2021 is below the 22" size limit.
+
+
+
+
+
+
+<!---With stata's list, you can also use the 'sum' option to create a group sum. This avoids having to create and append a summation row . 
+
+	list group costs profits, sum(costs profits) labvar(group)
+
+	will add an extra line with group=sum containing the total cost and profits.
+	
+ ---> 
+
+~~~~
+<<dd_do:quietly>>
+/*minyangWin is setup to connect to oracle yet */
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
+	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
+	global 	oracle_cxn  " $mysole_conn"
+}
+local my_common1 "atlanticcod"
+local my_common2 "haddock"
+global working_year 2022
+global previous=$working_year-1
+
+
+global output_dir "${project_dir}/output"
+local stub "recreational_catches_2022_calibrate"
+
+/* use the most recent set of results that matches the stub pattern*/
+
+local list : dir "${output_dir}" files "`stub'*"
+local myfile: word count `list'
+local myfile: word `myfile' of `list'
+
+local sim_results_in "${output_dir}/`myfile'"
+
+
+use "`sim_results_in'", clear
+
+drop if month<=4
+gen fishing_year=$working_year
+gen year=fishing_year
+gen month_of_fy=month-12
+replace year=year+1 if month>=13
+replace month=month-12 if month>=13
+
+gen cod_tot_cat=cod_num_kept+cod_num_released
+gen hadd_tot_cat=haddock_num_kept+haddock_num_released
+*replace month=month-12 if month>=13
+sort month
+order cod_tot_cat hadd_tot_cat, after(month)
+format *num* %09.1gc
+format *mt %06.1fc
+format *tot_cat %09.1gc
+
+gen cod_mort_mt=cod_kept_mt+cod_released_dead_mt
+gen hadd_mort_mt=hadd_kept_mt+hadd_released_dead_mt
+
+
+
+
+collapse (mean) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(fishing_year year scenario month scenario_num)
+*collapse (sum) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(scenario scenario_num)
+order total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released 
+
+gen str60 description=""
+replace description="calibrated to 2022 total trips, April closed for cod." if scenario_num==0
+replace description="calibrated to 2022 total trips, April open for cod." if scenario_num==1
+
+preserve
+	keep scenario_num month fishing_year month cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt
+	reshape wide cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt, i(month fishing_year) j(scenario_num)
+	tempfile wide
+	save `wide'
+restore
+
+
+
+foreach var of varlist choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_tot_cat hadd_tot_cat cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt cod_mort_mt hadd_mort_mt{
+	rename `var' sim_`var'
+}
+
+tempfile calib_resultsO   calib_resultsC  calib_results10
+format sim* %10.0fc
+format *mt %06.1fc
+
+preserve 
+keep if scenario_num==0
+save `calib_resultsO', replace
+
+restore
+preserve
+keep if scenario_num==1
+save `calib_resultsC', replace
+restore
+
+
+keep if inlist(scenario_num,0,1)
+gen freq=1
+/*replace freq=3 if scenario_num==3 */
+replace scenario_num=10
+collapse (mean) sim_total_trips sim_cod_num_kept sim_cod_num_released sim_haddock_num_kept sim_haddock_num_released sim_cod_tot_cat sim_hadd_tot_cat sim_choice_occasions sim_cod_kept_mt sim_cod_released_mt sim_cod_released_dead_mt sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_released_dead_mt sim_cod_mort_mt sim_hadd_mort_mt [fweight=freq], by(fishing_year year month scenario_num)
+
+save `calib_results10', replace
+
+/* NOTE 1: Now, I need to take the average of scenarios 1 and 3.   */
+
+
+use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${previous}.dta", replace 
+
+keep if inlist(month,"11","12") | inlist(month,"09","10")
+replace year=$working_year
+append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${working_year}.dta"
+
+replace year=$working_year+1 if month=="04"
+cap destring month, replace
+gen fishing_year=$working_year
+sort year month 
+
+*list fishing_year year month dtrip, abbreviate(16)
+
+
+/* 
+Bring in the average of the 3 and 1 scenarios.
+*/
+
+
+merge 1:1 fishing_year month using `calib_results10'
+
+replace year=$working_year+1 if month<=4 & year==.
+replace year=$working_year if month>4 & year==.
+
+*replace dtrip=0 if dtrip==. & _merge==2
+gen error=(dtrip-sim_total_trips)/dtrip
+gen yield=sim_total_trips/sim_choice_occasions
+egen tco=total(sim_choice_occasions)
+gen needed_choice_occs=dtrip/yield
+
+egen needed_total_co=total(needed_choice_occs)
+
+gen needed_frac=needed_choice_occs/needed_total_co
+
+rename dtrip actual_trips
+sort fishing_year year month
+
+
+
+<</dd_do>>
+~~~~
+
+The results file you are using is  <<dd_display: "`myfile'">> This table has my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I'm using to calibrate the model. 
+~~~~
+<<dd_do:nocommands>>
+
+list fishing_year month actual_trips sim_total_trips error yield needed_choice_occs  needed_total_co  needed_frac , abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
+<</dd_do>>
+~~~~
+
+The number of trips is accurate, usually to 1-2%.  As expected.
+
+<!---
+
+The following table has the calibration target and the number of simulated trips for 4 calibrations model runs:
+
+1. April open for cod and haddock 
+2. April closed for cod and haddock 
+3. April open for haddock, closed for cod 
+4. April closed for haddock, open for cod
+
+I think #2 and #4 are irrelevant.  I am using an average #1 of #3.
+--->
+~~~~
+<<dd_do:quietly>>
+use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${previous}.dta", replace 
+
+
+keep if inlist(month,"11","12") | inlist(month,"09","10")
+replace year=$working_year
+append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${working_year}.dta"
+
+replace year=$working_year+1 if month=="04"
+cap destring month, replace
+gen fishing_year=$working_year
+sort year month 
+destring month, replace
+sort fishing_year month
+merge 1:1 fishing_year month using `wide'
+format total_trips* %10.0fc
+
+replace year=$working_year+1 if month<=4 & year==.
+replace year=$working_year if month>4 & year==.
+
+sort fishing_year year month 
+rename dtrip actual_trips
+<</dd_do>>
+
+<<dd_do:quietly>>
+list fishing_year month actual_trips total_trips0 total_trips1 , abbreviate(16)
+<</dd_do>>
+~~~~
+
+
+
+Catch Statistics for Cod  
+===============================================================
+Here are the cod numbers (a, b1, b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.
+
+
+
+
+~~~~
+<<dd_do:quietly>>
+use "${MRIP_dir}/monthly/`my_common1'_landings_${previous}.dta", replace
+keep if inlist(month,11,12)  | inlist(month,9,10)
+replace year=$working_year
+append using "${MRIP_dir}/monthly/`my_common1'_landings_${working_year}.dta"
+
+replace year=$working_year+1 if month==4
+gen fishing_year=$working_year
+
+sort year month 
+merge 1:1 fishing_year month using `calib_results10'
+replace year=$working_year+1 if month<=4 & year==.
+replace year=$working_year if month>4 & year==.
+gen sim_tot_cat_cod =sim_cod_num_kept+sim_cod_num_released
+
+format tot_cat* a b1 b2 landings sim_tot_cat_cod sim_cod_mort_mt %10.0fc
+
+rename tot_catch actual_cat
+
+
+replace year=1 if month==0
+sort fishing_year year month 
+
+
+<</dd_do>>
+
+
+<<dd_do:nocommands>>
+
+list fishing_year month actual_cat sim_tot_cat_cod landings sim_cod_num_kept  b2  sim_cod_num_released  , abbreviate(16) sum(actual_cat sim_tot_cat_cod landings sim_cod_num_kept  b2  sim_cod_num_released ) labvar(month)
+<</dd_do>>
+~~~~
+
+Here are the cod weights (a, b1, b2) for actual and calibration results for Fishing Year 2021. Over the entire year, the kept numbers are too high (28.4 mt actual vs 37.3 mt simulated). The weights of released cod are also a bit high (655 mt actual vs 698 mt simulated). I think this is being caused by using annual Length frequencies. For example in the september actual data, cod over 21" are either going to be 23" or 29". But when we apply the annual length-frequency, it's there's a smoother mix. There's also some larger fish.  The data are just so sparse. 
+~~~~
+<<dd_do:quietly>>
+use "${MRIP_dir}/monthly/cod_weights_${previous}.dta", clear
+
+
+keep if inlist(month,11,12) | inlist(month,9,10)
+replace year=$working_year
+
+append using "${MRIP_dir}/monthly/cod_weights_${working_year}.dta"
+
+replace year=$working_year+1 if month==4
+gen fishing_year=$working_year
+
+
+sort year month 
+
+
+replace ab1weight=ab1weight/2204
+rename ab1weight ab1mt
+replace b2weight=b2weight/2204
+rename b2weight b2mt
+sort year month 
+format ab1mt b2mt %10.2fc
+
+merge 1:1 fishing_year month using `calib_results10'
+
+replace year=$working_year+1 if month<=4 & year==.
+replace year=$working_year if month>4 & year==.
+
+format ab1_count b2_count sim_cod_mort_mt sim_cod_kept_mt %10.0fc
+
+
+
+replace year=1 if month==0
+sort fishing_year year month 
+
+
+format *mt %06.1fc
+
+<</dd_do>>
+
+
+<<dd_do:nocommands>>
+list fishing_year month ab1mt b2mt sim_cod_kept_mt sim_cod_released_mt sim_cod_mort_mt , abbreviate(16) sum(ab1mt b2mt sim_cod_kept_mt sim_cod_released_mt sim_cod_mort_mt ) labvar(month)
+<</dd_do>>
+~~~~
+
+
+
+Catch Statistics for Haddock  
+===============================================================
+
+Here are the haddock (a, b1, b2) in numbers for Fishing Year 2021 that we are calibrating to.  
+
+
+1.  Total catch matches very well, except for April  (140,400 caught vs 90,000 simulated).
+1.  It looks like I'm having problems sorting catch into kept and released fish.  I am overpredicting catch and under predicting releases in June, July, August, Sept.  And the opposite in April and May.  
+
+~~~~
+<<dd_do:quietly>>
+use "${MRIP_dir}/monthly/`my_common2'_landings_${previous}.dta", replace
+
+keep if inlist(month,11,12) | inlist(month,9,10)
+replace year=$working_year
+
+append using "${MRIP_dir}/monthly/`my_common2'_landings_${working_year}.dta"
+
+replace year=$working_year+1 if month==4
+gen fishing_year=$working_year
+
+sort year month 
+
+
+
+merge 1:1 fishing_year month using `calib_results10'
+replace year=$working_year+1 if month<=4 & year==.
+replace year=$working_year if month>4 & year==.
+
+
+gen sim_tot_cat_haddock=sim_haddock_num_kept+sim_haddock_num_released
+
+format tot_cat* a b1 b2 landings sim_tot_cat_haddock sim_hadd_mort_mt %10.0fc
+
+replace year=1 if month==0
+sort fishing_year year month 
+rename tot_catch actual_cat
+
+<</dd_do>>
+
+
+<<dd_do:nocommands>>
+list fishing_year month actual_cat sim_tot_cat_haddock landings sim_haddock_num_kept b2  sim_haddock_num_released sim_hadd_mort_mt, abbreviate(16) sum(actual_cat sim_tot_cat_haddock landings sim_haddock_num_kept b2  sim_haddock_num_released sim_hadd_mort_mt ) labvar(month)
+<</dd_do>>
+~~~~
+
+
+
+Here are the haddock (a+b1 and b2) in weights and numbers for Fishing Year 2021 that we are calibrating to. This uses the 2b95 method.  
+~~~~
+<<dd_do:quietly>>
+use "${MRIP_dir}/monthly/haddock_weights_${previous}.dta", clear
+
+keep if inlist(month,11,12) | inlist(month,9,10)
+replace year=$working_year
+
+append using "${MRIP_dir}/monthly/haddock_weights_${working_year}.dta"
+
+replace year=$working_year+1 if month==4
+gen fishing_year=$working_year
+
+
+sort year month 
+
+
+replace ab1weight=ab1weight/2204
+rename ab1weight ab1mt
+replace b2weight=b2weight/2204
+rename b2weight b2mt
+sort year month 
+format ab1mt b2mt %10.2fc
+
+merge 1:1 fishing_year month using `calib_results10'
+
+replace year=$working_year+1 if month<=4 & year==.
+replace year=$working_year if month>4 & year==.
+
+format ab1_count b2_count sim_hadd_mort_mt sim_hadd_kept_mt %10.0fc
+
+replace year=1 if month==0
+sort fishing_year year month 
+
+format *mt %06.1fc
+
+<</dd_do>>
+
+
+<<dd_do:nocommands>>
+list fishing_year month ab1mt b2mt  sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_mort_mt, abbreviate(16) sum(ab1mt b2mt  sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_mort_mt ) labvar(month)
+<</dd_do>>
+~~~~
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!---
+
+This is the monthly number of a+b1s of Cod, after we apply the 2b95 method. I don't know how to do the 2b95 method.  I'll just have to read it in when I'm assembling those data.
+
+| Year | Month |Trimmed_Landings|
+| :------ | :---- | ------- :|
+|2020| 	5 |63|
+|2020 |	6 |2,267|
+|2020 |	7 |1,465|
+|2020 |	8 |3,912|
+|2020 |	9 |7,829|
+|2020 |	10 |955|
+|2020 |	11 |0  |
+|2021 |	4 | 1,434|
+|2021 |	5  |10|
+|2021 |	6  |517|
+|2021 |	7  |61|
+|2021 |	8  |258 |
+--->
+

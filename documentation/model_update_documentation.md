@@ -1,10 +1,15 @@
 # How to update the code and whatnot for the BLAST for recreational Cod and Haddock regulations
 
-# Prereqs
-You'll have to get updated MRIP data using the code found at https://github.com/mle2718/READ-SSB-Lee-MRIP-BLAST.
-Make a new folder for the year. I don't really know why I do this, except to make it slighly easier to go back in time if necessary.
+# Prerequistes
 
-# Presim
+# Data
+
+You'll have to get updated MRIP data using the code found at https://github.com/mle2718/READ-SSB-Lee-MRIP-BLAST.
+Make a new folder for the year. I don't really know why I do this, except to make it slightly easier to go back in time if necessary.
+
+# Simulations
+
+## Presim
 
 The Presim folder contains code to get the simulation set up.  This is mostly contained in the file ``run_this_once.do``
 1. Which years and months are being simulated? 
@@ -16,10 +21,12 @@ The Presim folder contains code to get the simulation set up.  This is mostly co
 7. Once you have updated projections, update their locations in the ``run_this_once.do`` wrapper.  You should not have to edit the do files that are called by this wrapper.
  
 
-
-# Sim
+## Sim
 This is mostly where the code to simulate the model resides. I use ``cod_haddock_calibrate.do`` to calibrate the model; then construct ``cod_haddock_template.do`` file from it. 
 
 Set the regulations in the ``sim/regulations`` folder and pass names in using the ``rec_management`` global.
 
 The ``/presim/cod_hadd_bio_params.do`` file must be updated with the locations of the input data. That input data is created in the Presim section.  So, all you need to do is copy the globals in from the ``run_this_once.do`` file
+
+## Postsim
+You will need to use stata's dyndoc to make outputs. You will have to fiddle with the input files and folders in the ``postsim/calibration_summaries.txt.'' In particular, you'll have to point this file to the updated MRIP data.  
