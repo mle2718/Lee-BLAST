@@ -88,8 +88,7 @@ quietly gen q3=.
 quietly gen q4=.
 quietly gen q5=.
 quietly gen q6=.
-quietly gen prob=.
-quietly gen probold=.
+quietly gen prob=0
 
 quietly gen trip_occur = . 
 quietly gen WTP=0 
@@ -538,9 +537,11 @@ do "$code_dir/sim/aux_prob.do"
 
 putmata prob, replace
 
-/*
-do "$code_dir/sim/prob_summer.do"
-*/
+
+
+
+
+
 
 /* NOW WE NEED TO REPEAT OUR PROCESS FOR ACTUAL CATCH   IT IS SIMILAR TO EXPECTED CATCH,WITH A FEW EXCEPTIONS.  
 1.  ADD 'WEIGHTS'
