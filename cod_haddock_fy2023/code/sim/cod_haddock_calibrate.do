@@ -203,12 +203,8 @@ global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
-/* FY 2020 had 407,000 trips. 
-FY2021 is on track for a similar number (371,900) 
-We'll probably need to set tot_trips to around 600 000
+/* Current Calibration for FY 2022 (waiting on Wave 5 data) 222,860 trips taken.  616104 needed choice occasions. 
 
-
-global tot_trips 494000 --> 202,000 actual trips.
 
 
 */
@@ -683,28 +679,7 @@ notes: this contains the numbers at lengths of cod for the current replicate
 save "${working_data}/cod_length_count.dta", replace
 
 /* Recreational Fishing occurs in Feb */
-
-	if "$closedbehavior" == "alwaysonboth"  {
-	do "$code_dir/sim/simulation_v42a_both_on.do"
-         }
-        else if "$closedbehavior" == "stopfishingboth"  {
-	do "$code_dir/sim/simulation_v42a_stop_both.do"
-         }
-        else if "$closedbehavior" == "alwaysonhaddock"  {
-	do "$code_dir/sim/simulation_v42a_always_on_haddock.do"
-         }
-        else if "$closedbehavior" == "alwaysoncod"  {
-	do "$code_dir/sim/simulation_v42a_always_on_cod.do"
-         }
-	else {
-                  display as err /*
-                            */ "specify adjust(means) or adjust(medians)"
-                  exit 198
-             }
-
-
-
-*quietly do "aux_wtp.do"
+	do "$code_dir/sim/simulation_v42a.do"
 
 quietly do "$code_dir/sim/aux_wtp2.do"
 /* post the fishing statistics for wave 1
