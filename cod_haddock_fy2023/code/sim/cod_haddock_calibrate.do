@@ -210,11 +210,12 @@ local max_months=($months*$total_years_sim) + 4
 */
 
 global tot_trips 638116
-global scale_factor 100
+global scale_factor 10
 global numtrips=$tot_trips/$scale_factor
 
 global which_year=2022
 
+global expectation_reps 10
 
 /* read in biological data, economic data, and backround data on catch from the commercial fishery*/
 do "${code_dir}/presim/cod_hadd_bio_params.do"
@@ -285,7 +286,6 @@ Right now this distribution is hard coded -- one day it should be set up to look
 /* Allocate the commercial cod and haddock mortality to each of the 6 waves.  Allocate the recreational effort to each of the waves*/
 
 
-/* to open september to the private fleet, increase the september number of trips by 80% */
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 
@@ -1007,9 +1007,10 @@ shell chmod 440 `sp2_out'
 shell chmod 440 `econ_out'
  */
 
-timer list
 
 di "This is two simulations.  One with October open the other with october closed."
 dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+
+timer list
 log close
 

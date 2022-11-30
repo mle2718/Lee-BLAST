@@ -95,8 +95,8 @@ pause off
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
 }
 
 
@@ -105,6 +105,7 @@ global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
+global mrip_source_data "${source_data}/mrip"
 
 /* setup date/time for file logging */
 local date: display %td_CCYY_NN_DD date(c(current_date), "DMY")
@@ -119,7 +120,7 @@ local mins=substr("`time'",4,2)
 2022SQ is a copy of the 2021calibrate.
 */
 
-global rec_management "2022Combine"
+global rec_management "2023Combine"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
@@ -202,22 +203,19 @@ global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
-/* FY 2020 had 407,000 trips. 
-FY2021 is on track for a similar number (371,900) 
-We'll probably need to set tot_trips to around 600 000
+/* Current Calibration for FY 2022 (waiting on Wave 5 data) 222,860 trips taken.  616104 needed choice occasions. 
 
-
-global tot_trips 494000 --> 202,000 actual trips.
 
 
 */
 
-global tot_trips 879000
-global scale_factor 100
+global tot_trips 638116
+global scale_factor 10
 global numtrips=$tot_trips/$scale_factor
 
 global which_year=2022
 
+global expectation_reps 10
 
 /* read in biological data, economic data, and backround data on catch from the commercial fishery*/
 do "${code_dir}/presim/cod_hadd_bio_params.do"
@@ -290,9 +288,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.2852   \ 5, 0.0971 \ 6, 0.1388 \ 7 ,0.09133 \ 8, .1255\ 9 , .0830 \10, .0370   \ 11, .1421 \ 12,0.00)   
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.271 \ 5, 0.0990 \ 6, 0.141 \ 7 ,0.095 \ 8, .130  \ 9 , .0846 \10, .0375 \ 11, .1420 \ 12,0.00)   
 
+recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4039 \ 5, 0.1305 \ 6, 0.0687 \ 7 ,0.07431  \ 8, 0.1019 \ 9 , 0.1609 \10, .05977 \ 11, 0.0  \ 12,0.00)   
 
 recreational_effort_waves = J(10,1,recreational_effort_waves)
 recreational_effort_monthly = J(10,1,recreational_effort_months) 
@@ -1010,6 +1007,9 @@ shell chmod 440 `sp2_out'
 shell chmod 440 `econ_out'
  */
 
+di "Some Text to Display"
+/* This is a good place to dyndoc something. Maybe */
+* dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
 timer list
 log close
 
