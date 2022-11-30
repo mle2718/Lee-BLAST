@@ -87,9 +87,6 @@ tempvar V
 gen `V'=$pi_cod_keep*sqrt(ckeep)+$pi_cod_release*sqrt(crel)+ $pi_hadd_keep*sqrt(hkeep) + $pi_hadd_release*sqrt(hrel)
 gen utilActual=-ln(1+exp(`V'))/$pi_cost
 
-replace `V'=$pi_cod_keep*sqrt(eckeep)+$pi_cod_release*sqrt(ecrel)+ $pi_hadd_keep*sqrt(ehkeep) + $pi_hadd_release*sqrt(ehrel)
-gen utilExpected=-ln(1+exp(`V'))/$pi_cost
-
 
 
 
