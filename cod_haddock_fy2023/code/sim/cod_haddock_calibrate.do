@@ -286,7 +286,6 @@ Right now this distribution is hard coded -- one day it should be set up to look
 /* Allocate the commercial cod and haddock mortality to each of the 6 waves.  Allocate the recreational effort to each of the waves*/
 
 
-/* to open september to the private fleet, increase the september number of trips by 80% */
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 
