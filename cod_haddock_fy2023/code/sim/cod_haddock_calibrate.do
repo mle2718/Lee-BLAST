@@ -210,11 +210,12 @@ local max_months=($months*$total_years_sim) + 4
 */
 
 global tot_trips 638116
-global scale_factor 100
+global scale_factor 10
 global numtrips=$tot_trips/$scale_factor
 
 global which_year=2022
 
+global expectation_reps 10
 
 /* read in biological data, economic data, and backround data on catch from the commercial fishery*/
 do "${code_dir}/presim/cod_hadd_bio_params.do"
@@ -1007,9 +1008,10 @@ shell chmod 440 `sp2_out'
 shell chmod 440 `econ_out'
  */
 
-timer list
 
 di "This is two simulations.  One with October open the other with october closed."
 dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+
+timer list
 log close
 
