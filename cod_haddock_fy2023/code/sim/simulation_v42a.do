@@ -101,6 +101,7 @@ quietly gen running_hadd=.
 quietly gen running_disc_cod=.
 quietly gen running_disc_hadd=.
 
+quietly gen utilExpected=0
 
 /* THIS IS THE END OF SECTION 0 */
 
@@ -147,16 +148,28 @@ replace tripcost=15+`temp1'*c_chart*triplength if mode==4
 
 
 
-
-
-
 mata:
-
-
-
 /* Draw 2 random variables that represents the individual's trip's propensity to keep sub-legal cod or haddock. */
 wcodt=runiform(`wave_obs',1)
 whaddt=runiform(`wave_obs',1)
+end
+
+
+
+
+
+
+local end_mata end
+
+forvalues expectation=1(1)$expectation_reps{
+quietly replace q1=.
+quietly replace q2=.
+quietly replace q3=.
+quietly replace q4=.
+quietly replace q5=.
+quietly replace q6=.
+
+mata:
 
 /* This code gets the number of linedrops for haddock. I wrote it in two lines to make it explicit:
 		temp1=rdiscrete($wave_numtrips,1 ,hadd_catch_class_by_month[.,$wave_of_cy+1])
@@ -209,7 +222,6 @@ whadd=mm_expand(whaddt,1,cols(haddock_lengths))
 whadd=mm_expand(wcodt,1,cols(haddock_lengths))
 */
 
-mata drop wcodt whaddt
 
 /* Constructing the adjusted length matrix */
 
@@ -524,19 +536,23 @@ ehrel=rowsum(ehadd_released)
 
 mata drop eh_encountered etemphbag erunning_sum_temphbag position ehbagopen ehbagclosed
 
-end
+/*This dodges around the "no mata....end inside a loop." But it also breaks the code folding in stata's do file editor. */
+`end_mata' 
 
-
-getmata ehkeep ehrel ehrand eckeep ecrel ecrand
+noi di "this is the end of rep `expectation'"
+getmata ehkeep ehrel ehrand eckeep ecrel ecrand, replace
 
 
 
 /* This aux do file generates and regenerates probability of a trip occurring.  
 It also rescales the probability, multipliying by the scale factor. */
 do "$code_dir/sim/aux_prob.do"
+}
+
+replace prob=prob/$expectation_reps
+replace utilExpected=utilExpected/$expectation_reps
 
 putmata prob, replace
-
 
 
 
