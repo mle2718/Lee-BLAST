@@ -7,7 +7,7 @@
 
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_30" 
 }
 
 
@@ -37,9 +37,7 @@ dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/ca
  ---> 
 
 
-
-
-Fishing Year 2020 and 2021 Regulations
+2020 and 2021 Regulations
 ==============================================================
 
 The same regulations were in place for FY2020 and FY2021.
@@ -62,7 +60,7 @@ The rec sub-ACL for cod was 193mt in 2020.
 
 MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions. 
 
-Fishing Year 2022 Regulations
+2022 Regulations
 ==============================================================
 The recreational sub-ACL for GoM cod is 192 mt for FY 2022. The recreational sub-ACL for GOM haddock is 3,634 mt.
 
@@ -79,14 +77,21 @@ Cod:
 *   Open Sept 1-October 7 and April 1-April 14 for the for-hire anglers
 
 
+
+
+Fishing Year 2023 Regulations
+==============================================================
+The recreational sub-ACL for GoM cod is 192 mt for FY 2023. The recreational sub-ACL for GOM haddock is 610 mt.  Regulations have not been set yet.
+
+
 Input data
 ==============================================================
 
-1.  **Monthly** length-frequencies for cod and haddock
+1.  **Annual** length-frequencies for cod and haddock
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
 1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
-1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)
+1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
 
 
 
@@ -94,11 +99,8 @@ Calibration
 ===============================================================
 
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
-1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 and the minimum size to 100". This does the same thing. 
-1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  For September-October, we will just have to try to get Sept+october to 'match'. September and october are not matching well right now. We need a little more effort in those months, but there's also something squirrly about the number of kept fish. This will probably change with the new data, but right now almost all of the catch distribution from September of 2021 is below the 22" size limit.
-
-
-
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. We set the minimum size to 100".  This does the same thing. 
+1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  For September-October, we will just have to try to get Sept+october to 'match'. 
 
 
 
@@ -115,7 +117,7 @@ Calibration
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_30" 
 	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
 	global 	oracle_cxn  " $mysole_conn"
 }
@@ -297,6 +299,8 @@ rename dtrip actual_trips
 <</dd_do>>
 
 <<dd_do:quietly>>
+
+
 list fishing_year month actual_trips total_trips0 total_trips1 , abbreviate(16)
 <</dd_do>>
 ~~~~
@@ -344,7 +348,11 @@ list fishing_year month actual_cat sim_tot_cat_cod landings sim_cod_num_kept  b2
 <</dd_do>>
 ~~~~
 
-Here are the cod weights (a, b1, b2) for actual and calibration results for Fishing Year 2021. Over the entire year, the kept numbers are too high (28.4 mt actual vs 37.3 mt simulated). The weights of released cod are also a bit high (655 mt actual vs 698 mt simulated). I think this is being caused by using annual Length frequencies. For example in the september actual data, cod over 21" are either going to be 23" or 29". But when we apply the annual length-frequency, it's there's a smoother mix. There's also some larger fish.  The data are just so sparse. 
+Here are the cod weights (a, b1, b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. 
+
+MRIP's April cod retentions are suspect.  Nearly all fish caught in April are landed.  
+
+
 ~~~~
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/cod_weights_${previous}.dta", clear
@@ -397,11 +405,9 @@ list fishing_year month ab1mt b2mt sim_cod_kept_mt sim_cod_released_mt sim_cod_m
 Catch Statistics for Haddock  
 ===============================================================
 
-Here are the haddock (a, b1, b2) in numbers for Fishing Year 2021 that we are calibrating to.  
+Here are the haddock (a, b1, b2) in numbers for Fishing Year <<dd_display: %4.0f $working_year>> that we are calibrating to.  
 
 
-1.  Total catch matches very well, except for April  (140,400 caught vs 90,000 simulated).
-1.  It looks like I'm having problems sorting catch into kept and released fish.  I am overpredicting catch and under predicting releases in June, July, August, Sept.  And the opposite in April and May.  
 
 ~~~~
 <<dd_do:quietly>>
@@ -442,7 +448,7 @@ list fishing_year month actual_cat sim_tot_cat_haddock landings sim_haddock_num_
 
 
 
-Here are the haddock (a+b1 and b2) in weights and numbers for Fishing Year 2021 that we are calibrating to. This uses the 2b95 method.  
+Here are the haddock (a+b1 and b2) in weights and numbers for Fishing Year <<dd_display: %4.0f $working_year>> that we are calibrating to.
 ~~~~
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/haddock_weights_${previous}.dta", clear
