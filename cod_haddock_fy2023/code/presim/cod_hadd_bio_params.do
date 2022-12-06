@@ -69,8 +69,8 @@ global haddock_catch_class "${mrip_source_data}/haddock_catch_class2022.dta"
 
  /* If you want to use ANNUAL catch-class data uncomment this */
 
-global cod_catch_class "${mrip_source_data}/cod_catch_class_ANNUAL2022.dta" 
-global haddock_catch_class "${mrip_source_data}/haddock_catch_class_ANNUAL2022.dta" 
+global cod_catch_class "${mrip_source_data}/cod_catch_class2022.dta" 
+global haddock_catch_class "${mrip_source_data}/haddock_catch_class2022.dta" 
 
 
 

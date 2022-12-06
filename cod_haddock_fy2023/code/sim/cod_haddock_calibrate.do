@@ -209,7 +209,7 @@ local max_months=($months*$total_years_sim) + 4
 
 */
 
-global tot_trips 638116
+global tot_trips 609610
 global scale_factor 10
 global numtrips=$tot_trips/$scale_factor
 
@@ -289,7 +289,7 @@ Right now this distribution is hard coded -- one day it should be set up to look
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 
-recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4039 \ 5, 0.1305 \ 6, 0.0687 \ 7 ,0.07431  \ 8, 0.1019 \ 9 , 0.1609 \10, .05977 \ 11, 0.0  \ 12,0.00)   
+recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4443 \ 5, 0.1235 \ 6, 0.06764 \ 7 ,0.08 \ 8, 0.109 \ 9 , 0.1221 \10, .0526 \ 11, 0.0  \ 12,0.00)   
 
 recreational_effort_waves = J(10,1,recreational_effort_waves)
 recreational_effort_monthly = J(10,1,recreational_effort_months) 
@@ -1009,7 +1009,7 @@ shell chmod 440 `econ_out'
 
 
 di "This is two simulations.  One with October open the other with october closed."
-dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries_mix.html) replace
 
 timer list
 log close
