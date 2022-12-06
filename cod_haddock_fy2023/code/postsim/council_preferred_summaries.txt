@@ -49,8 +49,13 @@ dyndoc "${code_dir}/postsim/council_preferred_summaries.txt", saving(${project_d
 /****************************/
 /****************************/
 
-global hadd_recACL=3634
+global hadd_recACL2022=3634
+global cod_recACL2022=192
+
+
+global hadd_recACL=610
 global cod_recACL=192
+
 
 <</dd_do>>
 ~~~~
@@ -79,7 +84,27 @@ The rec sub-ACL for cod was 193mt in 2020.
 
 ## Fishing Year 2022 Regulations
 
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
+
+Haddock:
+
+*    20 fish, 17"
+*    Open May1-Feb 28 and April 1- April 30
+*    The change from 2021 is to increase the possession limit from 15 to 20 haddock
+
+Cod: 
+
+*   1 fish, 22"
+*   Open Sept 1-October 7 and April 1-April 14 for private anglers
+*   Open Sept 1-October 7 and April 1-April 14 for the for-hire anglers
+
+
+
+## Fishing Year 2023 Regulations
+==============================================================
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.  Regulations are TBD.
+
+
 
 
 ## Data
