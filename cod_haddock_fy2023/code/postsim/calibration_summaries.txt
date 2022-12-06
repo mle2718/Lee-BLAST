@@ -100,7 +100,7 @@ Calibration
 
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
 1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. We set the minimum size to 100".  This does the same thing. 
-1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  For September-October, we will just have to try to get Sept+october to 'match'. 
+1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  October is open for 1 week.  I have been just simulating the model with October closed. However, I can also run the model with October open and closed and take a weighted average of the two.  
 
 
 
@@ -201,9 +201,12 @@ restore
 
 keep if inlist(scenario_num,0,1)
 gen freq=1
+/* weight the "october closed scenario 3 times heavier than the october open scenario*/
+replace freq=3 if month==10 & scenario_num==0
 /*replace freq=3 if scenario_num==3 */
+
 replace scenario_num=10
-collapse (mean) sim_total_trips sim_cod_num_kept sim_cod_num_released sim_haddock_num_kept sim_haddock_num_released sim_cod_tot_cat sim_hadd_tot_cat sim_choice_occasions sim_cod_kept_mt sim_cod_released_mt sim_cod_released_dead_mt sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_released_dead_mt sim_cod_mort_mt sim_hadd_mort_mt [fweight=freq], by(fishing_year year month scenario_num)
+collapse (mean) sim_total_trips sim_cod_num_kept sim_cod_num_released sim_haddock_num_kept sim_haddock_num_released sim_cod_tot_cat sim_hadd_tot_cat sim_choice_occasions sim_cod_kept_mt sim_cod_released_mt sim_cod_released_dead_mt sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_released_dead_mt sim_cod_mort_mt sim_hadd_mort_mt [aweight=freq], by(fishing_year year month scenario_num)
 
 save `calib_results10', replace
 

@@ -24,7 +24,7 @@ Scenario,SimName,SimMonth,HaddockMin,HaddockMax,HaddockBag,CodMin,CodMax,CodBag,
 1,StatusQuoB,7,17,100,20,98,100,5,alwaysonboth
 1,StatusQuoB,8,17,100,20,98,100,5,alwaysonboth
 1,StatusQuoB,9,17,100,20,22,100,1,alwaysonboth
-1,StatusQuoB,10,17,100,20,98,100,5,alwaysonboth
+1,StatusQuoB,10,17,100,20,22,100,1,alwaysonboth
 1,StatusQuoB,11,17,100,20,98,100,5,alwaysonboth
 1,StatusQuoB,12,17,100,20,98,100,5,alwaysonboth
 1,StatusQuoB,13,17,100,20,98,100,5,alwaysonboth
