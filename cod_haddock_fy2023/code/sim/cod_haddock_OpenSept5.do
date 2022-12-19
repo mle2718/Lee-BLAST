@@ -96,7 +96,7 @@ pause off
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19" 
 }
 
 

@@ -29,7 +29,7 @@ ageclass lines for 2020 to 2022.  Take out the age 1's.
 
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_11_16" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19"
 }
 
 
@@ -227,7 +227,7 @@ Here are some results.  In this section, I first compute the annual totals for e
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2021_12_20" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19" 
 	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
 	global 	oracle_cxn  " $mysole_conn"
 }
@@ -239,8 +239,8 @@ local my_common2 "haddock"
 
 
 global cm_to_inch=0.39370787
-global cod_naa "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
-global cod_naa_start "${source_data}/cod agepro/GOM_COD_2021_UPDATE_BOTH.dta"
+global cod_naa "${source_data}/cod agepro/historical_and_mean_projected_Cod_NAA.dta"
+global cod_naa_start "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
 
 global codalkey "${working_data}/cod_al_key.dta"
 
