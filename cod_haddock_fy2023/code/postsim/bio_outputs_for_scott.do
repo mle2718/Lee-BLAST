@@ -14,7 +14,7 @@ mata: cod_jan1_weights=(0.057,  0.365,  0.908 , 1.662 , 2.426 , 3.307 , 4.09 , 5
 
 
 
-global project_dir "/home/mlee/Documents/Workspace/recreational_simulations/cod_haddock_fy2022"
+global project_dir "/home/mlee/Documents/Workspace/recreational_simulations/cod_haddock_fy2023"
 
 global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
@@ -81,7 +81,7 @@ save "$hadd_naa_fix2", replace
 
 
 use "$hadd_naa_fix2"
-keep if year==2021
+keep if year==2022
 
 tempfile agepro
 gen str200 source="$hadd_naa_fix2"
@@ -105,7 +105,7 @@ save `agepro', replace
 
 
 use "$hadd_naa_sort"
-keep if year==2021
+keep if year==2022
 /* you did some bad shit with the id and replicate. 
 ID in the source naa data == replicate in the results data. you are dumb.
 */
@@ -126,7 +126,7 @@ cd "$output_dir"
 *local stub "cod_end_of_wave"
 local stub "haddock_end_of_wave"
 
-local dateread "2020_02_04"
+local dateread "2022_12_19"
 
 
 local filelist1: dir "." files "`stub'*`dateread'*.dta"
@@ -186,7 +186,7 @@ so????
 
 
 
-*graph box age* if year==2021, nooutsides legend(rows(2)) ytitle("000s of fish") title("Cod Numbers at Age 2021") subtitle("M-Ramp M=0.4 projection")
+*graph box age* if year==2022, nooutsides legend(rows(2)) ytitle("000s of fish") title("Cod Numbers at Age 2022") subtitle("M-Ramp M=0.4 projection")
 
 drop commercial_discards cmin hbag cbag hmax cmax cod_release_mort hadd_release_mort source cumulative_commercial year hmin
 
@@ -206,7 +206,7 @@ reshape long age, i(scenario_num replicate) j(ageclass)
 rename age num
 
 sort scenario_num replicate ageclass
-graph box num if inlist(scenario_num,1001,2003,9998, 9999) & age>=2, over(scenario, label(angle(45))) over(ageclass)  nooutsides ytitle("Millions of fish") title("Haddock Numbers at Age in 2021") subtitle("retroadjusted M=0.2 projection") asyvars legend(order(1 "AgePro" 2 "AgePro Adjusted" 3 "BioEcon- SQ" 4 "BioEcon - Slot"))
+graph box num if inlist(scenario_num,1001,2003,9998, 9999) & age>=2, over(scenario, label(angle(45))) over(ageclass)  nooutsides ytitle("Millions of fish") title("Haddock Numbers at Age in 2022") subtitle("retroadjusted M=0.2 projection") asyvars legend(order(1 "AgePro" 2 "AgePro Adjusted" 3 "BioEcon- SQ" 4 "BioEcon - Slot"))
 
 graph export $output_dir/haddock_comparison.png, as(png) replace width(1000)
 
@@ -215,5 +215,5 @@ replace J1mt=J1mt/1000
 replace ssb=ssb/1000
 label var J1mt "Jan 1 Biomass"
 label var ssb "SSB*"
-graph box J1mt ssb if inlist(scenario_num,1001,2003,9998, 9999) & age==1, over(scenario, relabel(1 "AGEPRO" 2 "AGEPRO Adjusted" 3 "BioEcon SQ" 4 "BioEcon slot")) nooutsides ytitle("Weight (000s mt)") title("Haddock in 2021") subtitle("retroadjusted M=0.2 projection") 
+graph box J1mt ssb if inlist(scenario_num,1001,2003,9998, 9999) & age==1, over(scenario, relabel(1 "AGEPRO" 2 "AGEPRO Adjusted" 3 "BioEcon SQ" 4 "BioEcon slot")) nooutsides ytitle("Weight (000s mt)") title("Haddock in 2022") subtitle("retroadjusted M=0.2 projection") 
 graph export $output_dir/haddock_biomass.png, as(png) replace width(1000)
