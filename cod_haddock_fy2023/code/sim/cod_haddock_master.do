@@ -203,15 +203,10 @@ global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
-/* Current Calibration for FY 2022 (waiting on Wave 5 data) 222,860 trips taken.  616104 needed choice occasions. 
 
-
-
-*/
-
-global tot_trips 638116
+*global tot_trips 646340
 global scale_factor 10
-global numtrips=$tot_trips/$scale_factor
+*global numtrips=$tot_trips/$scale_factor
 
 global which_year=2022
 
@@ -288,12 +283,21 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
+recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4039 \ 5, 0.1305 \ 6, 0.0687 \ 7 ,0.07431  \ 8, 0.1019 \ 9 , 0.1609 \10, .05977 \ 11, 0.0  \ 12,0.00)   
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 269917  \ 5, 75398 \ 6, 41600 \ 7, 58559 \ 8, 79487 \ 9 , 105744 \10, 17006 \ 11, 0  \ 12, 0) 
+st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
+
 
 recreational_effort_waves = J(10,1,recreational_effort_waves)
 recreational_effort_monthly = J(10,1,recreational_effort_months) 
+recreational_trips_months = J(10,1,recreational_trips_months) 
+
 end
+
+global tot_trips =scalar(my_num_trips)
+global numtrips=$tot_trips/$scale_factor
+
 /* END of Global macros */
 /**************************************************************/
 /**************************************************************/
@@ -506,7 +510,8 @@ I've written each mata command individually
 
 	mata:	st_numscalar("haddock_quota",haddock_commercial_catch_monthly[`this_month'])
 	mata:	st_numscalar("cod_quota",cod_commercial_catch_monthly[`this_month'])
-	mata:   st_numscalar("rec_effort_fraction",recreational_effort_monthly[`this_month',2])
+	*mata:   st_numscalar("rec_effort_fraction",recreational_effort_monthly[`this_month',2])
+	mata:   st_numscalar("rec_effort_trips",recreational_trips_months[`this_month',2])
 
 /* Get the correct recreational fishing regulations a little ugly because I'm getting
 scalars from mata and then sending them to globals. */
@@ -559,7 +564,10 @@ scalars from mata and then sending them to globals. */
 		
 	
 	
-	global wave_numtrips=floor(scalar(rec_effort_fraction)*$numtrips)
+   *global wave_numtrips=floor(scalar(rec_effort_fraction)*$numtrips)
+	
+	global wave_numtrips=floor(scalar(rec_effort_trips)/$scale_factor)
+
 	
 	/* nobody goes fishing if cod and haddock bag limits are zero */
 	if $codbag==0 & $haddockbag==0{

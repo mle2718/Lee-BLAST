@@ -202,22 +202,13 @@ global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
-/* FY 2020 had 407,000 trips. 
-FY2021 is on track for a similar number (371,900) 
-We'll probably need to set tot_trips to around 600 000
-
-
-global tot_trips 494000 --> 202,000 actual trips.
-
-
-*/
-
-global tot_trips 879000
-global scale_factor 100
-global numtrips=$tot_trips/$scale_factor
+*global tot_trips 646340
+global scale_factor 10
+*global numtrips=$tot_trips/$scale_factor
 
 global which_year=2022
 
+global expectation_reps 10
 
 /* read in biological data, economic data, and backround data on catch from the commercial fishery*/
 do "${code_dir}/presim/cod_hadd_bio_params.do"
@@ -288,16 +279,23 @@ Right now this distribution is hard coded -- one day it should be set up to look
 /* Allocate the commercial cod and haddock mortality to each of the 6 waves.  Allocate the recreational effort to each of the waves*/
 
 
-/* to open september to the private fleet, increase the september number of trips by 80% */
 mata: 
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.271 \ 5, 0.0990 \ 6, 0.141 \ 7 ,0.095 \ 8, .130  \ 9 , .0846 \10, .0375 \ 11, .1420 \ 12,0.00)   
+recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_effort_months = (1,0.0 \ 2,0.0 \ 3, 0.00 \ 4, 0.271 \ 5, 0.0990 \ 6, 0.141 \ 7 ,0.095 \ 8, .130  \ 9 , .1904  \10, .0375 \ 11, .1420 \ 12,0.00)   
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 269917  \ 5, 75398 \ 6, 41600 \ 7, 58559 \ 8, 79487 \ 9 , 105744 \10, 17006 \ 11, 0  \ 12, 0) 
+st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
+
 
 recreational_effort_waves = J(10,1,recreational_effort_waves)
 recreational_effort_monthly = J(10,1,recreational_effort_months) 
+recreational_trips_months = J(10,1,recreational_trips_months) 
+
 end
+
+global tot_trips =scalar(my_num_trips)
+global numtrips=$tot_trips/$scale_factor
+
 /* END of Global macros */
 /**************************************************************/
 /**************************************************************/
@@ -510,7 +508,8 @@ I've written each mata command individually
 
 	mata:	st_numscalar("haddock_quota",haddock_commercial_catch_monthly[`this_month'])
 	mata:	st_numscalar("cod_quota",cod_commercial_catch_monthly[`this_month'])
-	mata:   st_numscalar("rec_effort_fraction",recreational_effort_monthly[`this_month',2])
+	*mata:   st_numscalar("rec_effort_fraction",recreational_effort_monthly[`this_month',2])
+	mata:   st_numscalar("rec_effort_trips",recreational_trips_months[`this_month',2])
 
 /* Get the correct recreational fishing regulations a little ugly because I'm getting
 scalars from mata and then sending them to globals. */
@@ -563,7 +562,10 @@ scalars from mata and then sending them to globals. */
 		
 	
 	
-	global wave_numtrips=floor(scalar(rec_effort_fraction)*$numtrips)
+   *global wave_numtrips=floor(scalar(rec_effort_fraction)*$numtrips)
+	
+	global wave_numtrips=floor(scalar(rec_effort_trips)/$scale_factor)
+
 	
 	/* nobody goes fishing if cod and haddock bag limits are zero */
 	if $codbag==0 & $haddockbag==0{
