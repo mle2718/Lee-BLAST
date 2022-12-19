@@ -215,7 +215,7 @@ save `calib_results10', replace
 
 use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${previous}.dta", replace 
 
-keep if inlist(month,"11","12") | inlist(month,"09","10")
+keep if inlist(month,"11","12")
 replace year=$working_year
 append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${working_year}.dta"
 
@@ -250,6 +250,8 @@ gen needed_frac=needed_choice_occs/needed_total_co
 rename dtrip actual_trips
 sort fishing_year year month
 
+format needed_frac  error yield  %05.4fc
+format needed_choice_occs  needed_total_co %9.0fc
 
 
 <</dd_do>>
@@ -259,7 +261,7 @@ The results file you are using is  <<dd_display: "`myfile'">> This table has my 
 ~~~~
 <<dd_do:nocommands>>
 
-list fishing_year month actual_trips sim_total_trips error yield needed_choice_occs  needed_total_co  needed_frac , abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
+list fishing_year month actual_trips sim_total_trips error yield needed_choice_occs  , abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
 <</dd_do>>
 ~~~~
 
@@ -281,7 +283,7 @@ I think #2 and #4 are irrelevant.  I am using an average #1 of #3.
 use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${previous}.dta", replace 
 
 
-keep if inlist(month,"11","12") | inlist(month,"09","10")
+keep if inlist(month,"11","12")
 replace year=$working_year
 append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${working_year}.dta"
 
@@ -320,7 +322,7 @@ Here are the cod numbers (a, b1, b2) for actual and calibration results for Fish
 ~~~~
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/`my_common1'_landings_${previous}.dta", replace
-keep if inlist(month,11,12)  | inlist(month,9,10)
+keep if inlist(month,11,12) 
 replace year=$working_year
 append using "${MRIP_dir}/monthly/`my_common1'_landings_${working_year}.dta"
 
@@ -361,7 +363,7 @@ MRIP's April cod retentions are suspect.  Nearly all fish caught in April are la
 use "${MRIP_dir}/monthly/cod_weights_${previous}.dta", clear
 
 
-keep if inlist(month,11,12) | inlist(month,9,10)
+keep if inlist(month,11,12)
 replace year=$working_year
 
 append using "${MRIP_dir}/monthly/cod_weights_${working_year}.dta"
@@ -416,7 +418,7 @@ Here are the haddock (a, b1, b2) in numbers for Fishing Year <<dd_display: %4.0f
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/`my_common2'_landings_${previous}.dta", replace
 
-keep if inlist(month,11,12) | inlist(month,9,10)
+keep if inlist(month,11,12)
 replace year=$working_year
 
 append using "${MRIP_dir}/monthly/`my_common2'_landings_${working_year}.dta"
@@ -456,7 +458,7 @@ Here are the haddock (a+b1 and b2) in weights and numbers for Fishing Year <<dd_
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/haddock_weights_${previous}.dta", clear
 
-keep if inlist(month,11,12) | inlist(month,9,10)
+keep if inlist(month,11,12)
 replace year=$working_year
 
 append using "${MRIP_dir}/monthly/haddock_weights_${working_year}.dta"
