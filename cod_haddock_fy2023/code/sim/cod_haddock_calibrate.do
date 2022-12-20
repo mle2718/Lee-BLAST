@@ -418,13 +418,13 @@ scalar hreplicate=replicate[1]
 notes: this contains the numbers at age of haddock for the current replicate
 keep  age*
 assert _n==1
-
-/*  OPTION 3: Use the median numbers at age from the the AGEPRO output.  This is very useful to calibrate
+*/
+/*  OPTION 3: Use the median numbers at age from the the AGEPRO output.  This is very useful to calibrate*/
 use "$hadd_naa_start", clear
 keep if year==$which_year
 collapse (median) age1-age9
 scalar hreplicate=1
-*/
+
 
 save "${working_data}/haddock_age_count.dta", replace
 
@@ -446,7 +446,7 @@ There are a few "options here"  PAY CLOSE ATTENTION.
 /* This section of code reads in an observation, "stacks" it, performs the age--> length transformation and saves it to an auxilliary dta (cod_length_count.dta)*/
 
 
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*/
+/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
 
 use "$cod_naa_sort", clear
 keep if year==$which_year
@@ -454,16 +454,16 @@ keep if id==`replicate'
 scalar creplicate=replicate[1]
 assert _n==1
 notes: this contains the numbers at age of cod for the current replicate
-keep age*
+keep age**/
 
-/*  OPTION 3: Use the median numbers at age from the AGEPRO output
+/*  OPTION 3: Use the median numbers at age from the AGEPRO output*/
 
 use "$cod_naa_start", clear
 keep if year==$which_year
 collapse (median) age1-age9
 scalar creplicate=[1]
 keep  age*
-*/
+
 
 save "${working_data}/cod_age_count.dta", replace
  
