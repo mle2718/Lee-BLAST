@@ -7,8 +7,11 @@
 
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19"
+	global MRIP_root  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/"
 }
+
+
+
 
 
 /* setup directories */
@@ -16,6 +19,8 @@ global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2022_12_20"
+global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
 
@@ -37,7 +42,7 @@ dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/ca
  ---> 
 
 
-2020 and 2021 Regulations
+Previous years Regulations
 ==============================================================
 
 The same regulations were in place for FY2020 and FY2021.
@@ -89,7 +94,8 @@ The recreational sub-ACL for GoM cod is 192 mt for FY 2023. The recreational sub
 Input data
 ==============================================================
 
-1.  **Annual** length-frequencies for cod and haddock
+1.  Cod Length Frequencies: I've grouped April, September, and October together. And I've grouped the other months together. 
+1.  Haddock Length Frequencies: **Annual** length-frequencies 
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
 1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
@@ -101,22 +107,35 @@ Calibration
 ===============================================================
 
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
-1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 and the minimum size to 100" -- this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. We set the minimum size to 100".  This does the same thing. 
-1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  October is open for 1 week.  I have been just simulating the model with October closed. However, I can also run the model with October open and closed and take a weighted average of the two.  
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. This does the same thing. 
+1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  October is open for 1 week.  I have been running one model where October is open for cod and one where it is closed and then taking a weighted average (1 part open and 3 parts closed) of the two.
 
 ~~~~
 <<dd_do:quietly>>
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19"
 	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
 	global 	oracle_cxn  " $mysole_conn"
 }
+
+
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2022_12_20"
+global MRIP_raw  "${MRIP_root}/data_folder/raw"
+
 local my_common1 "atlanticcod"
 local my_common2 "haddock"
 global working_year 2022
 global previous=$working_year-1
+
+global hmin=17
+global cmin=22
+global cmin2022=21
 
 global lbs_per_mt=2204.62
 global output_dir "${project_dir}/output"
@@ -306,9 +325,7 @@ list fishing_year month actual_trips total_trips0 total_trips1 , abbreviate(16)
 
 Catch Statistics for Cod  
 ===============================================================
-Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches actuals very well, with the exceptions of September landings, April landings, and April discards.  April total catch is quite accurate.  
-
-
+Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April.  April total catch is quite accurate, but the breakdown into landings and discards is not correct.  
 
 
 ~~~~
@@ -353,8 +370,7 @@ list fishing_year month actual_cat sim_catch actual_landings sim_landings  actua
 
 
 
-Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.   MRIP's April cod retentions are a bit surprising. MRIP reports that 83% of cod caught in April were landed. I'm using annual length distributions, and 75\% of the catch is 21" or smaller.  There's not a good alternative though:  There were no measured cod in April 2022.  The best we can do here is probably adjust this after the fact. 
-
+Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.   
 
 ~~~~
 <<dd_do:quietly>>
@@ -373,9 +389,9 @@ gen fishing_year=$working_year
 sort year month 
 
 
-replace ab1weight=ab1weight/2204
+replace ab1weight=ab1weight/$lbs_per_mt
 rename ab1weight ab1mt
-replace b2weight=b2weight/2204
+replace b2weight=b2weight/$lbs_per_mt
 rename b2weight b2mt
 sort year month 
 format ab1mt b2mt %10.2fc
@@ -419,13 +435,102 @@ gen MRIP_cod_mortality=actual_landed_mt+0.15*actual_discard_mt
 
 scalar adj=MRIP_cod_mortality-sim_mortality_mt
 
+
+
 <</dd_do>>
 
-We are slightly low for the weight of discard cod, but that probably isn't a big deal.  We are predicting landings that are too high in September - while the number of fish is too high by ~3000, the weight too high by 15mt. The MRIP average weight of landed fish in September was 4lbs. The simulation model predicts 6.3lbs. 
+We are slightly low for the weight of discard cod, but that probably isn't a big deal.  
 
-
-April is the other problem month: The model predicts 3.1mt of landings while the actual landings were 29mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_release_mt[1])>>mt.  The cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
+April is the problem month. The best we can do here is probably adjust this after the fact. The model predicts <<dd_display: %3.2f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_release_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
  <<dd_display: %3.1f sim_mortality_mt[1]>>mt.  We should be adding <<dd_display: %3.1f scalar(adj)>>mt of cod mortality to our projections to account for this.  
+ 
+ 
+
+A few helpful MRIP statistics for Cod
+===============================================================
+ 
+ 
+Breakdown of MRIP A+B1's into legal (22+ inches) and sublegal (under 22 inches) sizes:
+
+~~~~
+<<dd_do:quietly>>
+use "${MRIP_dir}/monthly/cod_ab1_2022.dta", clear
+gen legal=l_in_bin>=$cmin
+collapse (sum) count, by(legal month)
+bysort month: egen total_landings=total(count)
+keep if legal==0
+rename count number_sublegal
+gen prop_sublegal=number_sublegal/total_landings
+sort month legal
+format number_sublegal total_landings %8.0fc
+format prop_sublegal %03.2fc
+<</dd_do>>
+
+<<dd_do:nocommands>>
+list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(number_sublegal total_landings)
+<</dd_do>>
+~~~~
+
+
+MRIP data in April is sparse.  MRIP reports that 18,841 (83%) cod were landed (A) in April and 3,911 (17%) were released (B2).
+
+
+~~~~
+<<dd_do:quietly>>
+use "${source_data}/mrip/cod_size_class_OPEN_SPLIT2022.dta", clear
+keep if month==4
+gen legal=lngcat>=$cmin2022
+collapse (sum) count, by(legal month)
+bysort month: egen total_landings=total(count)
+keep if legal==0
+rename count number_sublegal
+gen pct_sublegal=number_sublegal/total_landings*100
+format pct_sublegal %03.0fc
+<</dd_do>>
+~~~~
+
+I'm using a length distribution that aggregates April, September, and October toegether.  <<dd_display: %3.0f (pct_sublegal[1])>> % of the catch is smaller than <<dd_display: %3.0f $cmin2022>> inches.  
+
+Using just April 2022 for the length distribution is not a good idea:There were no measured B2 cod in April 2022 and the measured data is quite sparse.  
+
+
+Here is the info from the "catch" MRIP file: April Atlantic cod
+~~~~
+<<dd_do>>
+use "${MRIP_raw}/catch_20222.dta", clear
+keep if common=="ATLANTIC COD" & month=="04"
+order strat_id psu tot_len*  claim harvest release wp*
+qui count 
+local total=r(N)
+qui count if wp_catch==0 
+local no_svy_wgt=r(N)
+local has_svy_wgts=`total'-`no_svy_wgt'
+list strat_id psu_id tot_len* claim harvest release wp_int if wp_catch>0|wp_int>0, abbreviate(16)
+<</dd_do>>
+~~~~
+There are  <<dd_display: %4.0f `total'>>  rows here, but <<dd_display: %4.0f `no_svy_wgt'>> had no survey weights. 
+
+Here is the info from the "size" MRIP file. 
+~~~~
+<<dd_do>>
+use "${MRIP_raw}/size_20222.dta", clear
+keep if common=="ATLANTIC COD" & month=="04"
+order strat_id psu l_in_bin  wgt wp*
+count if wp_size==0
+
+qui count 
+local total=r(N)
+qui count if wp_size==0 | wp_size==.
+local no_svy_wgt=r(N)
+
+local has_svy_wgts=`total'-`no_svy_wgt'
+
+list strat_id psu l_in_bin  wgt wp* if wp_size>0 & wp_size~=. , abbreviate(16)
+<</dd_do>>
+~~~~ 
+ There are  <<dd_display: %4.0f `total'>>  rows (fish that were measured), but <<dd_display: %4.0f `no_svy_wgt'>> had survey weights=0 or missing. When I compute the length distributions, I use wp_size for sample weighting. This means that April 2022 numbers are only based on <<dd_display: %4.0f `has_svy_wgts'>> records. 
+
+The B2_size MRIP file does not have any entries with wp_size>0 for Atlantic Cod during wave 2 of 2022.  I've filled those in with the B2 length distribution from September and October 2021 - this probably makes the most sense because it captures some time when cod was open and when it was closed.  Using the B2 length distribution from May 2022 is not a good idea because cod had zero possesion in May and the B2s from this period will probably reflect disards of larger fish.
  
  
  
@@ -433,9 +538,9 @@ April is the other problem month: The model predicts 3.1mt of landings while the
 Catch Statistics for Haddock  
 ===============================================================
 
-Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  The model matches reasonably well, catch is quite accurate. Landings are low and discards are too high, although a large part of this 'miss' is from April of 2022, when MRIP reported zero discards.  
+Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  The model matches reasonably well, catch is quite accurate. Landings are low and discards are too high, although this miss due to April of 2022, when MRIP reported zero discards.  
 
-
+Approximately 8% of the A+B1s where 16" or less in 2022.
 
 ~~~~
 <<dd_do:quietly>>
@@ -501,9 +606,9 @@ gen fishing_year=$working_year
 sort year month 
 
 
-replace ab1weight=ab1weight/2204
+replace ab1weight=ab1weight/$lbs_per_mt
 rename ab1weight ab1mt
-replace b2weight=b2weight/2204
+replace b2weight=b2weight/$lbs_per_mt
 rename b2weight b2mt
 sort year month 
 format ab1mt b2mt %10.2fc
@@ -526,7 +631,7 @@ rename b2mt actual_discard_mt
 format *mt %06.1fc
 
 rename sim_hadd_kept_mt sim_landings_mt
-rename sim_hadd_released_mt sim_disard_mt
+rename sim_hadd_released_mt sim_discard_mt
 rename sim_hadd_mort_mt sim_mortality_mt
 
 
@@ -534,36 +639,65 @@ rename sim_hadd_mort_mt sim_mortality_mt
 
 
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt actual_discard_mt  sim_landings_mt sim_disard_mt sim_mortality_mt, abbreviate(16) sum(actual_landed_mt actual_discard_mt  sim_landings_mt sim_disard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt actual_discard_mt  sim_landings_mt sim_discard_mt sim_mortality_mt, abbreviate(16) sum(actual_landed_mt actual_discard_mt  sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+<</dd_do>>
+~~~~
+
+
+<<dd_do:quietly>>
+keep if fishing_year==2022 & month==4
+assert _n==1
+scalar hadd_lbs_per_kept=actual_landed_mt/ab1_count*$lbs_per_mt
+scalar hadd_lbs_per_release=actual_discard_mt/b2_count*$lbs_per_mt
+gen missing_kept_mt=(ab1_count-sim_haddock_num_kept)*hadd_lbs_per_kept/$lbs_per_mt
+gen missing_release_mt=(b2_count-sim_haddock_num_released)*hadd_lbs_per_release/$lbs_per_mt
+gen missing_release_mortmt=0.15*(b2_count-sim_haddock_num_released)*hadd_lbs_per_kept/$lbs_per_mt
+
+
+
+<</dd_do>>
+
+We are slightly low for the weight of discard cod, but that probably isn't a big deal.  
+
+April is the problem month: The model predicts <<dd_display: %3.2f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.2f actual_landed_mt>>mt.  The average landed haddock in April weighed <<dd_display: %3.2f scalar(hadd_lbs_per_kept)>>lbs.  We have under-estimated the weight of kept haddock by <<dd_display: %3.1f missing_kept_mt[1]>>mt.
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+Breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) sizes:
+~~~~
+<<dd_do:quietly>>
+use "${MRIP_dir}/monthly/haddock_ab1_2022.dta", clear
+gen legal=l_in_bin>=$hmin
+collapse (sum) count, by(legal month)
+bysort month: egen total_landings=total(count)
+keep if legal==0
+rename count number_sublegal
+gen prop_sublegal=number_sublegal/total_landings
+sort month legal
+format number_sublegal total_landings %8.0fc
+format prop_sublegal %03.2fc
+
+<</dd_do>>
+
+
+
+
+<<dd_do:nocommands>>
+list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(number_sublegal total_landings)
 <</dd_do>>
 ~~~~
 
 
 
 
-
-
-
-
-
-
-<!---
-
-This is the monthly number of a+b1s of Cod, after we apply the 2b95 method. I don't know how to do the 2b95 method.  I'll just have to read it in when I'm assembling those data.
-
-| Year | Month |Trimmed_Landings|
-| :------ | :---- | ------- :|
-|2020| 	5 |63|
-|2020 |	6 |2,267|
-|2020 |	7 |1,465|
-|2020 |	8 |3,912|
-|2020 |	9 |7,829|
-|2020 |	10 |955|
-|2020 |	11 |0  |
-|2021 |	4 | 1,434|
-|2021 |	5  |10|
-|2021 |	6  |517|
-|2021 |	7  |61|
-|2021 |	8  |258 |
---->
 
