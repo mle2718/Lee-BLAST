@@ -62,9 +62,10 @@ global haddock_catch_class "${mrip_source_data}/haddock_catch_classANNUAL2022.dt
 
 ******************************/
 
+ global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_OPEN_SPLIT2022.dta"  
  
  /* If you want to use ANNUAL length-frequency data uncomment this  */
- global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2022.dta"  
+ *global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2022.dta"  
  global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class_ANNUAL2022.dta" 
 
  /* If you want to use monthly catch-class data uncomment this */

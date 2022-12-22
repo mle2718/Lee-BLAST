@@ -96,7 +96,7 @@ pause off
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_20" 
 }
 
 
@@ -204,7 +204,7 @@ local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
 *global tot_trips 646340
-global scale_factor 10
+global scale_factor 1
 *global numtrips=$tot_trips/$scale_factor
 
 global which_year=2022
@@ -284,7 +284,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 269917  \ 5, 75398 \ 6, 41600 \ 7, 58559 \ 8, 79487 \ 9 , 105744 \10, 17006 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275825  \ 5, 76600 \ 6, 41500 \ 7, 60500 \ 8, 80800 \ 9 , 115900 \10, 18000 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -318,18 +318,18 @@ This is useful for troubleshooting and debugging  */
 /* EVERYTHING BEFORE THIS POINT IS SETUP */
 
 /* these parameters are set in "economic_parameters". I'm overwriting them now */
-global hadd_relax_main=1
+global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
 global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.004
+global haddock_sublegal_hi=0.30
 
 
 /* Cod sub-legals after wave 2 */
 
 global cod_relax_main=2
-global cod_sublegal_low=.001
-global cod_sublegal_hi=.001+$cod_sublegal_low
+global cod_sublegal_low=.005
+global cod_sublegal_hi=.090+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
 qui foreach scenario of local scenario_list{
@@ -409,7 +409,7 @@ These are used to set up the number of fish in the first year of fishing
 
 /* This section of code reads in an observation, performs the age--> length transformation and saves it to an auxilliary dta (haddock_length_count.dta)*/
 /* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
-*/
+
 
 use "$hadd_naa_sort", clear
 keep if year==$which_year
@@ -446,7 +446,7 @@ There are a few "options here"  PAY CLOSE ATTENTION.
 /* This section of code reads in an observation, "stacks" it, performs the age--> length transformation and saves it to an auxilliary dta (cod_length_count.dta)*/
 
 
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
+/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*
 
 use "$cod_naa_sort", clear
 keep if year==$which_year
@@ -454,8 +454,8 @@ keep if id==`replicate'
 scalar creplicate=replicate[1]
 assert _n==1
 notes: this contains the numbers at age of cod for the current replicate
-keep age**/
-
+keep age*
+*/
 /*  OPTION 3: Use the median numbers at age from the AGEPRO output*/
 
 use "$cod_naa_start", clear
@@ -1016,7 +1016,7 @@ shell chmod 440 `econ_out'
 
 
 di "This is two simulations.  One with October open the other with october closed."
-dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries_mix.html) replace
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summariesOS.html) replace
 
 timer list
 log close
