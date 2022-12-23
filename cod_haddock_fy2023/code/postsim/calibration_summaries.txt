@@ -29,21 +29,25 @@ global MRIP_raw  "${MRIP_root}/data_folder/raw"
 dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
 
 
-/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  
-		After changing to 1-3, I have to recalibrate slightly, but it shouldn't take more than 1-2 tries.
-
- */
-/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
-	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
-	could be the fact that we're using annual data. 
-	
-	
-	Scott to send the number of trips that are private in September. We are going to model opening up September for the private by doubling their number of trips.
-	*/
-
-
-
  ---> 
+~~~~
+<<dd_do:quietly>>
+/****************************/
+/****************************/
+/* Haddock and Cod rec ACLs in mt*/
+/****************************/
+/****************************/
+
+global hadd_recACL2022=3634
+global cod_recACL2022=192
+
+
+global hadd_recACL2023=610
+global cod_recACL2023=192
+
+
+<</dd_do>>
+~~~~
 
 
 Previous years Regulations
@@ -69,7 +73,7 @@ The rec sub-ACL for cod was 193mt in 2020.
 
 MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions. 
 
-
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
 
 2022 Regulations
 ==============================================================
@@ -89,10 +93,9 @@ Cod:
 
 
 
-
-Fishing Year 2023 Regulations
+## Fishing Year 2023 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is 192 mt for FY 2023. The recreational sub-ACL for GOM haddock is 610 mt.  Regulations have not been set yet.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.  Regulations are TBD.
 
 
 Input data
@@ -165,13 +168,12 @@ use "`sim_results_in'", clear
 drop if month<=4
 gen fishing_year=$working_year
 gen year=fishing_year
-gen month_of_fy=month-12
+gen month_of_fy=month-4
 replace year=year+1 if month>=13
 replace month=month-12 if month>=13
 
 gen cod_tot_cat=cod_num_kept+cod_num_released
 gen hadd_tot_cat=haddock_num_kept+haddock_num_released
-*replace month=month-12 if month>=13
 sort month
 order cod_tot_cat hadd_tot_cat, after(month)
 format *num* %09.1gc
@@ -189,8 +191,9 @@ collapse (mean) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(f
 order total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released 
 
 gen str60 description=""
-replace description="calibrated to 2022 total trips, April closed for cod." if scenario_num==0
-replace description="calibrated to 2022 total trips, April open for cod." if scenario_num==1
+replace description="calibrated to 2022 total trips, April closed for cod." if scenario_num==1
+replace description="calibrated to 2022 total trips, April open for cod." if scenario_num==2
+replace description="calibrated to 2022 total trips." if scenario_num==0
 
 preserve
 	keep scenario_num month fishing_year month cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt
@@ -210,7 +213,7 @@ format sim* %10.0fc
 format *mt %06.1fc
 
 preserve 
-keep if scenario_num==0
+keep if scenario_num==2
 save `calib_resultsO', replace
 
 restore
@@ -220,13 +223,12 @@ save `calib_resultsC', replace
 restore
 
 
-keep if inlist(scenario_num,0,1)
+keep if inlist(scenario_num,1,2)
 gen freq=1
 /* weight the "october closed scenario 3 times heavier than the october open scenario*/
-replace freq=3 if month==10 & scenario_num==0
-/*replace freq=3 if scenario_num==3 */
+replace freq=3 if month==10 & scenario_num==1
 
-replace scenario_num=10
+replace scenario_num=0
 collapse (mean) sim_total_trips sim_cod_num_kept sim_cod_num_released sim_haddock_num_kept sim_haddock_num_released sim_cod_tot_cat sim_hadd_tot_cat sim_choice_occasions sim_cod_kept_mt sim_cod_released_mt sim_cod_released_dead_mt sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_released_dead_mt sim_cod_mort_mt sim_hadd_mort_mt [aweight=freq], by(fishing_year year month scenario_num)
 
 save `calib_results10', replace
@@ -249,7 +251,7 @@ sort year month
 
 
 /* 
-Bring in the average of the 3 and 1 scenarios.
+Bring in the average of the 1 and 2 scenarios.
 */
 
 
