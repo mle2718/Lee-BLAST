@@ -100,6 +100,12 @@ if strmatch("$user","minyangWin"){
 }
 
 
+
+if strmatch("$user","minyangNix"){
+	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
+	global MRIP_dir "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19" 
+}
+
 /* setup directories */
 global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
@@ -474,7 +480,7 @@ putmata cod_initial_counts=(age*), replace
 clear
 
 
-forvalues this_month=1/`max_months'{
+qui forvalues this_month=1/`max_months'{
 
 /*Send/Extract the commercial fishing and recreational effort to scalars
 The mata: .... end command doesn't play nicely with a forvalues loop.

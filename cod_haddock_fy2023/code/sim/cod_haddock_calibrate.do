@@ -358,7 +358,7 @@ nois _dots 0, title(Loop running: scenario $ws) reps($total_reps)
 set seed 2485768
 
 
-forvalues replicate=1/$total_reps{	
+qui forvalues replicate=1/$total_reps{	
 	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
