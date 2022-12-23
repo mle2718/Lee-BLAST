@@ -332,7 +332,7 @@ global cod_sublegal_low=.005
 global cod_sublegal_hi=.090+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
- foreach scenario of local scenario_list{
+qui foreach scenario of local scenario_list{
 	global ws=`scenario'
 	do "${code_dir}/sim/read_in_regs.do"
 
@@ -351,7 +351,7 @@ nois _dots 0, title(Loop running: scenario $ws) reps($total_reps)
 set seed 2485768
 
 
-forvalues replicate=1/$total_reps{	
+qui forvalues replicate=1/$total_reps{	
 	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
@@ -474,7 +474,7 @@ putmata cod_initial_counts=(age*), replace
 clear
 
 
-qui forvalues this_month=1/`max_months'{
+forvalues this_month=1/`max_months'{
 
 /*Send/Extract the commercial fishing and recreational effort to scalars
 The mata: .... end command doesn't play nicely with a forvalues loop.
@@ -1015,8 +1015,7 @@ shell chmod 440 `econ_out'
  */
 
 
-di "This is two simulations.  One with October open the other with october closed."
-dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summariesOS.html) replace
+di "cod_haddock_fy2023.do finished."
 
 timer list
 log close
