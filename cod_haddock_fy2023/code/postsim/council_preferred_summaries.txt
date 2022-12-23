@@ -8,28 +8,17 @@ THIS IS A PLACEHOLDER --->
 <!---Execute this with:
 
 
-/* NOTE 1: Now, I need to take the (weighted) average of scenarios 1 and 3.  DONE   */
-/* NOTE 2: Cod mort under status quo is a little less than in 2021. Why?  
-	Could be a "younger" age structure -- check the NAA from 2020, 2021, and 2022.
-	could be the fact that we're using annual data. 
-		Added in the graphs about the NAA and length structures
-
-	Slot limit of 23 to 28" for GB cod --
-		With open seasons that are the same for private and for-hire.
-	
-		How to test this out
-			Run the model with a 21 to 22" slot limit. Very few fish should be kept.
-			The model is coded for \geq the minimum and leq the maximum. So if I want a 23-28" slot, I need to enter the max as 27.9 
-
-
-ageclass lines for 2020 to 2022.  Take out the age 1's.
-				
-	*/
-
 
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19"
+	global MRIP_root  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/"
+}
+
+
+
+if strmatch("$user","minyangNix"){
+	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
+	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
 
@@ -38,8 +27,11 @@ global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2022_12_19"
+global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
-dyndoc "${code_dir}/postsim/council_preferred_summaries.txt", saving(${project_dir}/council_preferred_summaries.html) replace
+dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/status_quo_summaries.html) replace
+
 ---> 
 ~~~~
 <<dd_do:quietly>>
@@ -53,8 +45,8 @@ global hadd_recACL2022=3634
 global cod_recACL2022=192
 
 
-global hadd_recACL=610
-global cod_recACL=192
+global hadd_recACL2023=610
+global cod_recACL2023=192
 
 
 <</dd_do>>
@@ -62,7 +54,8 @@ global cod_recACL=192
 
 # Inputs and Background
 
-## Fishing Year 2020 and 2021 Regulations
+Previous years Regulations
+==============================================================
 
 The same regulations were in place for FY2020 and FY2021.
 
@@ -86,6 +79,10 @@ The rec sub-ACL for cod was 193mt in 2020.
 
 The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
 
+2022 Regulations
+==============================================================
+The recreational sub-ACL for GoM cod is 192 mt for FY 2022. The recreational sub-ACL for GOM haddock is 3,634 mt.
+
 Haddock:
 
 *    20 fish, 17"
@@ -105,21 +102,22 @@ Cod:
 The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.  Regulations are TBD.
 
 
+Input data
+==============================================================
 
-
-## Data
-
-
-1.  **Annual** length-frequencies for cod and haddock
+1.  Cod Length Frequencies: I've grouped April, September, and October together. And I've grouped the other months together. 
+1.  Haddock Length Frequencies: **Annual** length-frequencies 
 1.  **Monthly** catch-per-trip for cod and haddock
-    1.  The April 2021 catch-per-trip distribution for cod has 33.5% trips with 0 cod, 64.9% of trips with 1 cod, and **1.5% of trips catching 2 or more cod**.  This is really similar to March, 2021 and VERY different from May, 2021 .
-	1.  May 2021: 39% of trips with 0 cod, 23% with 1 cod, 10.7% with 2, 7% with 3 cod, 3% with 4 cod, and there's a smooth decline typical of a reasonably sampled dataset.
-	1.  March 2021: 40% of trips with 0 cod, 52.4% with 1 cod, 1.3% with 2, 2.7% with 3 cod, 3% with 10 cod. 
 1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
-1.  Bottomtrawl survey data from 2017-2019 to form the age-length keys.
-1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE)
+1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
+1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
 
-MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions. 
+Calibration 
+===============================================================
+
+1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. This does the same thing. 
+1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  October is open for 1 week.  I have been running one model where October is open for cod and one where it is closed and then taking a weighted average (1 part open and 3 parts closed) of the two.
 
 # Simulations 
 
@@ -138,74 +136,16 @@ Whole month of April for both Cod and Haddock scenario 1.
 
 | Scenario number| Short Description | Long Description| Status|
 | :-----        |    :---------------   |          :--------------------- |   :-----|
-| 0| Status Quo 2022       | Same regs from 2021.   | Done|
-| 552|   CMTE | CMTE - 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
-| 562|   RAP | RAP 5 week fall, 2 week spring. 1 cod at 21" | Done|
+| 0| Status Quo 2023       | Same regs from 2022.   | Setup|
 
 
 <!---
 | Scenario number| Short Description | Long Description| Status|
 | :-----        |    :---------------   |          :--------------------- |   :-----|
-| 0| Status Quo 2022       | Same regs from 2021.   | Done|
-| 1| April Open        | Same regs from 2021, except April is open all month for both| Done|
-| 3| April Closed for Cod        | Same regs from 2021, except April is open all month for haddock and closed for cod | Done|
-| 5| 1Cod_20        |  April is open for both all month.1 cod at 20" | Done|
-| 11| 1Cod_19 |   April is open for both all month. 1 cod at 19" | Done|
-| 13| Slot 21-23		|  1 Cod slot at 21-23" for testing  | Done|
-| 14| Slot 22-28		|  1 Cod slot at 22-28" | Done|
-| 16| Slot 22-28 Sept	|  1 Cod slot at 22-28" Sept open| Done|
-| 21| April and Sept | April and sept open for everyone| Done|
-| 23| Sept    | April closed for cod, sept open for everyone| Done|
-| 25| April and Sept 20 | April and sept open for everyone. 1 cod at 20" | Done|
-| 470|   21in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 21" | Done|
-| 471| 21in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 21" | Done|
-| 472|   21in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 21" | Done|
-| 480|   22 in, Fall 4, spring 0| 4 week fall, April closed. 1 cod at 22" | Done|
-| 481|   22 in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22" | Done|
-| 482|   22 in, Fall 4, spring 2| 4 week fall, 2 week spring. 1 cod at 22" | Done|
-| 490|   Slot Fall 4,  spring 0| 4 week fall, April closed. 1 cod at 22-28" | Done|
-| 491|   Slot in, Fall 4, spring 4| 4 week fall, April Open. 1 cod at 22-28" | Done|
-| 492|   Slot in, Fall 4 spring 2| 4 week fall, 2 week spring. 1 cod at 22-28" | Done|
-| 570|   21in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 21" | Done|
-| 571|   21in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 21" | Done|
-| 572|   21in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 21" | Done|
-| 580|   22 in, Fall 5, spring 0| 5 week fall, April closed. 1 cod at 22" | Done|
-| 581|   22 in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22" | Done|
-| 582|   22 in, Fall 5, spring 2| 5 week fall, 2 week spring. 1 cod at 22" | Done|
-| 590|   Slot Fall 5,  spring 0| 5 week fall, April closed. 1 cod at 22-28" | Done|
-| 591|   Slot in, Fall 5, spring 4| 5 week fall, April Open. 1 cod at 22-28" | Done|
-| 592|   Slot in, Fall 5 spring 2| 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
-| 670|   21in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 21" | Done|
-| 671|   21in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 21" | Done|
-| 672|   21in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 21" | Done|
-| 680|   22 in, Fall 6, spring 0| 6 week fall, April closed. 1 cod at 22" | Done|
-| 681|   22 in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22" | Done|
-| 682|   22 in, Fall 6, spring 2| 6 week fall, 2 week spring. 1 cod at 22" | Done|
-| 690|   Slot Fall 6,  spring 0| 6 week fall, April closed. 1 cod at 22-28" | Done|
-| 691|   Slot in, Fall 6, spring 4| 6 week fall, April Open. 1 cod at 22-28" | Done|
-| 692|   Slot in, Fall 6 spring 2| 6 week fall, 2 week spring. 1 cod at 22-28" | Done|
-| 552|   CMTE | CMTE - 5 week fall, 2 week spring. 1 cod at 22-28" | Done|
-| 562|   RAP | RAP 5 week fall, 2 week spring. 1 cod at 21" | Done|
+| 0| Status Quo 2022		| Same regs from 2022.   | Setup|
+| 1| April Oct Closed		| Same regs from 2022, except April and October are closed for cod| Setup|
+| 2| April Oct Open			| Same regs from 2022, except April and October are open for cod| Setup|
 
-We are running the status quo and 3 sets of regulations under varying "fall scenarios"
-
-The scenarios numbers are ABC
-1 cod at 21": B=7
-1 cod at 22": B=8
-1 cod at 22-28": B=9
-
-Fall season of "1 month": A=4
-fall season of 5 weeks: A=5
-fall season of 6 weeks A=6
-
-April open: C=0
-April closed: C=1
-April partially open:C=2
-
-I have to run 3 separate calling files -- 
-_OpenSept
-_OpenSept5
-_OpenSept6
  ---> 
 
 
@@ -226,16 +166,28 @@ Here are some results.  In this section, I first compute the annual totals for e
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2022" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19" 
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global MRIP_root  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/"
 	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
 	global 	oracle_cxn  " $mysole_conn"
 }
-/* These are only needed 
+
+if strmatch("$user","minyangNix"){
+	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
+		global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
+}
+/* setup directories */
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2022_12_20"
+global MRIP_raw  "${MRIP_root}/data_folder/raw"
+
+
+
 local my_common1 "atlanticcod"
 local my_common2 "haddock"
-*/
-
 
 
 global cm_to_inch=0.39370787
@@ -246,7 +198,7 @@ global codalkey "${working_data}/cod_al_key.dta"
 
 
 
-global working_year 2022
+global working_year 2023
 global previous=$working_year-1
 
 
@@ -268,23 +220,14 @@ local stub "recreational_catches_2022Combine_"
 *local SlotAOS "recreational_catches_2022Slot_AOS_"
 *local sensitivity "recreational_catches_2022_OS_sensA_"
 
-local round25 "recreational_catches5_2022_Round2"
-local round26 "recreational_catches6_2022_Round2"
-local round24 "recreational_catches_2022_Round2"
-local roundCMTE "recreational_catches5_2022_RAPGC"
-
-local roundCouncil "recreational_catches5_2022_Council"
 
 local filelist1: dir "${output_dir}" files "`stub'*.dta"
 local filelist2: dir "${output_dir}" files "`round25'*.dta"
-local filelist3: dir "${output_dir}" files "`round26'*.dta"
-local filelist4: dir "${output_dir}" files "`round24'*.dta"
-local filelist5: dir "${output_dir}" files "`roundCMTE'*.dta"
-local filelist6: dir "${output_dir}" files "`roundCouncil'*.dta"
 
-local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
-local combinedfiles `" `filelist6' "'
+*local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
+
+local combinedfiles `" `filelist1' "'
 
 
 /****************************/
@@ -333,29 +276,6 @@ drop if scenario_num==10
 preserve
 
 
-/* construct the  472, 482, 492, 572, 582, 592, 672, 682, 692 scenarios by averaging the corresponding 0 and 1 scenarios.*/
-
-keep if scenario_num>=470 & scenario_num<=691
-gen freq=1
-
-replace scenario_num=floor(scenario_num/10)*10+2
-
-
-collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy)
-
-
-
-tempfile s470
-save `s470', replace emptyok
-restore
-
-
-append using `s470'
-
-
-
-
-
 gen cod_tot_cat=cod_num_kept+cod_num_released
 gen hadd_tot_cat=haddock_num_kept+haddock_num_released
 
@@ -401,70 +321,55 @@ label var haddock_num_released "Haddock relased (#)"
 
 tempfile raw_results
 
-replace scenario="22in, Fall 4, spring 2" if scenario_num==582
 
 
-/* RAP CMTE scenario names */
+collapse (mean) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(fishing_year year scenario month scenario_num)
+*collapse (sum) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(scenario scenario_num)
+order total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released 
 
-sort scenario_num
+gen str60 description=""
+replace description="Status Quo to 2022 total trips, April closed for cod." if scenario_num==1
+replace description="calibrated to 2022 total trips, April open for cod." if scenario_num==2
 
-replace scenario="Committee" if scenario_num==552
-replace scenario="RAP" if scenario_num==562
-replace scenario="Council" if scenario_num==582
-
-
-
-
-gen cod_limit=1 if inlist(scenario_num,582)
-/*round 2 cod limits */
-replace cod_limit=1 if scenario_num>=470 & scenario_num<=692
-
-
-replace cod_limit=2 if inlist(scenario_num,7,8,9,10,12,15,17)
-gen hadd_limit=15 
-replace hadd_limit=20 if inlist(scenario_num,550,551,552,560,561,562,582)
-
-gen str10 hadd_size=`"17""'
-
-gen str10 cod_size=`"21""' 
-replace cod_size=`"22""' if inlist(scenario_num,582)
+preserve
+	keep scenario_num month fishing_year month cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt
+	reshape wide cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt, i(month fishing_year) j(scenario_num)
+	tempfile wide
+	save `wide'
+restore
 
 
 
+foreach var of varlist choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_tot_cat hadd_tot_cat cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt cod_mort_mt hadd_mort_mt{
+	rename `var' sim_`var'
+}
+
+tempfile calib_resultsO   calib_resultsC  calib_results10
+format sim* %10.0fc
+format *mt %06.1fc
+
+preserve 
+keep if scenario_num==2
+save `calib_resultsO', replace
+
+restore
+preserve
+keep if scenario_num==1
+save `calib_resultsC', replace
+restore
 
 
+keep if inlist(scenario_num,1,2)
+gen freq=1
+/* weight the "october closed scenario 3 times heavier than the october open scenario*/
+replace freq=3 if month==10 & scenario_num==1
 
+replace scenario_num=0
+collapse (mean) sim_total_trips sim_cod_num_kept sim_cod_num_released sim_haddock_num_kept sim_haddock_num_released sim_cod_tot_cat sim_hadd_tot_cat sim_choice_occasions sim_cod_kept_mt sim_cod_released_mt sim_cod_released_dead_mt sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_released_dead_mt sim_cod_mort_mt sim_hadd_mort_mt [aweight=freq], by(fishing_year year month scenario_num)
 
-
-
-gen str20 mode="Private For-Hire"
-replace mode="All" if inlist(scenario_num,16,17,161,21,23,25,211)
-/*round 2 modes */
-replace mode="All" if scenario_num>=470 & scenario_num<=692 
-
-gen str60 cod_open_season=" Sep 15-Sep 30, Apr 1-14   Sep8-Oct 7, Apr 1-14" if inlist(scenario_num,0)
-
-replace  cod_open_season="Sept 1 -Oct 8, April 1-30" if inlist(scenario_num,570,580,590, 550, 560)
-
-
-replace  cod_open_season="Sept 1 -Oct 8, April 1-14" if inlist(scenario_num,572,582,592, 552, 562)
-
-
-replace  cod_open_season="Sept 1 -Oct 8 " if inlist(scenario_num,571,581,591,551,561 )
-
-/*round 2 cod open seasons */
-
-
-
-
-gen str60 had_open_season=" May-Feb28, Apr 15-Apr30" if inlist(scenario_num,0)
-replace  had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,1,3,5,7,9,11,12,13,14,15,21,22,25,16,17,23,211,161)
-replace  had_open_season=" May-Feb28, Apr 1-Apr30" if scenario_num>=470 & scenario_num<=692 
-
-replace  had_open_season=" May-Feb28" if inlist(scenario_num,2,4,6,8,10)
-
-save `raw_results', replace
-
+save `calib_results10', replace
+append using `calib_resultsO'
+append using `calib_resultsC'
 
 /****************************/
 /****************************/
@@ -476,10 +381,10 @@ collapse (sum) total_trips cod_num_kept cod_num_released haddock_num_kept haddoc
 /* Flag replicates where mortality less than subacl*/
 
 gen cod_ok=0
-replace cod_ok=1 if cod_mort_mt<=$cod_recACL
+replace cod_ok=1 if cod_mort_mt<=$cod_recACL2023
 
 gen hadd_ok=0 
-replace hadd_ok=1 if hadd_mort_mt<=$hadd_recACL
+replace hadd_ok=1 if hadd_mort_mt<=$hadd_recACL2023
 
 
 
