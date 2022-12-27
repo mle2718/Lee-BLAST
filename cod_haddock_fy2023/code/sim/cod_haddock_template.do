@@ -203,7 +203,7 @@ global waves=6
 global periods_per_year=$months
 
 /*how many years, replicates */
-global total_reps=100
+global total_reps=2
 
 global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
@@ -214,7 +214,7 @@ local max_months=($months*$total_years_sim) + 4
 global scale_factor 10
 *global numtrips=$tot_trips/$scale_factor
 
-global which_year=2022
+global which_year=2023
 
 global expectation_reps 10
 
@@ -357,7 +357,7 @@ nois _dots 0, title(Loop running: scenario $ws) reps($total_reps)
 set seed 2485768
 
 
-forvalues replicate=1/$total_reps{	
+qui forvalues replicate=1/$total_reps{	
 	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
@@ -414,8 +414,7 @@ These are used to set up the number of fish in the first year of fishing
 
 
 /* This section of code reads in an observation, performs the age--> length transformation and saves it to an auxilliary dta (haddock_length_count.dta)*/
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates
-*/
+/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*/
 
 use "$hadd_naa_sort", clear
 keep if year==$which_year
