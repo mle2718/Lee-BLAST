@@ -40,13 +40,18 @@ dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/sta
 /* Haddock and Cod rec ACLs in mt*/
 /****************************/
 /****************************/
-
-global hadd_recACL2022=3634
 global cod_recACL2022=192
+global hadd_recACL2022=3634
 
-
-global hadd_recACL2023=610
 global cod_recACL2023=192
+global hadd_recACL2023=610
+
+global cod_calibration_adj=0
+global hadd_calibration_adj=0
+
+global adj_cod_recACL2023=$cod_recACL2023-$cod_calibration_adj
+global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
+
 
 
 <</dd_do>>
@@ -144,7 +149,7 @@ Whole month of April for both Cod and Haddock scenario 1.
 | :-----        |    :---------------   |          :--------------------- |   :-----|
 | 0| Status Quo 2022		| Same regs from 2022.   | Setup|
 | 1| April Oct Closed		| Same regs from 2022, except April and October are closed for cod| Setup|
-| 2| April Oct Open			| Same regs from 2022, except April and October are open for cod| Setup|
+| 2| April Oct Open		| Same regs from 2022, except April and October are open for cod| Setup|
 
  ---> 
 
@@ -174,7 +179,7 @@ if strmatch("$user","minyangWin"){
 
 if strmatch("$user","minyangNix"){
 	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
-		global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
+	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -212,7 +217,7 @@ global output_dir "${project_dir}/output"
 
 
 /* Read in all the model runs that match `stub' */
-local stub "recreational_catches_2022Combine_"
+local stub "recreational_catches_2023_SQ_"
 *local stub2 "recreational_catches_2022A"
 
 *local OpenSept "recreational_catches_2022_Open_Sept_"
@@ -271,9 +276,38 @@ replace year=year+1 if month>=13
 replace month=month-12 if month>=13
 
 
-/* accidentally ran #10, drop it */
-drop if scenario_num==10 
 preserve
+
+
+/* construct the  SQ scenario by taking a weighted average of the corresponding 1 and 2 scenarios.*/
+
+keep if inlist(scenario_num,1,2) 
+gen freq=1
+replace freq=3 if month==10 & scenario_num==1
+replace scenario_num=0
+
+
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy)
+
+
+
+tempfile s0
+save `s0', replace emptyok
+restore
+
+
+append using `s0'
+
+
+
+
+
+
+
+
+
+
+
 
 
 gen cod_tot_cat=cod_num_kept+cod_num_released
@@ -320,56 +354,41 @@ label var haddock_num_kept "Haddock kept (#)"
 label var haddock_num_released "Haddock relased (#)"
 
 tempfile raw_results
+save `raw_results'
+
+
+/* scenario names */
+
+sort scenario_num
+
+gen cod_limit=1 
+gen hadd_limit=20 
+
+gen str10 hadd_size=`"17""'
+gen cod_size=`"22""' 
+
+ 
+gen str20 mode="All"
+/*cod open seasons */
+
+gen str60  cod_open_season="Sept 1 -Oct 7, April 1-14" if inlist(scenario_num,0)
+replace  cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,1)
+replace  cod_open_season="Sept 1 -Oct 30, April 1-April 30 " if inlist(scenario_num,2)
+
+/*haddock open seasons */
+
+gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,1,2)
+save `raw_results', replace
 
 
 
-collapse (mean) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(fishing_year year scenario month scenario_num)
-*collapse (sum) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(scenario scenario_num)
-order total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released 
-
-gen str60 description=""
-replace description="Status Quo to 2022 total trips, April closed for cod." if scenario_num==1
-replace description="calibrated to 2022 total trips, April open for cod." if scenario_num==2
-
-preserve
-	keep scenario_num month fishing_year month cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt
-	reshape wide cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt, i(month fishing_year) j(scenario_num)
-	tempfile wide
-	save `wide'
-restore
 
 
 
-foreach var of varlist choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_tot_cat hadd_tot_cat cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt cod_mort_mt hadd_mort_mt{
-	rename `var' sim_`var'
-}
-
-tempfile calib_resultsO   calib_resultsC  calib_results10
-format sim* %10.0fc
-format *mt %06.1fc
-
-preserve 
-keep if scenario_num==2
-save `calib_resultsO', replace
-
-restore
-preserve
-keep if scenario_num==1
-save `calib_resultsC', replace
-restore
 
 
-keep if inlist(scenario_num,1,2)
-gen freq=1
-/* weight the "october closed scenario 3 times heavier than the october open scenario*/
-replace freq=3 if month==10 & scenario_num==1
 
-replace scenario_num=0
-collapse (mean) sim_total_trips sim_cod_num_kept sim_cod_num_released sim_haddock_num_kept sim_haddock_num_released sim_cod_tot_cat sim_hadd_tot_cat sim_choice_occasions sim_cod_kept_mt sim_cod_released_mt sim_cod_released_dead_mt sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_released_dead_mt sim_cod_mort_mt sim_hadd_mort_mt [aweight=freq], by(fishing_year year month scenario_num)
 
-save `calib_results10', replace
-append using `calib_resultsO'
-append using `calib_resultsC'
 
 /****************************/
 /****************************/
@@ -382,9 +401,15 @@ collapse (sum) total_trips cod_num_kept cod_num_released haddock_num_kept haddoc
 
 gen cod_ok=0
 replace cod_ok=1 if cod_mort_mt<=$cod_recACL2023
+gen adj_cod_ok=0
+replace adj_cod_ok=1 if cod_mort_mt<=$adj_cod_recACL2023
+
 
 gen hadd_ok=0 
 replace hadd_ok=1 if hadd_mort_mt<=$hadd_recACL2023
+
+gen adj_hadd_ok=0
+replace adj_hadd_ok=1 if hadd_mort_mt<=$adj_hadd_recACL2023
 
 
 
@@ -403,8 +428,11 @@ label var cod_released_mt "Cod Released (mt)"
 label var hadd_kept_mt "Haddock Kept (mt)"
 label var hadd_released_mt "Haddock Released(mt)"
 label var cod_ok "% Under Cod subACL"
-
 label var hadd_ok "% Under Haddock subACL"
+label var adj_cod_ok "Adjusted % Under Cod subACL"
+
+label var adj_hadd_ok "Adjusted % Under Haddock subACL"
+
 label var source "Where is this data"
 
 label var cod_num_kept "Cod kept (#)"
@@ -419,7 +447,7 @@ save `annual_results', replace
 ~~~~
 
 
-
+<<dd_do>>
 /****************************/
 /****************************/
 /* Contract to medians  */
@@ -428,9 +456,11 @@ save `annual_results', replace
 use  `annual_results', replace
 
 
-collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip   (sum) cod_ok hadd_ok  (count) N=replicate, by(scenario source scenario_num cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season)
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip   (sum) cod_ok hadd_ok adj_cod_ok adj_hadd_ok (count) N=replicate, by(scenario source scenario_num cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season)
 replace cod_ok=cod_ok/N*100
 replace hadd_ok=hadd_ok/N*100
+replace adj_cod_ok=adj_cod_ok/N*100
+replace adj_hadd_ok=adj_hadd_ok/N*100
 
 
 
@@ -466,11 +496,11 @@ replace scenario=ltrim(rtrim(itrim(scenario)))
 tempfile summed_results
 
 
-local graphlist 582 
+local graphlist 0,1,2 
 keep if inlist(scenario_num, `graphlist')
 
 /*reorder */
-gen scott_order=mod(scenario_num,100)*10+floor(scenario_num/100)
+gen scott_order=scenario_num
 
 replace scenario=subinstr(scenario,", spring 2","", .) 
 replace scenario=subinstr(scenario," Fall 4","Fall 4 weeks", .) 
@@ -486,8 +516,8 @@ save `summed_results', replace
 
  
 ## Summary Outputs
+Here is some sample text.
 
-These scenarios are under the cod ACL and haddock ACL. Apart from the status-quo scenario and 3 , they also are open for both stocks for the full month of April.  
 ~~~~
 <<dd_do:nocommands>>
 
