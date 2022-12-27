@@ -126,7 +126,7 @@ local mins=substr("`time'",4,2)
 2022SQ is a copy of the 2021calibrate.
 */
 
-global rec_management "2023Combine"
+global rec_management "2023_size_limits"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
