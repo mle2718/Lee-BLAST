@@ -150,6 +150,9 @@ Whole month of April for both Cod and Haddock scenario 1.
 | 0| Status Quo 2022		| Same regs from 2022.   | Setup|
 | 1| April Oct Closed		| Same regs from 2022, except April and October are closed for cod| Setup|
 | 2| April Oct Open		| Same regs from 2022, except April and October are open for cod| Setup|
+| 3| April Oct Closed		| Same regs as 1, except with a 21" cod limit | Setup|
+| 4| April Oct Open		| Same regs as 2, except with a 21" cod limit | Setup|
+| 5| Status quo with 21" cod		| Same regs as SQ, except with a 21" cod limit | Setup|
 
  ---> 
 
@@ -218,7 +221,7 @@ global output_dir "${project_dir}/output"
 
 /* Read in all the model runs that match `stub' */
 local stub "recreational_catches_2023_SQ_"
-*local stub2 "recreational_catches_2022A"
+local stub2 "recreational_catches_2023_size_limits"
 
 *local OpenSept "recreational_catches_2022_Open_Sept_"
 *local SlotA "recreational_catches_2022Slot_A_"
@@ -227,12 +230,12 @@ local stub "recreational_catches_2023_SQ_"
 
 
 local filelist1: dir "${output_dir}" files "`stub'*.dta"
-local filelist2: dir "${output_dir}" files "`round25'*.dta"
+local filelist2: dir "${output_dir}" files "`stub2'*.dta"
 
 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
-local combinedfiles `" `filelist1' "'
+local combinedfiles `" `filelist1' `filelist2'"'
 
 
 /****************************/
@@ -281,10 +284,12 @@ preserve
 
 /* construct the  SQ scenario by taking a weighted average of the corresponding 1 and 2 scenarios.*/
 
-keep if inlist(scenario_num,1,2) 
+*keep if inlist(scenario_num,1,2) 
 gen freq=1
-replace freq=3 if month==10 & scenario_num==1
-replace scenario_num=0
+replace freq=3 if month==10 & inlist(scenario_num,1,3)
+replace scenario_num=0 if inlist(scenario_num,1,2)
+replace scenario_num=5 if inlist(scenario_num,3,4)
+
 
 
 collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy)
@@ -367,17 +372,18 @@ gen hadd_limit=20
 gen str10 hadd_size=`"17""'
 gen cod_size=`"22""' 
 
- 
+ replace  cod_size=`"22""' if inlist(scenario_num,3,4,5)
+
 gen str20 mode="All"
 /*cod open seasons */
 
-gen str60  cod_open_season="Sept 1 -Oct 7, April 1-14" if inlist(scenario_num,0)
-replace  cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,1)
-replace  cod_open_season="Sept 1 -Oct 30, April 1-April 30 " if inlist(scenario_num,2)
+gen str60  cod_open_season="Sept 1 -Oct 7, April 1-14" if inlist(scenario_num,0,5)
+replace  cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,1,3)
+replace  cod_open_season="Sept 1 -Oct 30, April 1-April 30 " if inlist(scenario_num,2,4)
 
 /*haddock open seasons */
 
-gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,1,2)
+gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,1,2,3,4,5)
 save `raw_results', replace
 
 
@@ -496,7 +502,7 @@ replace scenario=ltrim(rtrim(itrim(scenario)))
 tempfile summed_results
 
 
-local graphlist 0,1,2 
+local graphlist 0,1,2,3,4,5 
 keep if inlist(scenario_num, `graphlist')
 
 /*reorder */
