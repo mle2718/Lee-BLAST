@@ -329,7 +329,7 @@ rename dtrip actual_trips
 <<dd_do:quietly>>
 
 
-list fishing_year month actual_trips total_trips0 total_trips1 , abbreviate(16)
+list fishing_year month actual_trips total_trips1 total_trips2 , abbreviate(16)
 <</dd_do>>
 ~~~~
 
