@@ -291,7 +291,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275825  \ 5, 76600 \ 6, 41500 \ 7, 60500 \ 8, 80800 \ 9 , 115900 \10, 18000 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 292300  \ 5, 85625 \ 6, 66150 \ 7, 76500 \ 8, 82300 \ 9 , 138250 \10, 25100 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -1023,7 +1023,7 @@ shell chmod 440 `econ_out'
 
 
 di "This is two simulations.  One with October open the other with october closed."
-dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summariesOS.html) replace
+dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
 
 timer list
 log close

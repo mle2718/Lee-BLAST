@@ -93,7 +93,7 @@ Cod:
 
 
 
-## Fishing Year 2023 Regulations
+Fishing Year 2023 Regulations
 ==============================================================
 The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.  Regulations are TBD.
 
@@ -129,14 +129,14 @@ if strmatch("$user","minyangWin"){
 
 if strmatch("$user","minyangNix"){
 	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
-		global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
+	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 /* setup directories */
 global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
-global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2022_12_20"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2023_01_04"
 global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 
@@ -337,11 +337,11 @@ list fishing_year month actual_trips total_trips1 total_trips2 , abbreviate(16)
 
 Catch Statistics for Cod  
 ===============================================================
-Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April.  April total catch is quite accurate, but the breakdown into landings and discards is not correct.  
+Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April.  Simulated april total catch is too low, and the breakdown into landings and discards is not correct.  
 
 
 ~~~~
-<<dd_do:quietly>>
+<<Sdd_do:quietly>>
 use "${MRIP_dir}/monthly/`my_common1'_landings_${previous}.dta", replace
 keep if inlist(month,11,12) 
 replace year=$working_year
@@ -484,12 +484,12 @@ list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(numb
 ~~~~
 
 
-MRIP data in April is sparse.  MRIP reports that 18,841 (83%) cod were landed (A) in April and 3,911 (17%) were released (B2).
+Previous MRIP data in April of 2022 was sparse.  Data update seems to have corrected that.
 
 
 ~~~~
 <<dd_do:quietly>>
-use "${source_data}/mrip/cod_size_class_OPEN_SPLIT2022.dta", clear
+use "${source_data}/mrip/cod_size_class_2022.dta", clear
 keep if month==4
 gen legal=lngcat>=$cmin2022
 collapse (sum) count, by(legal month)
@@ -501,12 +501,8 @@ format pct_sublegal %03.0fc
 <</dd_do>>
 ~~~~
 
-I'm using a length distribution that aggregates April, September, and October toegether.  <<dd_display: %3.0f (pct_sublegal[1])>> % of the catch is smaller than <<dd_display: %3.0f $cmin2022>> inches.  
 
-Using just April 2022 for the length distribution is not a good idea:There were no measured B2 cod in April 2022 and the measured data is quite sparse.  
-
-
-Here is the info from the "catch" MRIP file: April Atlantic cod
+Here is the info from the "catch" MRIP file: April Atlantic cod. 
 ~~~~
 <<dd_do>>
 use "${MRIP_raw}/catch_20222.dta", clear
@@ -520,7 +516,7 @@ local has_svy_wgts=`total'-`no_svy_wgt'
 list strat_id psu_id tot_len* claim harvest release wp_int if wp_catch>0|wp_int>0, abbreviate(16)
 <</dd_do>>
 ~~~~
-There are  <<dd_display: %4.0f `total'>>  rows here, but <<dd_display: %4.0f `no_svy_wgt'>> had no survey weights. 
+There are  <<dd_display: %4.0f `total'>>  rows here and <<dd_display: %4.0f `no_svy_wgt'>> had no survey weights. All the missing survey weights have been filled in.
 
 Here is the info from the "size" MRIP file. 
 ~~~~
@@ -540,9 +536,7 @@ local has_svy_wgts=`total'-`no_svy_wgt'
 list strat_id psu l_in_bin  wgt wp* if wp_size>0 & wp_size~=. , abbreviate(16)
 <</dd_do>>
 ~~~~ 
- There are  <<dd_display: %4.0f `total'>>  rows (fish that were measured), but <<dd_display: %4.0f `no_svy_wgt'>> had survey weights=0 or missing. When I compute the length distributions, I use wp_size for sample weighting. This means that April 2022 numbers are only based on <<dd_display: %4.0f `has_svy_wgts'>> records. 
-
-The B2_size MRIP file does not have any entries with wp_size>0 for Atlantic Cod during wave 2 of 2022.  I've filled those in with the B2 length distribution from September and October 2021 - this probably makes the most sense because it captures some time when cod was open and when it was closed.  Using the B2 length distribution from May 2022 is not a good idea because cod had zero possesion in May and the B2s from this period will probably reflect disards of larger fish.
+ There are  <<dd_display: %4.0f `total'>>  rows (fish that were measured) and <<dd_display: %4.0f `no_svy_wgt'>> had survey weights=0 or missing. 
  
  
  
