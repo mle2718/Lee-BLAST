@@ -23,7 +23,7 @@ global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
-global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2022_12_19"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2023_01_04"
 global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
