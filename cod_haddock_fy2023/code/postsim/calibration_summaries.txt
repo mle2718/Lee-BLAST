@@ -451,9 +451,9 @@ scalar adj=MRIP_cod_mortality-sim_mortality_mt
 
 <</dd_do>>
 
-We are slightly low for the weight of discard cod, but that probably isn't a big deal.  
+We are moderately low for the weight of discard cod.  
 
-April is the problem month. The best we can do here is probably adjust this after the fact. The model predicts <<dd_display: %3.2f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_release_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
+April is the problem month. The best we can do here is probably adjust this after the fact. The model predicts <<dd_display: %3.1f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_release_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
  <<dd_display: %3.1f sim_mortality_mt[1]>>mt.  We should be adding <<dd_display: %3.1f scalar(adj)>>mt of cod mortality to our projections to account for this.  
  
  
