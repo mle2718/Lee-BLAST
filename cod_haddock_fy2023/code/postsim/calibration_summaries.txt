@@ -337,11 +337,11 @@ list fishing_year month actual_trips total_trips1 total_trips2 , abbreviate(16)
 
 Catch Statistics for Cod  
 ===============================================================
-Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April.  Simulated april total catch is too low, and the breakdown into landings and discards is not correct.  
+Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April and June.  Simulated April total catch is too low, and the breakdown into landings and discards is not correct.  Simulated catch, landings, and discards for June (in numbers) is too high.  But simulated discards for June is too low.
 
 
 ~~~~
-<<Sdd_do:quietly>>
+<<dd_do:quietly>>
 use "${MRIP_dir}/monthly/`my_common1'_landings_${previous}.dta", replace
 keep if inlist(month,11,12) 
 replace year=$working_year
@@ -489,7 +489,7 @@ Previous MRIP data in April of 2022 was sparse.  Data update seems to have corre
 
 ~~~~
 <<dd_do:quietly>>
-use "${source_data}/mrip/cod_size_class_2022.dta", clear
+use "${source_data}/mrip/cod_size_class2022.dta", clear
 keep if month==4
 gen legal=lngcat>=$cmin2022
 collapse (sum) count, by(legal month)
