@@ -290,7 +290,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 292300  \ 5, 85625 \ 6, 66150 \ 7, 76500 \ 8, 82300 \ 9 , 138250 \10, 25100 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275000  \ 5, 87000 \ 6, 67300 \ 7, 76000 \ 8, 90900 \ 9 , 146600 \10, 27900 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -335,7 +335,7 @@ global haddock_sublegal_hi=0.30
 
 global cod_relax_main=2
 global cod_sublegal_low=.005
-global cod_sublegal_hi=.090+$cod_sublegal_low
+global cod_sublegal_hi=.050+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
 qui foreach scenario of local scenario_list{
