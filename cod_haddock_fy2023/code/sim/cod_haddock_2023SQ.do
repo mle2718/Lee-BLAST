@@ -96,14 +96,14 @@ pause off
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_20" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_01_04" 
 }
 
 
 
 if strmatch("$user","minyangNix"){
 	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
-	global MRIP_dir "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19" 
+	global MRIP_dir "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_01_04" 
 }
 
 /* setup directories */
@@ -203,7 +203,7 @@ global waves=6
 global periods_per_year=$months
 
 /*how many years, replicates */
-global total_reps=10
+global total_reps=100
 
 global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
@@ -290,7 +290,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275825  \ 5, 76600 \ 6, 41500 \ 7, 60500 \ 8, 80800 \ 9 , 115900 \10, 18000 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 292300  \ 5, 85625 \ 6, 66150 \ 7, 76500 \ 8, 82300 \ 9 , 138250 \10, 25100 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -1020,7 +1020,7 @@ shell chmod 440 `econ_out'
  */
 
 
-di "cod_haddock_fy2023.do finished."
+di "cod_haddock_2023SQ.do finished."
 
 timer list
 log close
