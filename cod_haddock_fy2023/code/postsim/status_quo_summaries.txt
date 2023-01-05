@@ -46,13 +46,13 @@ global hadd_recACL2022=3634
 global cod_recACL2023=192
 global hadd_recACL2023=610
 
-global cod_calibration_adj=0
+global cod_calibration_adj=32.1
 global hadd_calibration_adj=0
 
 global adj_cod_recACL2023=$cod_recACL2023-$cod_calibration_adj
 global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
 
-
+global mrip_vintage "2023_01_04"
 
 <</dd_do>>
 ~~~~
@@ -102,18 +102,17 @@ Cod:
 
 
 
-## Fishing Year 2023 Regulations
+Fishing Year 2023 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.  Regulations are TBD.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $hadd_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations are TBD.
 
 
 Input data
 ==============================================================
-
-1.  Cod Length Frequencies: I've grouped April, September, and October together. And I've grouped the other months together. 
-1.  Haddock Length Frequencies: **Annual** length-frequencies 
+1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
+1.  **Monthly** length-frequencies for cod and haddock
 1.  **Monthly** catch-per-trip for cod and haddock
-1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
+1.  2023 numbers at age for cod and haddock from the AGEPRO projections.
 1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
 
@@ -162,7 +161,8 @@ Whole month of April for both Cod and Haddock scenario 1.
 # Annual Results 
 
 Here are some results.  In this section, I first compute the annual totals for every replicate. Then I report out on the medians.
-~~~
+
+
 <<dd_do:quietly>>
 
 
@@ -189,7 +189,7 @@ global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
-global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2022_12_20"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_${mrip_vintage}"
 global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 
@@ -450,10 +450,10 @@ label var haddock_num_released "Haddock relased (#)"
 tempfile annual_results
 save `annual_results', replace
 <</dd_do>>
-~~~~
 
 
-<<dd_do>>
+
+<<dd_do:quietly>>
 /****************************/
 /****************************/
 /* Contract to medians  */
@@ -518,11 +518,12 @@ replace scenario=subinstr(scenario," Fall 6","Fall 6 weeks", .)
 save `summed_results', replace
 
 <</dd_do>>
-~~~~
+
 
  
 ## Summary Outputs
-Here is some sample text.
+
+I've only managed to run 50 replicates.  
 
 ~~~~
 <<dd_do:nocommands>>
@@ -531,7 +532,7 @@ use `summed_results', clear
 format total_trips cod_mort_mt hadd_mort_mt hadd_catch cod_catch total_trips %10.0fc 
 sort scott_order
 qui gen str1 option=""
-list option mode cod_limit cod_size cod_open_season cod_mort_mt hadd_limit hadd_size  had_open_season hadd_mort_mt total_trips cod_ok hadd_ok scenario_num if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+list option scenario_num mode cod_limit cod_size cod_open_season cod_mort_mt hadd_limit hadd_size  had_open_season hadd_mort_mt total_trips cod_ok hadd_ok  if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
 <</dd_do>>
 ~~~~
 
