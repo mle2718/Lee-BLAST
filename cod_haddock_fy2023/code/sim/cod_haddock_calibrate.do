@@ -291,7 +291,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275000  \ 5, 87000 \ 6, 67300 \ 7, 76000 \ 8, 90900 \ 9 , 146600 \10, 27900 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275600  \ 5, 85900 \ 6, 68200 \ 7, 75150\ 8, 88900 \ 9 , 145250 \10, 27500 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -329,7 +329,7 @@ global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
 global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.30
+global haddock_sublegal_hi=0.40
 
 
 /* Cod sub-legals after wave 2 */
@@ -528,7 +528,7 @@ scalars from mata and then sending them to globals. */
 
 	mata: st_numscalar("cod_min_min",min(cod_min_vec))
         if scalar(cod_min_min>=90){
-	scalar cod_min_min=min(cod_min_min,21)
+	scalar cod_min_min=min(cod_min_min,22)
 }
 	mata: st_numscalar("hadbags",haddock_bag_vec[`this_month'])
 	mata: st_numscalar("hadmins",haddock_min_vec[`this_month'])
@@ -552,9 +552,9 @@ scalars from mata and then sending them to globals. */
 	global hadd_min_keep= scalar(hadmins)
 	global hadd_max_keep= scalar(hadmaxs)
 
-	/* Generally, we'll let a few people keep some fish that is "just under" the possession limit.
+	/* Generally, we'll let a few people keep some fish that is "just under" the size limit.
 	*/
-        	global cod_relax=2 
+        global cod_relax=2 
 		global hadd_relax=2 
 	/* however, this way of doing things doesn't work when we have  zero possession (modeled with a very high minimum size , over 90") When we have a very high minimum size, we'll
 	This way of coding things doesn't work if cod_min_min==cod_min_keep (aka cod is always closed).

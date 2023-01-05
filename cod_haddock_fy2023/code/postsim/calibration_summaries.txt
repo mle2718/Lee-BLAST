@@ -651,7 +651,7 @@ list fishing_year month actual_landed_mt actual_discard_mt  sim_landings_mt sim_
 
 
 <<dd_do:quietly>>
-keep if fishing_year==2022 & month==4
+keep if fishing_year==2022 & month==5
 assert _n==1
 scalar hadd_lbs_per_kept=actual_landed_mt/ab1_count*$lbs_per_mt
 scalar hadd_lbs_per_release=actual_discard_mt/b2_count*$lbs_per_mt
@@ -660,20 +660,27 @@ gen missing_release_mt=(b2_count-sim_haddock_num_released)*hadd_lbs_per_release/
 gen missing_release_mortmt=0.15*(b2_count-sim_haddock_num_released)*hadd_lbs_per_kept/$lbs_per_mt
 
 
+scalar hadd_lbs_per_kept_sim=sim_landings_mt/sim_haddock_num_kept*$lbs_per_mt
+scalar hadd_lbs_per_release_sim=sim_discard_mt/sim_haddock_num_released*$lbs_per_mt
 
 <</dd_do>>
 
-We are slightly low for the weight of discard cod, but that probably isn't a big deal.  
+We are low for the landed weight of haddock.  All of the months are low. But  April and May are where most of the errors are.
 
-April is the problem month: The model predicts <<dd_display: %3.2f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.2f actual_landed_mt>>mt.  The average landed haddock in April weighed <<dd_display: %3.2f scalar(hadd_lbs_per_kept)>>lbs.  We have under-estimated the weight of kept haddock by <<dd_display: %3.1f missing_kept_mt[1]>>mt.
+May  is the problem month: The model predicts <<dd_display: %3.2f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.2f actual_landed_mt>>mt.  
+
+The average landed haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_kept)>>lbs.
+
+The Model predicts that average landed haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_kept_sim)>>lbs. 
+
+
+The average discarded haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_release)>>lbs.
+
+The Model predicts that average discarded haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_release_sim)>>lbs. 
+
+
+We have under-estimated the weight of kept haddock by <<dd_display: %3.1f missing_kept_mt[1]>>mt.
  
-
-
-
-
-
-
-
 
 
 

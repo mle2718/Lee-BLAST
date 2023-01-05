@@ -290,7 +290,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275000  \ 5, 87000 \ 6, 67300 \ 7, 76000 \ 8, 90900 \ 9 , 146600 \10, 27900 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275600  \ 5, 85900 \ 6, 68200 \ 7, 75150\ 8, 88900 \ 9 , 145250 \10, 27500 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -328,7 +328,7 @@ global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
 global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.30
+global haddock_sublegal_hi=0.40
 
 
 /* Cod sub-legals after wave 2 */
