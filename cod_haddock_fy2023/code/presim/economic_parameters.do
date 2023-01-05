@@ -53,13 +53,13 @@ global pi_trip_length2 0
 /* Econ parameters: 
 how many fish can be caught on a trip 
 maximum age */
-global cod_upper_bound 25
-global haddock_upper_bound 40
+global cod_upper_bound 55
+global haddock_upper_bound 55
 
 
-global calibration_end 2022
+global calibration_end 2021
 global this_year=year(date("$S_DATE","DMY"))
-global this_year=2022
+global this_year=2021
 
 
 /* don't change this line .  You are storing a bigger matrix of commercial catch and rec regulations. these couple of lines just exclude the 'old' years, prior to the calibration years */ 
@@ -133,6 +133,8 @@ global dl_hadd=0
 
 
 /* Ignoring the Possession Limit */
+/* For GOM Cod, approximately 1.5% of trips which kept cod kept more than the 10 fish possession limit */
+/* These 11th and higher fish caught on these trips were responsible for 5.5% of all kept cod (by numbers).*/
 /* In order to address this, i'll set 2 globals which are the probability which an angler will `comply with the bag limit'  */
 
 global pcbag_comply=.90
