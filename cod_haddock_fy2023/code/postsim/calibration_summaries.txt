@@ -114,7 +114,7 @@ Calibration
 ===============================================================
 
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
-1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. This does the same thing. 
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. This does the same thing. 
 1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  October is open for 1 week.  I have been running one model where October is open for cod and one where it is closed and then taking a weighted average (1 part open and 3 parts closed) of the two.
 
 ~~~~
