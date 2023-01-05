@@ -203,7 +203,7 @@ global waves=6
 global periods_per_year=$months
 
 /*how many years, replicates */
-global total_reps=100
+global total_reps=1
 
 global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
@@ -1022,6 +1022,7 @@ shell chmod 440 `econ_out'
 
 di "cod_haddock_2023SQ.do finished."
 
+dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/status_quo_summaries.html) replace
 timer list
 log close
 

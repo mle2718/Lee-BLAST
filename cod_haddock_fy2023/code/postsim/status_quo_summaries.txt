@@ -230,7 +230,7 @@ local stub2 "recreational_catches_2023_size_limits"
 
 
 local filelist1: dir "${output_dir}" files "`stub'*.dta"
-local filelist2: dir "${output_dir}" files "`stub2'*.dta"
+*local filelist2: dir "${output_dir}" files "`stub2'*.dta"
 
 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
