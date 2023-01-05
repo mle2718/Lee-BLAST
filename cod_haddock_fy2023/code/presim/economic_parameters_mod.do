@@ -56,8 +56,8 @@ global pi_trip_length2 0
 /* Econ parameters: 
 how many fish can be caught on a trip 
 maximum age */
-global cod_upper_bound 55
-global haddock_upper_bound 55
+global cod_upper_bound 25
+global haddock_upper_bound 40
 
 
 global calibration_end 2020
