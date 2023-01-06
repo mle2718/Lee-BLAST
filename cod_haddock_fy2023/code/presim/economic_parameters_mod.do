@@ -56,7 +56,7 @@ global pi_trip_length2 0
 /* Econ parameters: 
 how many fish can be caught on a trip 
 maximum age */
-global cod_upper_bound 25
+global cod_upper_bound 40
 global haddock_upper_bound 40
 
 
@@ -78,8 +78,8 @@ global rec_month_starter=$periods_per_year*($which_year-$rec_junk)+1
 /* set years for age-length keys */
 
 /* Age-length key years*/
- global lcalibration_start 2017
- global lcalibration_end 2019
+ global lcalibration_start 2021
+ global lcalibration_end 2022
 
 /* set years for historical effort calibration params*/
  global rec_cal_start=$calibration_end
@@ -144,7 +144,7 @@ global dl_hadd=0
 /* In order to address this, i'll set 2 globals which are the probability which an angler will `comply with the bag limit'  */
 
 global pcbag_comply=.90
-global phbag_comply=.90
+global phbag_comply=.80
 
 
 global pcbag_non=1-$pcbag_comply
