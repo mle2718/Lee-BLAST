@@ -203,7 +203,7 @@ global waves=6
 global periods_per_year=$months
 
 /*how many years, replicates */
-global total_reps=50
+global total_reps=100
 
 global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
