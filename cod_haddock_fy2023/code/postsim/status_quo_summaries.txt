@@ -82,11 +82,10 @@ The rec sub-ACL for cod was 193mt in 2020.
 
 ## Fishing Year 2022 Regulations
 
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
 
 2022 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is 192 mt for FY 2022. The recreational sub-ACL for GOM haddock is 3,634 mt.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
 
 Haddock:
 
