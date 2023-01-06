@@ -17,13 +17,14 @@ if strmatch("$user","minyangNix"){
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
+global mrip_vintage "2023_01_04"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
-global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2023_01_04"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_${mrip_vintage}"
 global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
@@ -73,11 +74,10 @@ The rec sub-ACL for cod was 193mt in 2020.
 
 MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions. 
 
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
 
 2022 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is 192 mt for FY 2022. The recreational sub-ACL for GOM haddock is 3,634 mt.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $haddock_recACL2022>> mt.
 
 Haddock:
 
@@ -95,14 +95,13 @@ Cod:
 
 Fishing Year 2023 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL>> mt.  Regulations are TBD.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $haddock_recACL2023>> mt.  Regulations are TBD.
 
 
 Input data
 ==============================================================
-
-1.  Cod Length Frequencies: I've grouped April, September, and October together. And I've grouped the other months together. 
-1.  Haddock Length Frequencies: **Annual** length-frequencies 
+1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
+1.  **Monthly** catch-per-trip for cod and haddock
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
 1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
@@ -136,7 +135,7 @@ global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
-global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2023_01_04"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_${mrip_vintage}"
 global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 
@@ -417,12 +416,24 @@ format ab1_count b2_count sim_cod_mort_mt sim_cod_kept_mt %10.0fc
 rename sim_cod_kept_mt sim_landings_mt
 rename sim_cod_released_mt sim_disard_mt
 rename sim_cod_mort_mt sim_mortality_mt
+
+capture rename sim_tot_cat_cod sim_catch
+capture rename sim_cod_num_kept sim_landings
+capture rename sim_cod_num_released sim_discard
+
 replace year=1 if month==0
 sort fishing_year year month 
 
 rename ab1mt actual_landed_mt
 rename b2mt actual_discard_mt
 
+gen actual_cod_indiv_kept=actual_landed_mt/ab1_count*$lbs_per_mt
+gen actual_cod_indiv_release=actual_discard_mt/b2_count*$lbs_per_mt
+
+
+
+gen sim_cod_indiv_kept=sim_landings_mt/sim_landings*$lbs_per_mt
+gen sim_cod_indiv_release=sim_disard_mt/sim_discard*$lbs_per_mt
 
 format *mt %06.1fc
 
@@ -430,7 +441,7 @@ format *mt %06.1fc
 
 
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt actual_discard_mt sim_landings_mt sim_disard_mt sim_mortality_mt , abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_disard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_disard_mt sim_mortality_mt actual_cod_indiv_kept sim_cod_indiv_kept actual_cod_indiv_release sim_cod_indiv_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_disard_mt sim_mortality_mt ) labvar(month)
 <</dd_do>>
 ~~~~
 
@@ -438,11 +449,14 @@ list fishing_year month actual_landed_mt actual_discard_mt sim_landings_mt sim_d
 <<dd_do:quietly>>
 keep if fishing_year==2022 & month==4
 assert _n==1
-scalar cod_lbs_per_kept=actual_landed_mt/ab1_count*$lbs_per_mt
-scalar cod_lbs_per_release=actual_discard_mt/b2_count*$lbs_per_mt
-gen missing_kept_mt=(ab1_count-sim_cod_num_kept)*cod_lbs_per_kept/$lbs_per_mt
-gen missing_release_mt=(b2_count-sim_cod_num_released)*cod_lbs_per_release/$lbs_per_mt
-gen missing_release_mortmt=0.15*(b2_count-sim_cod_num_released)*cod_lbs_per_release/$lbs_per_mt
+
+
+scalar cod_indiv_kept=actual_cod_indiv_kept[1]
+scalar cod_indiv_release=actual_cod_indiv_release[1]
+
+gen missing_kept_mt=(ab1_count-sim_landings)*cod_indiv_kept/$lbs_per_mt
+gen missing_rel_mt=(b2_count-sim_discard)*cod_indiv_release/$lbs_per_mt
+gen missing_rel_mortmt=0.15*(b2_count-sim_discard)*cod_indiv_release/$lbs_per_mt
 gen MRIP_cod_mortality=actual_landed_mt+0.15*actual_discard_mt
 
 scalar adj=MRIP_cod_mortality-sim_mortality_mt
@@ -453,7 +467,7 @@ scalar adj=MRIP_cod_mortality-sim_mortality_mt
 
 We are moderately low for the weight of discard cod.  
 
-April is the problem month. The best we can do here is probably adjust this after the fact. The model predicts <<dd_display: %3.1f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_lbs_per_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_release_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
+April is the problem month. The best we can do here is probably adjust this after the fact. The model predicts <<dd_display: %3.1f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_rel_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
  <<dd_display: %3.1f sim_mortality_mt[1]>>mt.  We should be adding <<dd_display: %3.1f scalar(adj)>>mt of cod mortality to our projections to account for this.  
  
  
@@ -639,13 +653,21 @@ format *mt %06.1fc
 rename sim_hadd_kept_mt sim_landings_mt
 rename sim_hadd_released_mt sim_discard_mt
 rename sim_hadd_mort_mt sim_mortality_mt
+capture rename sim_tot_cat_cod sim_catch
+capture rename sim_cod_num_kept sim_landings
+capture rename sim_cod_num_released sim_discard
+gen actual_haddock_indiv_kept=actual_landed_mt/ab1_count*$lbs_per_mt
+gen actual_haddock_indiv_release=actual_discard_mt/b2_count*$lbs_per_mt
+
+gen sim_haddock_indiv_kept=actual_landed_mt/sim_landings*$lbs_per_mt
+gen sim_haddock_indiv_release=actual_discard_mt/sim_discard*$lbs_per_mt
 
 
 <</dd_do>>
 
 
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt actual_discard_mt  sim_landings_mt sim_discard_mt sim_mortality_mt, abbreviate(16) sum(actual_landed_mt actual_discard_mt  sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_discard_mt sim_mortality_mt actual_haddock_indiv_kept sim_haddock_indiv_kept actual_haddock_indiv_release sim_haddock_indiv_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
 <</dd_do>>
 ~~~~
 
@@ -653,15 +675,15 @@ list fishing_year month actual_landed_mt actual_discard_mt  sim_landings_mt sim_
 <<dd_do:quietly>>
 keep if fishing_year==2022 & month==5
 assert _n==1
-scalar hadd_lbs_per_kept=actual_landed_mt/ab1_count*$lbs_per_mt
-scalar hadd_lbs_per_release=actual_discard_mt/b2_count*$lbs_per_mt
-gen missing_kept_mt=(ab1_count-sim_haddock_num_kept)*hadd_lbs_per_kept/$lbs_per_mt
-gen missing_release_mt=(b2_count-sim_haddock_num_released)*hadd_lbs_per_release/$lbs_per_mt
-gen missing_release_mortmt=0.15*(b2_count-sim_haddock_num_released)*hadd_lbs_per_kept/$lbs_per_mt
+scalar haddock_indiv_kept=actual_landed_mt/ab1_count*$lbs_per_mt
+scalar haddock_indiv_release=actual_discard_mt/b2_count*$lbs_per_mt
+gen missing_kept_mt=(ab1_count-sim_haddock_num_kept)*haddock_indiv_kept/$lbs_per_mt
+gen missing_rel_mt=(b2_count-sim_haddock_num_released)*haddock_indiv_release/$lbs_per_mt
+gen missing_rel_mortmt=0.15*(b2_count-sim_haddock_num_released)*haddock_indiv_kept/$lbs_per_mt
 
 
-scalar hadd_lbs_per_kept_sim=sim_landings_mt/sim_haddock_num_kept*$lbs_per_mt
-scalar hadd_lbs_per_release_sim=sim_discard_mt/sim_haddock_num_released*$lbs_per_mt
+scalar haddock_indiv_kept_sim=sim_landings_mt/sim_haddock_num_kept*$lbs_per_mt
+scalar haddock_indiv_rel_sim=sim_discard_mt/sim_haddock_num_released*$lbs_per_mt
 
 <</dd_do>>
 
@@ -669,14 +691,14 @@ We are low for the landed weight of haddock.  All of the months are low. But  Ap
 
 May  is the problem month: The model predicts <<dd_display: %3.2f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.2f actual_landed_mt>>mt.  
 
-The average landed haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_kept)>>lbs.
+The average landed haddock in May weighed <<dd_display: %3.2f scalar(haddock_indiv_kept)>>lbs.
 
-The Model predicts that average landed haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_kept_sim)>>lbs. 
+The Model predicts that average landed haddock in May weighed <<dd_display: %3.2f scalar(haddock_indiv_kept_sim)>>lbs. 
 
 
-The average discarded haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_release)>>lbs.
+The average discarded haddock in May weighed <<dd_display: %3.2f scalar(haddock_indiv_release)>>lbs.
 
-The Model predicts that average discarded haddock in May weighed <<dd_display: %3.2f scalar(hadd_lbs_per_release_sim)>>lbs. 
+The Model predicts that average discarded haddock in May weighed <<dd_display: %3.2f scalar(haddock_indiv_release_sim)>>lbs. 
 
 
 We have under-estimated the weight of kept haddock by <<dd_display: %3.1f missing_kept_mt[1]>>mt.
