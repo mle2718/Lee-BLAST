@@ -12,10 +12,15 @@ clear
 *do "/home/mlee/Documents/Workspace/technical folder/do file scraps/odbc_connection_macros.do"
 
 #delimit ;
-tempfile temp_ages;
+tempfile cod_temp_ages hadd_temp_ages;
 set obs 9;
 gen age=_n;
-save `temp_ages', replace;
+gen svspp=73;
+save `cod_temp_ages', replace;
+replace svspp=74;
+
+save `hadd_temp_ages', replace;
+
 clear;
 
 /* Read in cod data the data */
@@ -55,6 +60,8 @@ save "${source_data}/svdbs/cod_fall_spring.dta", replace;
 
 /* Cod */
 /* To produce the "old" age length key with no seasons */
+use  "${source_data}/svdbs/cod_fall_spring.dta", replace;
+
 keep if year>=$lcalibration_start & year<=$lcalibration_end;
 collapse (sum) count, by(svspp length age);
 sort svspp;
@@ -62,17 +69,26 @@ sort svspp;
 
 bysort age: egen t=total(count);
 drop if t<=10;
+tempfile cod_lengths;
+save `cod_lengths', replace;
 
-merge m:1 age using `temp_ages';
+use `cod_temp_ages';
+/* potentially fill in any missing age classes */
 
+merge 1:m svspp age using `cod_lengths';
+
+sort svspp age length;
+
+count if _merge==1;
+if(r(N)>=1){;
 /* this will only work for continuous holes at the upper end of the age distribution */
-
-levelsof age if _merge==2, local(missing) sep(",");
+levelsof age if _merge==1, local(missing) sep(",");
 levelsof age if _merge==3, local(matched);
 qui summ age if _merge==3;
 
+
 local good=r(max);
-qui summ age if _merge==2;
+qui summ age if _merge==1;
 local bad=r(max);
 local reps=`bad'-`good';
 drop if inlist(age,`missing');
@@ -81,7 +97,7 @@ cap drop _merge;
 
 bysort svspp length age count: gen mark=_n;
 replace age=age+mark-1 if age==`good';
-
+};
 cap drop t ;
 cap drop mark;
 
@@ -92,7 +108,7 @@ assert r(min)==1;
 levelsof age, matrow(myage);
 mat b=rowsof(myage);
 assert b[1,1]==9;
-
+cap drop _merge;
 save "$codalkey", replace;
 clear;
 
@@ -129,10 +145,54 @@ collapse (sum) count, by(year season svspp age length);
 sort svspp year age length count;
 save "${source_data}/svdbs/haddock_fall_spring.dta", replace;
 
+
+# delimit ;
+use "${source_data}/svdbs/haddock_fall_spring.dta", replace;
+
 /* To produce the "old" age length key with no seasons */
+keep if year>=$lcalibration_start & year<=$lcalibration_end;
+sort svspp;
+
+
+
 keep if year>=$lcalibration_start & year<=$lcalibration_end;
 collapse (sum) count, by(svspp length age);
 sort svspp;
+
+
+bysort age: egen t=total(count);
+drop if t<=10;
+tempfile hadd_lengths;
+save `hadd_lengths', replace;
+
+use `hadd_temp_ages';
+/* potentially fill in any missing age classes */
+
+merge 1:m svspp age using `hadd_lengths';
+
+sort svspp age length;
+
+count if _merge==1;
+if(r(N)>=1){;
+/* this will only work for continuous holes at the upper end of the age distribution */
+levelsof age if _merge==1, local(missing) sep(",");
+levelsof age if _merge==3, local(matched);
+qui summ age if _merge==3;
+
+
+local good=r(max);
+qui summ age if _merge==1;
+local bad=r(max);
+local reps=`bad'-`good';
+drop if inlist(age,`missing');
+expand `reps'+1 if age==`good';
+cap drop _merge;
+
+bysort svspp length age count: gen mark=_n;
+replace age=age+mark-1 if age==`good';
+};
+cap drop t ;
+cap drop mark;
 
 qui summ age;
 assert r(max)==9;
@@ -141,6 +201,7 @@ assert r(min)==1;
 levelsof age, matrow(myage);
 mat b=rowsof(myage);
 assert b[1,1]==9;
+cap drop _merge;
 
 save "$haddalkey", replace;
 
