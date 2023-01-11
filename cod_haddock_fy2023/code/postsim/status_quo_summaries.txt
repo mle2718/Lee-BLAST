@@ -46,8 +46,8 @@ global hadd_recACL2022=3634
 global cod_recACL2023=192
 global hadd_recACL2023=610
 
-global cod_calibration_adj=32.1
-global hadd_calibration_adj=0
+global cod_calibration_adj=23
+global hadd_calibration_adj=-24
 
 global adj_cod_recACL2023=$cod_recACL2023-$cod_calibration_adj
 global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
