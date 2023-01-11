@@ -26,7 +26,7 @@ This is mostly where the code to simulate the model resides. I use ``cod_haddock
 
 Set the regulations in the ``sim/regulations`` folder and pass names in using the ``rec_management`` global.
 
-The ``/presim/cod_hadd_bio_params.do`` file must be updated with the locations of the input data. That input data is created in the Presim section.  So, all you need to do is copy the globals in from the ``run_this_once.do`` file
+The ``/presim/cod_hadd_bio_params.do`` file must be updated with the locations of the input data. That input data is created in the Presim section.  You need to copy the globals in from the ``run_this_once.do`` file and verify that they are correctly set. 
 
 ## Postsim
 You will need to use stata's dyndoc to make outputs. You will have to fiddle with the input files and folders in the ``postsim/calibration_summaries.txt.'' In particular, you'll have to point this file to the updated MRIP data.  
