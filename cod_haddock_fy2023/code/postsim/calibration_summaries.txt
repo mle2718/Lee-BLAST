@@ -77,7 +77,7 @@ MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles som
 
 2022 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $haddock_recACL2022>> mt.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
 
 Haddock:
 
@@ -95,7 +95,7 @@ Cod:
 
 Fishing Year 2023 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $haddock_recACL2023>> mt.  Regulations are TBD.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations are TBD.
 
 
 Input data
@@ -103,8 +103,8 @@ Input data
 1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  **Monthly** catch-per-trip for cod and haddock
-1.  2022 numbers at age for cod and haddock from the AGEPRO projections.
-1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
+1.  2022 mean numbers at age for cod and haddock from the AGEPRO projections.
+1.  Bottomtrawl survey data from 2017-2022 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
 
 
@@ -336,7 +336,7 @@ list fishing_year month actual_trips total_trips1 total_trips2 , abbreviate(16)
 
 Catch Statistics for Cod  
 ===============================================================
-Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April and June.  Simulated April total catch is too low, and the breakdown into landings and discards is not correct.  Simulated catch, landings, and discards for June (in numbers) is too high.  But simulated discards for June is too low.
+Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April and, to a lesser extent, June.  In April, although simulated catch matches actual catch numbers, the simulated April landings are too low.  The error here (11,800 fish) is approximately equal to the total error for the year (9,400 fish).  Simulated catch and discards for June (in numbers) is too low.
 
 
 ~~~~
@@ -379,9 +379,7 @@ list fishing_year month actual_cat sim_catch actual_landings sim_landings  actua
 ~~~~
 
 
-
-
-Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.   
+Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  April again is the problem month: the error here (26 mt) is larger than the total error for the year (14mt).  The model overestimates weight landed in September and October. This seems to primarily be caused by higher weights of kept fish during this time.  
 
 ~~~~
 <<dd_do:quietly>>
@@ -466,9 +464,7 @@ scalar adj=MRIP_cod_mortality-sim_mortality_mt
 
 <</dd_do>>
 
-We are moderately low for the weight of discard cod.  
-
-April is the problem month. The best we can do here is probably adjust this after the fact. The model predicts <<dd_display: %3.1f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_rel_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
+We are moderately low for the weight of discard cod.  The model predicts <<dd_display: %3.1f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_rel_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
  <<dd_display: %3.1f sim_mortality_mt[1]>>mt.  We should be adding <<dd_display: %3.1f scalar(adj)>>mt of cod mortality to our projections to account for this.  
  
  
@@ -675,6 +671,7 @@ list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_d
 <</dd_do>>
 ~~~~
 
+I have not programmed the discard mortality into stata. The major difference between the model and the MRIP data is is the landings.  Eyeballing the model and MRIP data, the simulation probably overestimates mortality by approximately 20mt. 
 
 
 Breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) sizes:
