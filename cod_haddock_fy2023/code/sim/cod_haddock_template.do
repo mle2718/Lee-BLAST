@@ -7,7 +7,6 @@ This .do file was written by Min-Yang.Lee@noaa.gov
 Version 1.2019
 Dec 3, 201
 
-Calibrated to the 3 year average of trips (320,750).  If you want to simulate "opening" one of the partially closed months, you need to adjust the rec_wave matrix
 TABLE OF CONTENTS
 0.  File description, Meta Data, changegoals, and changelog
 1.  Global, scalar, and other setup (parameterization)
@@ -15,14 +14,6 @@ TABLE OF CONTENTS
 3.  Population Dynamics -- including call to economic model
 4.  Loop?
 */
-
-
-/* changes
-A. Deal with folders a little more intelligently
-	Folders for source data
-	
-
- */
 
 /* BEGIN Section 0: FILE DESCRIPTION */
 
@@ -90,21 +81,21 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-pause off
-
+global mrip_vintage "2023_01_04"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_20" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_${mrip_vintage}" 
 }
 
 
 
 if strmatch("$user","minyangNix"){
 	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
-	global MRIP_dir "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2022_12_19" 
+	global MRIP_dir "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_${mrip_vintage}" 
 }
+
 
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -122,11 +113,10 @@ local hours=substr("`time'",1,2)
 local mins=substr("`time'",4,2)
 
 /*
-2021calibrate - 4 sets of regs that i'm using to calibrate the 2021 model.
-2022SQ is a copy of the 2021calibrate.
+csv containing the regulations
 */
 
-global rec_management "2023_size_limits"
+global rec_management "2023_haddock"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
@@ -203,13 +193,12 @@ global waves=6
 global periods_per_year=$months
 
 /*how many years, replicates */
-global total_reps=2
+global total_reps=100
 
 global total_years_sim=1
 local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
-
 *global tot_trips 646340
 global scale_factor 10
 *global numtrips=$tot_trips/$scale_factor
@@ -291,7 +280,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 275825  \ 5, 76600 \ 6, 41500 \ 7, 60500 \ 8, 80800 \ 9 , 115900 \10, 18000 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 260200  \ 5, 81100 \ 6, 64700 \ 7, 75300 \ 8, 89400 \ 9 , 130700 \10, 24900 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -329,14 +318,14 @@ global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
 global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.30
+global haddock_sublegal_hi=0.1
 
 
 /* Cod sub-legals after wave 2 */
 
 global cod_relax_main=2
 global cod_sublegal_low=.005
-global cod_sublegal_hi=.090+$cod_sublegal_low
+global cod_sublegal_hi=.010+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
 qui foreach scenario of local scenario_list{
@@ -526,7 +515,7 @@ scalars from mata and then sending them to globals. */
 
 	mata: st_numscalar("cod_min_min",min(cod_min_vec))
         if scalar(cod_min_min>=90){
-	scalar cod_min_min=min(cod_min_min,21)
+	scalar cod_min_min=min(cod_min_min,22)
 }
 	mata: st_numscalar("hadbags",haddock_bag_vec[`this_month'])
 	mata: st_numscalar("hadmins",haddock_min_vec[`this_month'])
@@ -550,7 +539,7 @@ scalars from mata and then sending them to globals. */
 	global hadd_min_keep= scalar(hadmins)
 	global hadd_max_keep= scalar(hadmaxs)
 
-	/* Generally, we'll let a few people keep some fish that is "just under" the possession limit.
+	/* Generally, we'll let a few people keep some fish that is "just under" the size limit.
 	*/
         	global cod_relax=2 
 		global hadd_relax=2 
@@ -689,6 +678,7 @@ drop myi
 notes drop _all
 notes: this contains the numbers at lengths of cod for the current replicate
 save "${working_data}/cod_length_count.dta", replace
+
 
 /* Recreational Fishing occurs in Feb */
 	do "$code_dir/sim/simulation_v42a.do"
@@ -1019,9 +1009,10 @@ shell chmod 440 `sp2_out'
 shell chmod 440 `econ_out'
  */
 
-di "Some Text to Display"
-/* This is a good place to dyndoc something. Maybe */
-* dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/calibration_summaries.html) replace
+
+di "cod_haddock_template.do finished."
+
+dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/summaries_haddock.html) replace
 timer list
 log close
 
