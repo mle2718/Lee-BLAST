@@ -210,7 +210,7 @@ local max_months=($months*$total_years_sim) + 4
 
 /*Setup model calibration*/
 *global tot_trips 646340
-global scale_factor 10
+global scale_factor 1
 *global numtrips=$tot_trips/$scale_factor
 
 global which_year=2022
@@ -290,7 +290,7 @@ mata:
 recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
 recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
 
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 259000  \ 5, 80200 \ 6, 63800 \ 7, 75000 \ 8, 87700  \ 9 , 130000 \10, 23800 \ 11, 0  \ 12, 0) 
+recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 260200  \ 5, 81100 \ 6, 64700 \ 7, 75300 \ 8, 89400 \ 9 , 130700 \10, 24900 \ 11, 0  \ 12, 0) 
 st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 
 
@@ -328,14 +328,14 @@ global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
 global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.05
+global haddock_sublegal_hi=0.1
 
 
 /* Cod sub-legals after wave 2 */
 
 global cod_relax_main=2
 global cod_sublegal_low=.005
-global cod_sublegal_hi=.020+$cod_sublegal_low
+global cod_sublegal_hi=.010+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
 qui foreach scenario of local scenario_list{
