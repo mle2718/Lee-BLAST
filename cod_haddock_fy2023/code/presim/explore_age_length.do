@@ -1,5 +1,27 @@
 /* graph and explore the haddock and cod age-length data */
-cd "/home/mlee/Documents/Workspace/recreational_simulations/cod_and_haddock"
+
+
+/*minyangWin is setup to connect to oracle yet */
+if strmatch("$user","minyangWin"){
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_01_04" 
+	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
+	global 	oracle_cxn  " $mysole_conn"
+}
+
+
+
+
+
+global code_dir "${project_dir}/code"
+global source_data "${project_dir}/source_data"
+global mrip_source_data "${project_dir}/mrip"
+
+global working_data "${project_dir}/working_data"
+global output_dir "${project_dir}/output"
+
+
+
 use "haddock_al_key9max.dta", clear
 destring, replace
 scalar cm_to_inch=0.39370787
