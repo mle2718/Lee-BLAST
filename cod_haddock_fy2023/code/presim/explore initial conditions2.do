@@ -120,8 +120,9 @@ use "${hadd_naa_start}", clear
 collapse (median) age*, by(year)
 reshape long age, i(year) j(ageclass)
 rename age count
-replace count=count/100000
-label var count "Fish (000,000s)"
+replace count=count/1000
+
+label var count "Fish (000s)"
 
 
 /* lets merge in the age-length key and compute the length structure */
@@ -139,13 +140,13 @@ keep year cl*
 collapse (sum) clprob*, by( year)
 reshape long clprob, i(year) j(sizeclass)
 rename clprob count
-label var count "Fish (000,000s)"
+label var count "Fish (000s)"
 
 
 
 
 forvalues myy=2022/2024{ 
-	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") yscale(range(0 50)) ylabel(0(10)50) xtitle("Length, inches")
+	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") yscale(range(0 50))  xtitle("Length, inches") xline(17) ylabel(0(1000)6000)
 
 	graph export "${image_dir}/haddock_med_`myy'length.tif", as(tif) replace
 }
@@ -161,8 +162,9 @@ use "${hadd_naa}", clear
 collapse (median) age*, by(year)
 reshape long age, i(year) j(ageclass)
 rename age count
-replace count=count/100000
-label var count "Fish (000,000s)"
+replace count=count/1000
+
+label var count "Fish (000s)"
 
 
 /* lets merge in the age-length key and compute the length structure */
@@ -180,13 +182,13 @@ keep year cl*
 collapse (sum) clprob*, by( year)
 reshape long clprob, i(year) j(sizeclass)
 rename clprob count
-label var count "Fish (000,000s)"
+label var count "Fish (000s)"
 
 
 
 
 forvalues myy=2018/2022{ 
-	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") xtitle("Length, inches")
+	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") xtitle("Length, inches")  xline(17) ylabel(0(1000)6000)
 
 	graph export "${image_dir}/haddock_means_`myy'length.tif", as(tif) replace
 }
@@ -248,8 +250,8 @@ label var count "Fish (000s)"
 
 
 
-forvalues myy=2022/2024{ 
-	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches")
+forvalues myy=2021/2024{ 
+	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches")  xline(22) ylabel(0(200)1200)
 	graph export "${image_dir}/cod_med_`myy'length.tif", as(tif) replace
 }
 
@@ -287,7 +289,7 @@ label var count "Fish (000s)"
 
 
 forvalues myy=2018/2022{ 
-	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches")
+	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches") xline(22) ylabel(0(200)1200)
 
 	graph export "${image_dir}/cod_means_`myy'length.tif", as(tif) replace
 }

@@ -6,8 +6,21 @@ clear
 use "${historical_cod_naaA}", replace
 append using "${historical_cod_naaB}"
 collapse (mean) age1-age9, by(year)
+
+
+
 destring, replace
 save "${historical_cod_naaBoth}", replace
+tempfile hist_cod
+foreach var of varlist age1-age9{
+replace `var'=`var'*1000
+}
+save `hist_cod', replace
+
+
+
+
+
 qui summ year
 local last=r(max)
 
@@ -21,12 +34,11 @@ keep if year>`last'
 collapse (mean) age1-age9, by(year source)
 collapse (mean) age1-age9, by(year)
 
-foreach var of varlist age1-age9{
-replace `var'=`var'/1000
-}
 
-append using "${historical_cod_naaBoth}"
+append using `hist_cod'
 sort year
 bysort year: assert _N==1
 notes: Constructed with "construct_historical_cod_NAA.do"
+notes: individual ish
+
 save "$cod_naaProj_and_Hist", replace
