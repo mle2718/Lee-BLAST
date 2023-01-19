@@ -40,14 +40,17 @@ dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/sta
 /* Haddock and Cod rec ACLs in mt*/
 /****************************/
 /****************************/
+global haddock_mort2022=666
+
+
 global cod_recACL2022=192
 global hadd_recACL2022=3634
 
 global cod_recACL2023=192
 global hadd_recACL2023=610
 
-global cod_calibration_adj=23
-global hadd_calibration_adj=-24
+global cod_calibration_adj=25
+global hadd_calibration_adj=-24.5
 
 global adj_cod_recACL2023=$cod_recACL2023-$cod_calibration_adj
 global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
@@ -139,8 +142,23 @@ Whole month of April for both Cod and Haddock scenario 1.
 
 | Scenario number| Short Description | Long Description| Status|
 | :-----        |    :---------------   |          :--------------------- |   :-----|
-| 0| Status Quo 2023       | Same regs from 2022.   | Setup|
-
+| 0| Status Quo 2023       | Same regs from 2022.   | Run|
+| 1| April Oct Closed		| Same regs from 2022, except April and October are closed for cod| Run|
+| 2| April Oct Open		| Same regs from 2022, except April and October are open for cod| Run|
+| 3| Haddock15A			| Same regs as 1, except with a 15 haddock cod limit | Run|
+| 4| Haddock15B			| Same regs as 2, except with a  15 haddock cod limit | Run|
+| 5| Haddock15C			| Same regs as 2022, except with a  15 haddock cod limit | Run|
+| 6| Haddock12A			| Same regs as 1, except with a 12 haddock cod limit | Run|
+| 7| Haddock12B			| Same regs as 2, except with a  12 haddock cod limit | Run|
+| 8| Haddock12C			| Same regs as 2022, except with a  12 haddock cod limit | Run|
+| 9| Haddock10A			| Same regs as 1, except with a 10 haddock cod limit | Run|
+| 10| Haddock10B			| Same regs as 2, except with a  10 haddock cod limit | Run|
+| 11| Haddock10C			| Same regs as 2022, except with a  10 haddock cod limit | Run|
+| 101| Scott2 		| Similar to 11, except Sept+October open; April closed | Run|
+| 111| Scott1 		| Same regs as 101, except Sept+October open; April 1-15 | Run|
+| 18| RAP18		| Cod: Sept+Oct. Haddock: April1-Feb 28.  18"  | Running|
+| 19| RAP19		| Cod: Sept+Oct. Haddock: April1-Feb 28.  19"  | Running|
+| 20| RAP20		| Cod: Sept+Oct. Haddock: April1-Feb 28.  20"  | Running|
 
 <!---
 | Scenario number| Short Description | Long Description| Status|
@@ -151,6 +169,15 @@ Whole month of April for both Cod and Haddock scenario 1.
 | 3| April Oct Closed		| Same regs as 1, except with a 21" cod limit | Setup|
 | 4| April Oct Open		| Same regs as 2, except with a 21" cod limit | Setup|
 | 5| Status quo with 21" cod		| Same regs as SQ, except with a 21" cod limit | Setup|
+
+101 , I will take the weighted average of 9 and 10.
+	1. I will set the weights for scenario_num==10 & month==4 to zero. Sets the april outcomes to the outcomes from Scenario 9 (April = closed). I will set the weights for
+			Scenario_num=9 and month=10 to zero. This sets the october outcomes to the outcomes from scenario 10 (october open).
+			
+	2.  To get 111 I will take a weighted average of 9 and 10.
+				Scenario_num=9 and month=10 to zero. This sets the october outcomes to the outcomes from scenario 10 (october open).
+				equal weight the april month for both senarios 9 and 10.
+
 
  ---> 
 
@@ -220,21 +247,16 @@ global output_dir "${project_dir}/output"
 
 /* Read in all the model runs that match `stub' */
 local stub "recreational_catches_2023_SQ_"
-local stub2 "recreational_catches_2023_size_limits"
-
-*local OpenSept "recreational_catches_2022_Open_Sept_"
-*local SlotA "recreational_catches_2022Slot_A_"
-*local SlotAOS "recreational_catches_2022Slot_AOS_"
-*local sensitivity "recreational_catches_2022_OS_sensA_"
-
+local stub2 "recreational_catches_2023_haddock"
+local stub3 "recreational_catches_2023_RAP_"
 
 local filelist1: dir "${output_dir}" files "`stub'*.dta"
-*local filelist2: dir "${output_dir}" files "`stub2'*.dta"
-
+local filelist2: dir "${output_dir}" files "`stub2'*.dta"
+local filelist3: dir "${output_dir}" files "`stub3'*.dta"
 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
-local combinedfiles `" `filelist1' `filelist2'"'
+local combinedfiles `" `filelist1' `filelist2'  `filelist3' "'
 
 
 /****************************/
@@ -278,29 +300,95 @@ replace year=year+1 if month>=13
 replace month=month-12 if month>=13
 
 
-preserve
+
+/* construct mean outcomes of as-run scenarios*/
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort ,by(scenario_num fishing_year year month replicate month_of_fy source)
+
+tempfile s_as_run
+save `s_as_run', replace emptyok
 
 
-/* construct the  SQ scenario by taking a weighted average of the corresponding 1 and 2 scenarios.*/
 
-*keep if inlist(scenario_num,1,2) 
+
+
+
+
+
+
+
+use `s_as_run', clear
+
+
+/* construct the  SQ scenario by taking a weighted average of the corresponding 1 and 2 scenarios.
+Scenario 5 is a weighted average of 3 and 4
+Scenario 8 is a weighted average of 6 and 7*/
+
+*keep if inlist(scenario_num,1,2,3,4,6,7) 
 gen freq=1
-replace freq=3 if month==10 & inlist(scenario_num,1,3)
+replace freq=3 if month==10 & inlist(scenario_num,1,3,6,9)
 replace scenario_num=0 if inlist(scenario_num,1,2)
 replace scenario_num=5 if inlist(scenario_num,3,4)
+replace scenario_num=8 if inlist(scenario_num,6,7)
+replace scenario_num=11 if inlist(scenario_num,9,10)
+keep if inlist(scenario_num,0,5,8,11)
+
+
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
+
+
+tempfile smodified
+save `smodified', replace emptyok
 
 
 
-collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy)
+/* work on scenario 101 
+
+
+To get 101, I will take the weighted average of 9 and 10.
+	1. I will set the weights for scenario_num==10 & month==4 to zero. Sets the april outcomes to the outcomes from Scenario 9 (April = closed). I will set the weights for
+			Scenario_num=9 and month=10 to zero. This sets the october outcomes to the outcomes from scenario 10 (october open).
+	*/		
 
 
 
-tempfile s0
-save `s0', replace emptyok
-restore
+
+use `s_as_run', clear
 
 
-append using `s0'
+keep if inlist(scenario_num,9,10) 
+gen freq=1
+replace freq=0 if month==10 & inlist(scenario_num,9)
+replace freq=0 if month==4 & inlist(scenario_num,10)
+
+replace scenario_num=101
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
+append using `smodified'
+save `smodified', replace emptyok
+
+
+
+
+/* work on scenario 111 
+	2.  To get 111 I will take a weighted average of 9 and 10.
+				Scenario_num=9 and month=10 to zero. This sets the october outcomes to the outcomes from scenario 10 (october open).
+				equal weight the april month for both senarios 9 and 10.
+*/		
+
+
+use `s_as_run', clear
+
+keep if inlist(scenario_num,9,10) 
+gen freq=1
+replace freq=0 if month==10 & inlist(scenario_num,9)
+
+replace scenario_num=111
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
+
+append using `smodified'
+save `smodified', replace emptyok
+
+
+append using `s_as_run'
 
 
 
@@ -368,23 +456,30 @@ sort scenario_num
 gen cod_limit=1 
 gen hadd_limit=20 
 
+replace  hadd_limit=15 if inlist(scenario_num,3,4,5,18,19,20,17)
+replace  hadd_limit=12 if inlist(scenario_num,6,7,8)
+replace  hadd_limit=10 if inlist(scenario_num,9,10,11,101,111)
 gen str10 hadd_size=`"17""'
-gen cod_size=`"22""' 
 
- replace  cod_size=`"22""' if inlist(scenario_num,3,4,5)
+
+replace  hadd_size=`"18""' if inlist(scenario_num,18)
+replace  hadd_size=`"19""' if inlist(scenario_num,19)
+replace  hadd_size=`"20""' if inlist(scenario_num,20)
+gen cod_size=`"22""' 
 
 gen str20 mode="All"
 /*cod open seasons */
 
-gen str60  cod_open_season="Sept 1 -Oct 7, April 1-14" if inlist(scenario_num,0,5)
-replace  cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,1,3)
-replace  cod_open_season="Sept 1 -Oct 30, April 1-April 30 " if inlist(scenario_num,2,4)
+gen str60  cod_open_season="Sept 1 -Oct 7, April 1-14" if inlist(scenario_num,0,5,8,11)
+replace  cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,1,3,6,9)
+replace  cod_open_season="Sept 1 -Oct 31, April 1-April 30" if inlist(scenario_num,2,4,7,10)
+replace  cod_open_season="Sept 1 -Oct 31" if inlist(scenario_num,101,17,18,19,20)
+replace  cod_open_season="Sept 1 -Oct 31, April 1-15" if inlist(scenario_num,111)
 
 /*haddock open seasons */
 
-gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,1,2,3,4,5)
+gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,1,2,3,4,5,6,7,8,9,10,11,101,111,18,19,20,17)
 save `raw_results', replace
-
 
 
 
@@ -407,15 +502,22 @@ collapse (sum) total_trips cod_num_kept cod_num_released haddock_num_kept haddoc
 gen cod_ok=0
 replace cod_ok=1 if cod_mort_mt<=$cod_recACL2023
 gen adj_cod_ok=0
-replace adj_cod_ok=1 if cod_mort_mt<=$adj_cod_recACL2023
+
+gen adj_cod_mort_mt=cod_mort_mt + $cod_calibration_adj
+replace adj_cod_ok=1 if adj_cod_mort_mt<=$cod_recACL2023
+
+
+global hadd_calibration_adj=-24
 
 
 gen hadd_ok=0 
 replace hadd_ok=1 if hadd_mort_mt<=$hadd_recACL2023
 
 gen adj_hadd_ok=0
-replace adj_hadd_ok=1 if hadd_mort_mt<=$adj_hadd_recACL2023
+gen adj_hadd_mort_mt=hadd_mort_mt+ $hadd_calibration_adj
+replace adj_hadd_ok=1 if adj_hadd_mort_mt<=$hadd_recACL2023
 
+format adj_hadd_mort_mt adj_cod_mort_mt %6.1gc
 
 
 
@@ -434,8 +536,13 @@ label var hadd_kept_mt "Haddock Kept (mt)"
 label var hadd_released_mt "Haddock Released(mt)"
 label var cod_ok "% Under Cod subACL"
 label var hadd_ok "% Under Haddock subACL"
-label var adj_cod_ok "Adjusted % Under Cod subACL"
 
+
+label var adj_cod_mort_mt  "Adjusted Cod Mortality (mt)"
+label var adj_hadd_mort_mt "Adjusted Haddock Mortality (mt)"
+
+
+label var adj_cod_ok "Adjusted % Under Cod subACL"
 label var adj_hadd_ok "Adjusted % Under Haddock subACL"
 
 label var source "Where is this data"
@@ -461,7 +568,7 @@ save `annual_results', replace
 use  `annual_results', replace
 
 
-collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip   (sum) cod_ok hadd_ok adj_cod_ok adj_hadd_ok (count) N=replicate, by(scenario source scenario_num cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season)
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  adj_cod_mort_mt adj_hadd_mort_mt (sum) cod_ok hadd_ok adj_cod_ok adj_hadd_ok (count) N=replicate, by(scenario source scenario_num cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season)
 replace cod_ok=cod_ok/N*100
 replace hadd_ok=hadd_ok/N*100
 replace adj_cod_ok=adj_cod_ok/N*100
@@ -493,26 +600,23 @@ label var cod_num_released "Cod released (#)"
 label var haddock_num_kept "Haddock kept (#)"
 label var haddock_num_released "Haddock relased (#)"
 
+
+label var adj_cod_mort_mt  "Adjusted Cod Mortality (mt)"
+label var adj_hadd_mort_mt "Adjusted Haddock Mortality (mt)"
+
+
+
 gen hadd_catch=haddock_num_kept+haddock_num_released
 
 gen cod_catch=cod_num_kept+cod_num_released
 
-replace scenario=ltrim(rtrim(itrim(scenario)))
 tempfile summed_results
 
 
-local graphlist 0,1,2,3,4,5 
+local graphlist 0,1,2,3,4,5,6,7,8,9,10,11,101,111,18,19,20,17 
 keep if inlist(scenario_num, `graphlist')
 
 /*reorder */
-gen scott_order=scenario_num
-
-replace scenario=subinstr(scenario,", spring 2","", .) 
-replace scenario=subinstr(scenario," Fall 4","Fall 4 weeks", .) 
-replace scenario=subinstr(scenario," Fall 5","Fall 5 weeks", .)
-replace scenario=subinstr(scenario," Fall 6","Fall 6 weeks", .) 
-
-
 
 save `summed_results', replace
 
@@ -522,16 +626,21 @@ save `summed_results', replace
  
 ## Summary Outputs
 
-I've only managed to run 50 replicates.  
-
 ~~~~
 <<dd_do:nocommands>>
 
 use `summed_results', clear
 format total_trips cod_mort_mt hadd_mort_mt hadd_catch cod_catch total_trips %10.0fc 
-sort scott_order
 qui gen str1 option=""
-list option scenario_num mode cod_limit cod_size cod_open_season cod_mort_mt hadd_limit hadd_size  had_open_season hadd_mort_mt total_trips cod_ok hadd_ok  if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+list option scenario_num mode cod_limit cod_size cod_open_season adj_cod_mort_mt  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt total_trips adj_cod_ok adj_hadd_ok  if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
 <</dd_do>>
 ~~~~
+
+Narrative:
+
+* Scenario 0 is the status quo. Mortality is slightly lower than 2022. This typically is due to changes in the age structure, typically an increase in younger and smaller fish 
+* Scenarios 9 and 11 have a very high probability of the catch of both stocks being under their respective sub-ACLs.
+* Scenario 101 has the same possession limits and size limits as Scenario 11.  October is opened to cod but April is closed to cod.
+* Scenario 102 is similar to 101, however April is partially open to cod.  
+
 
