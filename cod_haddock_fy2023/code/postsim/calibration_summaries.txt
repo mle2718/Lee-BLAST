@@ -39,6 +39,8 @@ dyndoc "${code_dir}/postsim/calibration_summaries.txt", saving(${project_dir}/ca
 /****************************/
 /****************************/
 
+global haddock_mort2022=666
+
 global hadd_recACL2022=3634
 global cod_recACL2022=192
 
@@ -412,7 +414,7 @@ replace year=$working_year if month>4 & year==.
 
 format ab1_count b2_count sim_cod_mort_mt sim_cod_kept_mt %10.0fc
 rename sim_cod_kept_mt sim_landings_mt
-rename sim_cod_released_mt sim_disard_mt
+rename sim_cod_released_mt sim_discard_mt
 rename sim_cod_mort_mt sim_mortality_mt
 
 rename sim_cod_tot_cat sim_catch
@@ -431,7 +433,7 @@ gen weight_per_release=actual_discard_mt/b2_count*$lbs_per_mt
 
 
 gen sim_weight_per_kept=sim_landings_mt/sim_landings*$lbs_per_mt
-gen sim_weight_per_release=sim_disard_mt/sim_discard*$lbs_per_mt
+gen sim_weight_per_release=sim_discard_mt/sim_discard*$lbs_per_mt
 
 format *mt %06.1fc
 format *per* %3.2fc
@@ -440,33 +442,21 @@ format *per* %3.2fc
 
 
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_disard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_disard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
 <</dd_do>>
 ~~~~
 
 
 <<dd_do:quietly>>
-keep if fishing_year==2022 & month==4
-assert _n==1
+keep if fishing_year==2022
+collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt  sim_discard_mt sim_mortality_mt
+gen actual_mortality=actual_landed_mt+0.15*actual_discard_mt
 
-
-scalar cod_indiv_kept=weight_per_kept[1]
-scalar cod_indiv_release=weight_per_release[1]
-
-gen missing_kept_mt=(ab1_count-sim_landings)*cod_indiv_kept/$lbs_per_mt
-gen missing_rel_mt=(b2_count-sim_discard)*cod_indiv_release/$lbs_per_mt
-gen missing_rel_mortmt=0.15*(b2_count-sim_discard)*cod_indiv_release/$lbs_per_mt
-gen MRIP_cod_mortality=actual_landed_mt+0.15*actual_discard_mt
-
-scalar adj=MRIP_cod_mortality-sim_mortality_mt
-
-
+global delta_mt=actual_mortality-sim_mortality_mt
 
 <</dd_do>>
 
-We are moderately low for the weight of discard cod.  The model predicts <<dd_display: %3.1f sim_landings_mt>>mt of landings while the actual landings were  <<dd_display: %3.1f actual_landed_mt>>mt.  The average landed cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_kept)>>lbs.  The  average released cod in April weighed <<dd_display: %3.2f scalar(cod_indiv_release)>>lbs. We have under-estimated the weight of kept cod by <<dd_display: %3.1f missing_kept_mt[1]>>mt and over-estimated the weight of discarded cod by <<dd_display: %3.1f abs(missing_rel_mt[1])>>mt.  The April cod mortality from the simulations should be <<dd_display: %3.1f MRIP_cod_mortality[1]>>mt instead of 
- <<dd_display: %3.1f sim_mortality_mt[1]>>mt.  We should be adding <<dd_display: %3.1f scalar(adj)>>mt of cod mortality to our projections to account for this.  
- 
+The actual mortality was <<dd_display: %3.1f actual_mortality[1]>>mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_mt)>>mt 
  
 
 A few helpful MRIP statistics for Cod
@@ -671,7 +661,17 @@ list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_d
 <</dd_do>>
 ~~~~
 
-I have not programmed the discard mortality into stata. The major difference between the model and the MRIP data is is the landings.  Eyeballing the model and MRIP data, the simulation probably overestimates mortality by approximately 20mt. 
+
+
+<<dd_do:quietly>>
+keep if fishing_year==2022
+collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt
+
+global delta_hadd_mt=$haddock_mort2022-sim_mortality_mt[1]
+<</dd_do>>
+
+The actual mortality was <<dd_display: %8.0fc $haddock_mort2022>> mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_hadd_mt)>>mt 
+
 
 
 Breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) sizes:
