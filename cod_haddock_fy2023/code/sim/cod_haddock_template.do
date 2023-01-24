@@ -116,7 +116,7 @@ local mins=substr("`time'",4,2)
 csv containing the regulations
 */
 
-global rec_management "2023_RAP"
+global rec_management "2023_CMTE"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
@@ -1012,7 +1012,7 @@ shell chmod 440 `econ_out'
 
 di "cod_haddock_template.do finished."
 
-dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/summaries_RAP.html) replace
+dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/summaries_CMTE.html) replace
 timer list
 log close
 
