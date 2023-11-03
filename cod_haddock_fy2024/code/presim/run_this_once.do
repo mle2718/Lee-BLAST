@@ -285,8 +285,7 @@ do "${code_dir}/presim/extract_length_age_data.do"
 
 
 
-/* commercial monthly catch
-do "${code_dir}/presim/commercial_helper.do" */
+/* commercial monthly catch */
 do "${code_dir}/presim/commercial_monthly_helper.do"
 
 
