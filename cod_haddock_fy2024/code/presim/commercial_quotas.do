@@ -17,9 +17,9 @@ global cod2018a=369*.86
 global cod2019a=361*.795
 global cod2020a=275*.82 
 global cod2021a=270*.82 
-
-global cod2022a=270*.87 
-global cod2023a=$cod2022a
+global cod2022a=270*.95 
+global cod2023a=278*.95 
+global cod2024a=$cod2023a
 
 
 
@@ -40,8 +40,10 @@ global haddock2018a=8738*.33
 global haddock2019a=8312*.43
 global haddock2020a=12057*.33 
 global haddock2021a=10281*.33 /* from the FW59 document */
-global haddock2022a=7056*.33
-global haddock2023a=$haddock2022a
+global haddock2022a=7056*.40
+global haddock2023a=1569*0.95 /* I usually adjust the acl by the fraction that was caught in the previous year. However, for gom haddock, i'm setting it to 0.95, because the quota was reduced by such a large amount.*/
+global haddock2024a=$haddock2023a
+
 
 
 global haddock_quota1=$haddock2011a*$mt_to_kilo*$kilo_to_lbs
@@ -56,6 +58,7 @@ global haddock_quota9=$haddock2019a*$mt_to_kilo*$kilo_to_lbs
 global haddock_quota10=$haddock2020a*$mt_to_kilo*$kilo_to_lbs 
 global haddock_quota11=$haddock2021a*$mt_to_kilo*$kilo_to_lbs 
 global haddock_quota12=$haddock2022a*$mt_to_kilo*$kilo_to_lbs 
+global haddock_quota13=$haddock2023a*$mt_to_kilo*$kilo_to_lbs 
 
 
 global cod_quota1=$cod2011a*$mt_to_kilo*$kilo_to_lbs
@@ -70,7 +73,7 @@ global cod_quota9=$cod2019a*$mt_to_kilo*$kilo_to_lbs
 global cod_quota10=$cod2020a*$mt_to_kilo*$kilo_to_lbs
 global cod_quota11=$cod2021a*$mt_to_kilo*$kilo_to_lbs
 global cod_quota12=$cod2022a*$mt_to_kilo*$kilo_to_lbs
-
+global cod_quota13=$cod2023a*$mt_to_kilo*$kilo_to_lbs
 
 
 
