@@ -10,7 +10,6 @@ set seed  4160
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
 	global MRIP_dir  "V:/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_11_02" 
-	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
 	global 	oracle_cxn  " $mysole_conn"
 }
 
