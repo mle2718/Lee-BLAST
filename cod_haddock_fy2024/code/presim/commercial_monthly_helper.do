@@ -11,25 +11,46 @@ May 12, 2014
 local prefix "my_cod_haddock";
 
 
-
-/* Extraction loop */
-forvalues yr=$commercial_grab_start(1)$commercial_grab_end {;
-/* and here is the odbc load command */
-	clear;
-	tempfile new;
-	local files `"`files'"`new'" "';
-	odbc load,  exec("select g.carea, s.gearid, s.tripid, s.sppcode, s.qtykept, s.datesold from vtr.veslog`yr's s, vtr.veslog`yr'g g where g.gearid=s.gearid and s.sppcode in ('COD', 'HADD') and g.carea between 511 and 515;
-") $oracle_cxn ;
-	gen year=`yr';
-	quietly save `new';
-};
 clear;
-append using `files';
-duplicates drop ;
+/* Extract landings */
+	odbc load,  exec("select sum(nvl(lndlb,0)) as landings,  sum(livlb) as livelnd, year, month, itis_tsn from cams_garfo.cams_land cl where 
+		cl.area between 511 and 515 and 
+		cl.year between $commercial_grab_start and $commercial_grab_end and
+		itis_tsn in ('164712','164744')
+group by year, month, itis_tsn;") $myNEFSC_USERS_conn ;
+destring itis_tsn, replace;
+
 destring, replace ;
 renvars, lower;
 compress;
+tempfile landings;
+save `landings', replace;
+clear;
+
+/* Extract discards */
+odbc load,  exec("select year, extract(month from date_trip) as month, itis_tsn, sum(nvl(cams_discard,0)) as discard from cams_garfo.cams_discard_all_years cl where 
+		cl.area between 511 and 515 and 
+		year>=2022 and 
+		itis_tsn in (164712,164744)
+		group by year, extract(month from date_trip), itis_tsn;") $myNEFSC_USERS_conn ;
+destring itis_tsn, replace;
+
+merge 1:1 year month itis_tsn using `landings';
+
+
+gen str4 sppcode="COD" if itis_tsn==164712;
+replace sppcode="HADD" if itis_tsn==164744;
+
+replace discard=0 if discard==.;
+replace livelnd=0 if livelnd==.;
+gen live=livelnd+discard;
+
 save "${source_data}/cfdbs/monthly_`prefix'_${commercial_grab_start}_${commercial_grab_end}.dta", replace;
+
+
+
+
+
 
 
 
@@ -38,19 +59,13 @@ save "${source_data}/cfdbs/monthly_`prefix'_${commercial_grab_start}_${commercia
 
 /* Keep only GOM landings */
 
-keep if carea>=511 & carea<=515;
-drop if qtykept==.;
-gen month=month(dofc(datesold));
 drop if year==.|month==.;
-gen nespp3=081 if strmatch(sppcode, "COD");
-replace nespp3=147 if strmatch(sppcode, "HADD");
 
-collapse (sum) live=qtykept, by(nespp3 year month);
 gen fishing_year=year;
 replace fishing_year=fishing_year-1 if month<=4;
 
 /*Lets "tag" the most recent "full" fishing year */
-bysort fishing_year nespp3: gen c=_N;
+bysort fishing_year sppcode: gen c=_N;
 keep if c==12;
 qui summ fishing_year;
 scalar p=r(max);
@@ -73,7 +88,7 @@ save "${source_data}/cfdbs/monthly_cod_timing.dta", replace;
 save "${source_data}/cfdbs/monthly_haddock_timing.dta", replace;
 
 use "${source_data}/cfdbs/monthly_haddock_timing.dta", clear;
-keep if nespp3==147;
+keep if sppcode=="HADD";
 collapse (sum) live, by(month);
 egen tl=total(live);
 gen frac=live/tl;
@@ -84,7 +99,7 @@ save "${source_data}/cfdbs/monthly_haddock_timing.dta", replace;
 
 
 use "${source_data}/cfdbs/monthly_cod_timing.dta", clear;
-keep if nespp3==081;
+keep if sppcode=="COD";
 collapse (sum) live, by(month);
 egen tl=total(live);
 gen frac=live/tl;
