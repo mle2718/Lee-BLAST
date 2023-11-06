@@ -59,27 +59,6 @@ global cod_recACL2024=0
 Previous years Regulations
 ==============================================================
 
-The same regulations were in place for FY2020 and FY2021.
-
-Haddock:
-
-*    15 fish, 17"
-*    Open May1-Feb 28 and April 1- April 30
-*    No Changes from 2019
-
-Cod: 
-
-*   1 fish, 21"
-*   Open Sept 15-Sept 30 and April 1-April 14 for private anglers
-*   Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers
-
-FY 2020 Regulations can be found [here](https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020).  Since there were no changes in FY2021, there is no federal register notice.
-
-The rec sub-ACL for cod was 193mt in 2020.  
-
-MRIP data uses "trimmed landings" estimates for Cod in FY 2020. This handles some outlier data.  These trimmed landings estimates affect the length-frequency distributions. 
-
-
 2022 Regulations
 ==============================================================
 The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
@@ -100,7 +79,23 @@ Cod:
 
 Fishing Year 2023 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations are TBD.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations were
+
+
+
+Haddock:
+
+*    For-Hire sector: 15 fish with an 18" minimum size.
+*    Private Anglers: 10 fish with a 17" minimum size.
+*    Open May1-Feb 28 and April 1- April 30. Closed for the month of March.
+
+Cod: 
+
+*   1 fish, 22"
+*   Open Sept 1-October 31 for all anglers.
+
+
+
 
 
 Input data
@@ -108,8 +103,8 @@ Input data
 1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  **Monthly** catch-per-trip for cod and haddock
-1.  2022 mean numbers at age for cod and haddock from the AGEPRO projections.
-1.  Bottomtrawl survey data from 2017-2022 to form the age-length keys.
+1.  2023 mean numbers at age for cod and haddock from the AGEPRO projections.
+1.  Bottomtrawl survey data from 2018-2023 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
 
 
@@ -118,16 +113,15 @@ Calibration
 ===============================================================
 
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
-1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. This does the same thing. 
-1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  October is open for 1 week.  I have been running one model where October is open for cod and one where it is closed and then taking a weighted average (1 part open and 3 parts closed) of the two.
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 20 fish in 2022 and 10 fish/17" in 2023. 
+
 
 ~~~~
 <<dd_do:quietly>>
-/*minyangWin is setup to connect to oracle yet */
+/*minyangWin is setup to connect to oracle */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_root  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/"
-	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
+	global MRIP_root  "V:/READ-SSB-Lee-MRIP-BLAST/"
 	global 	oracle_cxn  " $mysole_conn"
 }
 
@@ -147,16 +141,16 @@ global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 local my_common1 "atlanticcod"
 local my_common2 "haddock"
-global working_year 2022
+global working_year 2023
 global previous=$working_year-1
 
-global hmin=17
+global hmin=18
 global cmin=22
-global cmin2022=21
+global cmin2023=22
 
 global lbs_per_mt=2204.62
 global output_dir "${project_dir}/output"
-local stub "recreational_catches_2022_calibrate"
+local stub "recreational_catches_2023_calibrate"
 
 /* use the most recent set of results that matches the stub pattern*/
 
@@ -195,9 +189,9 @@ collapse (mean) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(f
 order total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released 
 
 gen str60 description=""
-replace description="calibrated to 2022 total trips, April closed for cod." if scenario_num==1
-replace description="calibrated to 2022 total trips, April open for cod." if scenario_num==2
-replace description="calibrated to 2022 total trips." if scenario_num==0
+replace description="calibrated to 2023 total trips. For Hire Regs for Haddock" if scenario_num==1
+replace description="calibrated to 2023 total trips. Private Regs for Haddock" if scenario_num==2
+replace description="calibrated to 2023 total trips. Blended regs for haddock" if scenario_num==0
 
 preserve
 	keep scenario_num month fishing_year month cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt
@@ -206,7 +200,7 @@ preserve
 	save `wide'
 restore
 
-
+/* through here is probably good, but after this needs a revision because the scenarios are different. */
 
 foreach var of varlist choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_tot_cat hadd_tot_cat cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt cod_mort_mt hadd_mort_mt{
 	rename `var' sim_`var'
@@ -451,7 +445,7 @@ list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_d
 
 
 <<dd_do:quietly>>
-keep if fishing_year==2022
+keep if fishing_year==2023
 collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt  sim_discard_mt sim_mortality_mt
 gen actual_mortality=actual_landed_mt+0.15*actual_discard_mt
 
@@ -470,7 +464,7 @@ Breakdown of MRIP A+B1's into legal (22+ inches) and sublegal (under 22 inches) 
 
 ~~~~
 <<dd_do:quietly>>
-use "${MRIP_dir}/monthly/cod_ab1_2022.dta", clear
+use "${MRIP_dir}/monthly/cod_ab1_2023.dta", clear
 gen legal=l_in_bin>=$cmin
 collapse (sum) count, by(legal month)
 bysort month: egen total_landings=total(count)
@@ -488,14 +482,14 @@ list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(numb
 ~~~~
 
 
-Previous MRIP data in April of 2022 was sparse.  Data update seems to have corrected that.
+Previous MRIP data in April of 2023 was sparse.  Data update seems to have corrected that.
 
 
 ~~~~
 <<dd_do:quietly>>
-use "${source_data}/mrip/cod_size_class2022.dta", clear
+use "${source_data}/mrip/cod_size_class2023.dta", clear
 keep if month==4
-gen legal=lngcat>=$cmin2022
+gen legal=lngcat>=$cmin2023
 collapse (sum) count, by(legal month)
 bysort month: egen total_landings=total(count)
 keep if legal==0
@@ -509,7 +503,7 @@ format pct_sublegal %03.0fc
 Here is the info from the "catch" MRIP file: April Atlantic cod. 
 ~~~~
 <<dd_do>>
-use "${MRIP_raw}/catch_20222.dta", clear
+use "${MRIP_raw}/catch_20232.dta", clear
 keep if common=="ATLANTIC COD" & month=="04"
 order strat_id psu tot_len*  claim harvest release wp*
 qui count 
@@ -525,7 +519,7 @@ There are  <<dd_display: %4.0f `total'>>  rows here and <<dd_display: %4.0f `no_
 Here is the info from the "size" MRIP file. 
 ~~~~
 <<dd_do>>
-use "${MRIP_raw}/size_20222.dta", clear
+use "${MRIP_raw}/size_20232.dta", clear
 keep if common=="ATLANTIC COD" & month=="04"
 order strat_id psu l_in_bin  wgt wp*
 count if wp_size==0
@@ -548,9 +542,9 @@ list strat_id psu l_in_bin  wgt wp* if wp_size>0 & wp_size~=. , abbreviate(16)
 Catch Statistics for Haddock  
 ===============================================================
 
-Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  The model matches reasonably well, catch is quite accurate. Landings are low and discards are too high, although this miss due to April of 2022, when MRIP reported zero discards.  
+Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  The model matches reasonably well, catch is quite accurate. Landings are low and discards are too high, although this miss due to April of 2023, when MRIP reported zero discards.  
 
-Approximately 8% of the A+B1s where 16" or less in 2022.
+Approximately 8% of the A+B1s where 16" or less in 2023.
 
 ~~~~
 <<dd_do:quietly>>
@@ -667,20 +661,20 @@ list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_d
 
 
 <<dd_do:quietly>>
-keep if fishing_year==2022
+keep if fishing_year==2023
 collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt
 
-global delta_hadd_mt=$haddock_mort2022-sim_mortality_mt[1]
+global delta_hadd_mt=$haddock_mort2023-sim_mortality_mt[1]
 <</dd_do>>
 
-The actual mortality was <<dd_display: %8.0fc $haddock_mort2022>> mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_hadd_mt)>>mt 
+The actual mortality was <<dd_display: %8.0fc $haddock_mort2023>> mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_hadd_mt)>>mt 
 
 
 
 Breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) sizes:
 ~~~~
 <<dd_do:quietly>>
-use "${MRIP_dir}/monthly/haddock_ab1_2022.dta", clear
+use "${MRIP_dir}/monthly/haddock_ab1_2023.dta", clear
 gen legal=l_in_bin>=$hmin
 collapse (sum) count, by(legal month)
 bysort month: egen total_landings=total(count)
