@@ -49,6 +49,7 @@ global hadd_recACL2023=610
 global cod_recACL2023=192
 
 
+global mrip_vintage "2023_11_02"
 
 global hadd_recACL2024=0
 global cod_recACL2024=0
