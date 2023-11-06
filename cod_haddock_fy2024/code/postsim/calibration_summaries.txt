@@ -6,18 +6,18 @@
 
 
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_root  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/"
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
+	global MRIP_root  "V:/READ-SSB-Lee-MRIP-BLAST/"
 }
 
 
 
 if strmatch("$user","minyangNix"){
-	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
+	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2024"
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
-global mrip_vintage "2023_01_04"
+global mrip_vintage "2023_11_02"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -49,6 +49,9 @@ global hadd_recACL2023=610
 global cod_recACL2023=192
 
 
+
+global hadd_recACL2024=0
+global cod_recACL2024=0
 <</dd_do>>
 ~~~~
 
