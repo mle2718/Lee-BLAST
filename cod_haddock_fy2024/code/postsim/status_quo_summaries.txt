@@ -10,24 +10,25 @@ THIS IS A PLACEHOLDER --->
 
 
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_root  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/"
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
+	global MRIP_root  "V:/READ-SSB-Lee-MRIP-BLAST/"
 }
 
 
 
 if strmatch("$user","minyangNix"){
-	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
+	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2024"
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
+global mrip_vintage "2023_11_02"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
 global source_data "${project_dir}/source_data"
 global working_data "${project_dir}/working_data"
 global output_dir "${project_dir}/output"
-global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_2023_01_04"
+global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_${mrip_vintage}"
 global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
 dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/status_quo_summaries.html) replace
@@ -55,7 +56,7 @@ global hadd_calibration_adj=-24.5
 global adj_cod_recACL2023=$cod_recACL2023-$cod_calibration_adj
 global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
 
-global mrip_vintage "2023_01_04"
+global mrip_vintage "2023_11_02"
 
 <</dd_do>>
 ~~~~
@@ -64,27 +65,6 @@ global mrip_vintage "2023_01_04"
 
 Previous years Regulations
 ==============================================================
-
-The same regulations were in place for FY2020 and FY2021.
-
-Haddock:
-
-*    15 fish, 17"
-*    Open May1-Feb 28 and April 1- April 30
-*    No Changes from 2019
-
-Cod: 
-
-*   1 fish, 21"
-*   Open Sept 15-Sept 30 and April 1-April 14 for private anglers
-*   Open Sept 8-Oct 7 and April 1-April 14 for the for-hire anglers
-
-FY 2020 Regulations can be found [here](https://www.federalregister.gov/documents/2020/08/14/2020-17707/fisheries-of-the-northeastern-united-states-northeast-multispecies-fishery-fishing-year-2020).  Since there were no changes in FY2021, there is no federal register notice.
-
-The rec sub-ACL for cod was 193mt in 2020.  
-
-## Fishing Year 2022 Regulations
-
 
 2022 Regulations
 ==============================================================
@@ -106,7 +86,23 @@ Cod:
 
 Fishing Year 2023 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $hadd_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations are TBD.
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations were
+
+
+
+Haddock:
+
+*    For-Hire sector: 15 fish with an 18" minimum size.
+*    Private Anglers: 10 fish with a 17" minimum size.
+*    Open May1-Feb 28 and April 1- April 30. Closed for the month of March.
+
+Cod: 
+
+*   1 fish, 22"
+*   Open Sept 1-October 31 for all anglers.
+
+
+
 
 
 Input data
@@ -115,7 +111,7 @@ Input data
 1.  **Monthly** length-frequencies for cod and haddock
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  2023 numbers at age for cod and haddock from the AGEPRO projections.
-1.  Bottomtrawl survey data from 2021-2022 to form the age-length keys.
+1.  Bottomtrawl survey data from 2018-2023 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
 
 Calibration 
@@ -203,8 +199,7 @@ Here are some results.  In this section, I first compute the annual totals for e
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_root  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/"
-	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
+	global MRIP_root  "V:/READ-SSB-Lee-MRIP-BLAST/"
 	global 	oracle_cxn  " $mysole_conn"
 }
 
