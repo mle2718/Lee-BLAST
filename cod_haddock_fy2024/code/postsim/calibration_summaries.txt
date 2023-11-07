@@ -17,7 +17,7 @@ if strmatch("$user","minyangNix"){
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
-global mrip_vintage "2023_11_02"
+global mrip_vintage "2023_11_07"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -104,9 +104,31 @@ Input data
 1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  **Monthly** catch-per-trip for cod and haddock
-1.  2023 mean numbers at age for cod and haddock from the AGEPRO projections.
+1.  2024 mean numbers at age for cod and haddock from the AGEPRO projections. See next
 1.  Bottomtrawl survey data from 2018-2023 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
+
+
+Numbers-at-Age for cod and haddock
+==============================================================
+The last stock assessment for cod was in 2021. The first year from this projection was 2020.  The off-the shelf "harvest scenario" specifies
+2020: 409.2 mt removals
+2021: 523 mt removals
+2022 and on: F=0.173
+
+I've computed recreational landings, discards, and dead discards from MRIP data.  I've extracted commercial landings from CAMS. The removals that are passed to AGEPRO are
+2021: 349mt
+2022: 548mt
+
+
+
+The last stock assessment for haddock was in 2022. The first year from this projection was 2022.  The off-the shelf "harvest scenario" specifies
+2022: 3912 mt of removals
+2023 and on: F=0.338
+
+
+I've computed recreational landings, discards, and dead discards from MRIP data.  I've extracted commercial landings from CAMS. The haddock removals that are passed to AGEPRO are
+2022: 3366mt
 
 
 
