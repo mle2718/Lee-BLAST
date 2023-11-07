@@ -90,7 +90,7 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-global mrip_vintage "2023_11_02"
+global mrip_vintage "2023_11_07"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
@@ -213,7 +213,7 @@ local max_months=($months*$total_years_sim) + 4
 global scale_factor 1
 *global numtrips=$tot_trips/$scale_factor
 
-global which_year=2022
+global which_year=2023
 
 global expectation_reps 10
 
@@ -616,6 +616,7 @@ scalars from mata and then sending them to globals. */
 			scalar lbs_cod_released_dead=0 
 			scalar lbs_hadd_releas_dead=0
 
+			global haddock_mortality_release=0
 
 			mata: rec_dead_cod=J(1, length(cod_age_selectivity),0)
 			mata: rec_dead_haddock=J(1, length(haddock_age_selectivity),0)

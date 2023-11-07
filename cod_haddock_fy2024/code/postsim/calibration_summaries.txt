@@ -49,16 +49,13 @@ global hadd_recACL2023=610
 global cod_recACL2023=192
 
 
-global mrip_vintage "2023_11_02"
+global mrip_vintage "2023_11_07"
 
 global hadd_recACL2024=0
 global cod_recACL2024=0
 <</dd_do>>
 ~~~~
 
-
-Previous years Regulations
-==============================================================
 
 2022 Regulations
 ==============================================================
@@ -78,7 +75,7 @@ Cod:
 
 
 
-Fishing Year 2023 Regulations
+2023 Regulations
 ==============================================================
 The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations were
 
@@ -138,18 +135,19 @@ Calibration
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
 1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 20 fish in 2022 and 10 fish/17" in 2023. 
 
+2. I need to think a little bit about how to handle the different regs for private and for-hire in the calibration
 
 ~~~~
 <<dd_do:quietly>>
 /*minyangWin is setup to connect to oracle */
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
 	global MRIP_root  "V:/READ-SSB-Lee-MRIP-BLAST/"
 	global 	oracle_cxn  " $mysole_conn"
 }
 
 if strmatch("$user","minyangNix"){
-	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
+	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2024"
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 /* setup directories */
