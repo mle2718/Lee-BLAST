@@ -9,7 +9,7 @@ set seed  4160
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
-	global MRIP_dir  "V:/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_11_02" 
+	global MRIP_dir  "V:/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_11_07" 
 	global 	oracle_cxn  " $mysole_conn"
 }
 
@@ -68,7 +68,7 @@ The commercial helper is set up to extract the 2016 FISHING YEAR */
  global commercial_calibrate_start=$calibration_end
  global commercial_calibrate_end=$calibration_end
 
- global commercial_grab_start=$calibration_end-2
+ global commercial_grab_start=$calibration_end-3
  global commercial_grab_end=$calibration_end
 
 

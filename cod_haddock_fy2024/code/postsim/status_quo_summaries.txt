@@ -21,7 +21,7 @@ if strmatch("$user","minyangNix"){
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
-global mrip_vintage "2023_11_02"
+global mrip_vintage "2023_11_07"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
