@@ -53,28 +53,28 @@ global lngcat_offset_haddock 0.5
 
 
 /*global for the monthly cod and haddock catch-at-length distributions (MRIP) */
-global cod_historical_sizeclass "${mrip_source_data}/cod_size_class2022.dta"  
-global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class2022.dta" 
+global cod_historical_sizeclass "${mrip_source_data}/cod_size_class2023.dta"  
+global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class2023.dta" 
 /***
 /*global for the ANNUAL cod and haddock catch-class distributions (MRIP)*/
-global cod_catch_class "${mrip_source_data}/cod_catch_classANNUAL2022.dta" 
-global haddock_catch_class "${mrip_source_data}/haddock_catch_classANNUAL2022.dta" 
+global cod_catch_class "${mrip_source_data}/cod_catch_classANNUAL2023.dta" 
+global haddock_catch_class "${mrip_source_data}/haddock_catch_classANNUAL2023.dta" 
 
 ******************************/
 
 
 /*global for the OPEN and CLOSED split for cod catch-at-length distributions (MRIP)
 
- global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_OPEN_SPLIT2022.dta"   */
+ global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_OPEN_SPLIT2023.dta"   */
  
  /* If you want to use ANNUAL length-frequency data uncomment this 
- *global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2022.dta"  
- global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class_ANNUAL2022.dta" 
+ *global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2023.dta"  
+ global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class_ANNUAL2023.dta" 
  */
  /* If you want to use monthly catch-class data uncomment this */
 
-global cod_catch_class "${mrip_source_data}/cod_catch_class2022.dta" 
-global haddock_catch_class "${mrip_source_data}/haddock_catch_class2022.dta" 
+global cod_catch_class "${mrip_source_data}/cod_catch_class2023.dta" 
+global haddock_catch_class "${mrip_source_data}/haddock_catch_class2023.dta" 
 
 
 
@@ -95,12 +95,12 @@ global cod_naa_start "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta
 
 
 
-global hadd_naa_sort "${source_data}/haddock agepro/haddock_beginning_sorted2022.dta"
-global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2022.dta"
+global hadd_naa_sort "${source_data}/haddock agepro/haddock_beginning_sorted2023.dta"
+global cod_naa_sort "${source_data}/cod agepro/cod_beginning_sorted2023.dta"
 
 
-global haddock_recruits_file "${source_data}/haddock agepro/haddock_recruits_2022base.dta"
-global cod_recruits_file "${source_data}/cod agepro/cod_recruits_2022both.dta"
+global haddock_recruits_file "${source_data}/haddock agepro/haddock_recruits_2023base.dta"
+global cod_recruits_file "${source_data}/cod agepro/cod_recruits_2023both.dta"
 
 
 
