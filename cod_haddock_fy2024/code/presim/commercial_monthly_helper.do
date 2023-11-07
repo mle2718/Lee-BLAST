@@ -36,7 +36,7 @@ odbc load,  exec("select year, extract(month from date_trip) as month, itis_tsn,
 destring itis_tsn, replace;
 
 merge 1:1 year month itis_tsn using `landings';
-
+drop _merge;
 
 gen str4 sppcode="COD" if itis_tsn==164712;
 replace sppcode="HADD" if itis_tsn==164744;
@@ -44,7 +44,7 @@ replace sppcode="HADD" if itis_tsn==164744;
 replace discard=0 if discard==.;
 replace livelnd=0 if livelnd==.;
 gen live=livelnd+discard;
-
+label var live "removals in live pounds" ;
 save "${source_data}/cfdbs/monthly_`prefix'_${commercial_grab_start}_${commercial_grab_end}.dta", replace;
 
 
@@ -66,11 +66,8 @@ replace fishing_year=fishing_year-1 if month<=4;
 
 /*Lets "tag" the most recent "full" fishing year */
 bysort fishing_year sppcode: gen c=_N;
-keep if c==12;
-qui summ fishing_year;
-scalar p=r(max);
-gen tag=0;
-replace tag=1 if fishing_year==p;
+gen full_fy = c==12;
+drop c;
 
 
 /* alternatively, tag the fishign year from $calibration_end
@@ -81,9 +78,15 @@ replace tag=1 if fishing_year<=$commercial_calibrate_end and fishing_year>=comme
 
 
 save "${source_data}/cfdbs/monthly_`prefix'_${commercial_grab_start}_${commercial_grab_end}.dta", replace;
+keep if full_fy==1;
 gen month_fy=month-4;
 replace month_fy=month_fy+12 if month_fy<=0;
-keep if tag==1;
+qui summ fishing_year;
+scalar p=r(max);
+gen tag=0;
+replace tag=1 if fishing_year==p;
+
+
 save "${source_data}/cfdbs/monthly_cod_timing.dta", replace;
 save "${source_data}/cfdbs/monthly_haddock_timing.dta", replace;
 
@@ -108,3 +111,23 @@ putmata cod_commercial_monthly=(month frac), replace;
 
 save "${source_data}/cfdbs/monthly_cod_timing.dta", replace;
 clear;
+
+
+use "${source_data}/cfdbs/monthly_`prefix'_${commercial_grab_start}_${commercial_grab_end}.dta", replace;
+keep if full_fy==1;
+collapse (sum) live, by(itis_tsn sppcode fishing_year);
+replace live=live/2204;
+rename live live_mt;
+save "${source_data}/cfdbs/annual_removals_fy_${commercial_grab_start}_${commercial_grab_end}.dta", replace;
+
+
+use "${source_data}/cfdbs/monthly_`prefix'_${commercial_grab_start}_${commercial_grab_end}.dta", replace;
+bysort year sppcode: gen c=_N;
+gen full_y = c==12;
+drop c;
+keep if full_y==1;
+collapse (sum) live, by(itis_tsn sppcode year);
+replace live=live/2204;
+rename live live_mt;
+save "${source_data}/cfdbs/annual_removals_cy_${commercial_grab_start}_${commercial_grab_end}.dta", replace;
+
