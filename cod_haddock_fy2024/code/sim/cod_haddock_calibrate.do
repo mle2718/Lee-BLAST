@@ -509,7 +509,8 @@ I've written each mata command individually
 	global hmrelease_large=scalar(hm1)
 	global hmrelease_small=scalar(hm2)
 
-	global haddock_mortality_release=scalar(hm1)
+/* these release mortalities get fed into hrvec, which feeds into hreleased_matrix */
+	/*global haddock_mortality_release=scalar(hm1) */
 
 	disp "checkpoint5"
 
