@@ -48,7 +48,7 @@ global tot_trips 200680
 global scale_factor 10
 global numtrips=$tot_trips/$scale_factor
 
-global which_year=2019
+global which_year=2023
 
 set seed 911
 
@@ -67,8 +67,8 @@ global haddalkey "$working_data/haddock_al_key9max.dta"
 /* age-length data */
 
 /* Age-length key years*/
- global lcalibration_start 2017
- global lcalibration_end 2019
+ global lcalibration_start 2018
+ global lcalibration_end 2023
 
 do "$code_dir/presim/extract_length_age_data.do"
 
