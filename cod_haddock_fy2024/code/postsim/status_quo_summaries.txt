@@ -21,7 +21,7 @@ if strmatch("$user","minyangNix"){
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
-global mrip_vintage "2023_11_07"
+global mrip_vintage "2023_11_08"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -56,7 +56,7 @@ global hadd_calibration_adj=-24.5
 global adj_cod_recACL2023=$cod_recACL2023-$cod_calibration_adj
 global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
 
-global mrip_vintage "2023_11_02"
+global mrip_vintage "2023_11_08"
 
 <</dd_do>>
 ~~~~

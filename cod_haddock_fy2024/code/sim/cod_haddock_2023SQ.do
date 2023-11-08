@@ -90,7 +90,7 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-global mrip_vintage "2023_11_02"
+global mrip_vintage "2023_11_08"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
