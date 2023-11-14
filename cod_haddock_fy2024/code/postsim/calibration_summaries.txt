@@ -100,8 +100,8 @@ Input data
 ==============================================================
 1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
 1.  **Monthly** catch-per-trip for cod and haddock
-1.  **Monthly** catch-per-trip for cod and haddock
-1.  2024 mean numbers at age for cod and haddock from the AGEPRO projections. See next
+1.  **Monthly** catch at length for cod and haddock
+1.  2023 mean numbers at age for cod and haddock from the AGEPRO projections. See next
 1.  Bottomtrawl survey data from 2018-2023 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
 
