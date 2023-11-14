@@ -173,6 +173,64 @@ global lbs_per_mt=2204.62
 global output_dir "${project_dir}/output"
 local stub "recreational_catches_2023_calibrate"
 
+
+<</dd_do>>
+~~~~
+
+
+
+The regulations for Haddock were different based on mode.
+
+~~~~
+<<dd_do>>
+
+use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_mode_${two_years}.dta", clear
+append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_mode_${previous}.dta"
+append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_mode_${working_year}.dta"
+destring month, replace
+
+
+qui summ month if year==$working_year
+local max=r(max)
+
+/* Use previous FY if I don't have wave 5 data yet. */
+if `max'<=8{
+expand 2 if year==${previous} & month>`max', gen(tag)
+replace year=$working_year if tag==1 & month>`max'
+}
+sort year month mode
+
+drop tag
+
+list year month mode dtrip if mode=="Private", abbreviate(16) sepby(year)
+list year month mode dtrip if mode=="ForHire", abbreviate(16) sepby(year)
+
+
+gen fishing_year=year 
+replace fishing_year=year-1 if month<=4 
+
+expand 2 if fishing_year==2022 & month<=4, gen(tag)
+replace fishing_year=2023 if month==4 & tag==1
+replace year=2024 if month==4 & tag==1
+
+tempfile by_mode
+drop tag my_dom_id dom_id area_s
+save `by_mode', replace
+
+collapse (sum) dtrip, by(fishing_year month)
+tempfile aggregate
+save `aggregate'
+
+
+
+<</dd_do>>
+~~~~
+
+
+~~~~
+<<dd_do>>
+
+
 /* use the most recent set of results that matches the stub pattern*/
 
 local list : dir "${output_dir}" files "`stub'*"
@@ -214,6 +272,10 @@ replace description="calibrated to 2023 total trips. For Hire Regs for Haddock" 
 replace description="calibrated to 2023 total trips. Private Regs for Haddock" if scenario_num==2
 replace description="calibrated to 2023 total trips. Blended regs for haddock" if scenario_num==0
 
+gen mode="Private" if scenario_num==2
+replace mode="ForHire" if scenario_num==1
+
+/*
 preserve
 	keep scenario_num month fishing_year month cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt
 	reshape wide cod_num_kept total_trips cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_mort_mt, i(month fishing_year) j(scenario_num)
