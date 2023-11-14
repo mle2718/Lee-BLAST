@@ -97,9 +97,9 @@ global cod_naaProj "${source_data}/cod agepro/NAA_GOM_COD_2021_UPDATE_BOTH.dta"
 global hadd_naaProj "${source_data}/haddock agepro/NAA_GOM_HADDOCK_2022_FMSY.dta"
 
 /* globals for the location of the xx1 AgePro output. Leave off the xx1, because I'm going to recycle this global to construct a .dta*/
-global GOM_COD_A_xx1 "${source_data}/cod agepro/codagepro2021/GOM_COD_2021_UPDATE_M02retroadjust_project_2023-11-07/GOM_COD_2021_UPDATE_M02retroadjust_project"
-global GOM_COD_B_xx1 "${source_data}/cod agepro/codagepro2021/GOM_COD_2021_UPDATE_MRAMP_M02_project_2023-11-07/GOM_COD_2021_UPDATE_MRAMP_M02_project"
-global GOM_Haddock_xx1 "${source_data}/haddock agepro/2022_HAD_GM/GOM_HADDOCK_2022_GROWTH_PROJECTIONS"
+global GOM_COD_A_xx1 "${source_data}/cod agepro/codagepro2021/GOM_COD_2021_UPDATE_M02retroadjust_project_2023-11-13/GOM_COD_2021_UPDATE_M02retroadjust_project"
+global GOM_COD_B_xx1 "${source_data}/cod agepro/codagepro2021/GOM_COD_2021_UPDATE_MRAMP_M02_project_2023-11-13/GOM_COD_2021_UPDATE_MRAMP_M02_project"
+global GOM_Haddock_xx1 "${source_data}/haddock agepro/2022_HAD_GM/GOM_HADDOCK_2022_GROWTH_PROJECTIONS_2023-11-13/GOM_HADDOCK_2022_GROWTH_PROJECTIONS"
 
 /* number of years in Cod and haddock projections  -- lift this from agepro */
 global codProjyears 12 
@@ -285,8 +285,8 @@ do "${code_dir}/presim/extract_length_age_data.do"
 
 
 
-/* commercial monthly catch 
+/* commercial monthly catch */
+
 do "${code_dir}/presim/commercial_monthly_helper.do"
 
 
-*/
