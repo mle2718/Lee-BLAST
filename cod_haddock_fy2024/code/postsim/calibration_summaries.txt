@@ -774,9 +774,9 @@ format prop_sublegal %03.2fc
 
 
 
-<<dd_do:nocommands>>
+<<dd_ignore>>
 list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(number_sublegal total_landings)
-<</dd_do>>
+<</dd_ignore>>
 ~~~~
 
 
