@@ -164,9 +164,10 @@ local my_common1 "atlanticcod"
 local my_common2 "haddock"
 global working_year 2023
 global previous=$working_year-1
+global two_years=$previous-1
 
-global hmin=18
-global cmin=22
+global hmin2022=18
+global cmin2022=22
 global cmin2023=22
 
 global lbs_per_mt=2204.62
@@ -548,7 +549,7 @@ Breakdown of MRIP A+B1's into legal (22+ inches) and sublegal (under 22 inches) 
 ~~~~
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/cod_ab1_2023.dta", clear
-gen legal=l_in_bin>=$cmin
+gen legal=l_in_bin>=$cmin2023
 collapse (sum) count, by(legal month)
 bysort month: egen total_landings=total(count)
 keep if legal==0
@@ -758,7 +759,7 @@ Breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) 
 ~~~~
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/haddock_ab1_2023.dta", clear
-gen legal=l_in_bin>=$hmin
+gen legal=l_in_bin>=$hmin2022
 collapse (sum) count, by(legal month)
 bysort month: egen total_landings=total(count)
 keep if legal==0
