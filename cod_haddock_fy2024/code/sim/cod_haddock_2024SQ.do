@@ -4,8 +4,6 @@
 
 /*
 This .do file was written by Min-Yang.Lee@noaa.gov 
-Version 1.2019
-Dec 3, 201
 
 Calibrated to the 3 year average of trips (320,750).  If you want to simulate "opening" one of the partially closed months, you need to adjust the rec_wave matrix
 TABLE OF CONTENTS
@@ -413,7 +411,7 @@ These are used to set up the number of fish in the first year of fishing
 
 
 /* This section of code reads in an observation, performs the age--> length transformation and saves it to an auxilliary dta (haddock_length_count.dta)*/
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*/
+/* OPTION 2a:  Draw from the AGEPRO output, but ensure that the initial conditions are constant across replicates*/
 
 use "$hadd_naa_sort", clear
 keep if year==$which_year
@@ -450,7 +448,7 @@ There are a few "options here"  PAY CLOSE ATTENTION.
 /* This section of code reads in an observation, "stacks" it, performs the age--> length transformation and saves it to an auxilliary dta (cod_length_count.dta)*/
 
 
-/* OPTION 2a:  Draw from the 2013 AGEPRO output, but ensure that the initial conditions are constant across replicates*/
+/* OPTION 2a:  Draw from the AGEPRO output, but ensure that the initial conditions are constant across replicates*/
 
 use "$cod_naa_sort", clear
 keep if year==$which_year
@@ -507,7 +505,8 @@ I've written each mata command individually
 	global hmrelease_large=scalar(hm1)
 	global hmrelease_small=scalar(hm2)
 
-	global haddock_mortality_release=scalar(hm1)
+/* these release mortalities get fed into hrvec, which feeds into hreleased_matrix */
+	/*global haddock_mortality_release=scalar(hm1) */
 
 	disp "checkpoint5"
 
@@ -613,6 +612,7 @@ scalars from mata and then sending them to globals. */
 			scalar lbs_cod_released_dead=0 
 			scalar lbs_hadd_releas_dead=0
 
+			global haddock_mortality_release=0
 
 			mata: rec_dead_cod=J(1, length(cod_age_selectivity),0)
 			mata: rec_dead_haddock=J(1, length(haddock_age_selectivity),0)
