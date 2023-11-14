@@ -283,53 +283,44 @@ preserve
 	tempfile wide
 	save `wide'
 restore
-
-/* through here is probably good, but after this needs a revision because the scenarios are different. */
+*/
 
 foreach var of varlist choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_tot_cat hadd_tot_cat cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt cod_mort_mt hadd_mort_mt{
 	rename `var' sim_`var'
 }
+format sim_total_trips %7.0fc
 
-tempfile calib_resultsO   calib_resultsC  calib_results10
-format sim* %10.0fc
-format *mt %06.1fc
-
-preserve 
-keep if scenario_num==2
-save `calib_resultsO', replace
-
-restore
-preserve
-keep if scenario_num==1
-save `calib_resultsC', replace
-restore
+tempfile calib_results12
+save `calib_results12', replace
 
 
-keep if inlist(scenario_num,1,2)
-gen freq=1
-/* weight the "october closed scenario 3 times heavier than the october open scenario*/
-replace freq=3 if month==10 & scenario_num==1
+collapse (sum) sim*, by(fishing_year year month)
+gen scenario_num=0
 
-replace scenario_num=0
-collapse (mean) sim_total_trips sim_cod_num_kept sim_cod_num_released sim_haddock_num_kept sim_haddock_num_released sim_cod_tot_cat sim_hadd_tot_cat sim_choice_occasions sim_cod_kept_mt sim_cod_released_mt sim_cod_released_dead_mt sim_hadd_kept_mt sim_hadd_released_mt sim_hadd_released_dead_mt sim_cod_mort_mt sim_hadd_mort_mt [aweight=freq], by(fishing_year year month scenario_num)
+gen str60 description=""
+replace description="calibrated to 2023 total trips. For Hire Regs for Haddock" if scenario_num==1
+replace description="calibrated to 2023 total trips. Private Regs for Haddock" if scenario_num==2
+replace description="calibrated to 2023 total trips. Summed Private and For-Hire" if scenario_num==0
+gen str10 scenario="SQ_Blend"
+tempfile calib_results0
+save `calib_results0', replace
 
-save `calib_results10', replace
+<</dd_do>>
+~~~~
 
-/* NOTE 1: Now, I need to take the average of scenarios 1 and 3.   */
 
 
-use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${previous}.dta", replace 
 
-keep if inlist(month,"11","12")
-replace year=$working_year
-append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${working_year}.dta"
+~~~~
+<<dd_do>>
+use  `calib_results12', replace
+sort fishing_year month mode
 
-replace year=$working_year+1 if month=="04"
-cap destring month, replace
-gen fishing_year=$working_year
-sort year month 
+merge 1:1 fishing_year mode month using `by_mode'
+drop if _merge==2
+replace dtrip=0 if _merge==2
+drop _merge
 
-*list fishing_year year month dtrip, abbreviate(16)
 
 
 /* 
@@ -337,12 +328,48 @@ Bring in the average of the 1 and 2 scenarios.
 */
 
 
-merge 1:1 fishing_year month using `calib_results10'
-
-replace year=$working_year+1 if month<=4 & year==.
-replace year=$working_year if month>4 & year==.
-
 *replace dtrip=0 if dtrip==. & _merge==2
+gen error=(dtrip-sim_total_trips)/dtrip
+gen yield=sim_total_trips/sim_choice_occasions
+egen tco=total(sim_choice_occasions)
+gen needed_choice_occs=dtrip/yield
+
+egen needed_total_co=total(needed_choice_occs)
+
+gen needed_frac=needed_choice_occs/needed_total_co
+
+rename dtrip actual_trips
+sort fishing_year year month
+format needed_frac  error yield  %05.4fc
+format needed_choice_occs  needed_total_co %9.0fc
+<</dd_do>>
+~~~~
+
+
+The results file you are using is  <<dd_display: "`myfile'">> This table has mode, my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I'm using to calibrate the model. 
+
+
+~~~~
+<<dd_do>>
+list fishing_year month mode actual_trips sim_total_trips error yield needed_choice_occs  if mode=="Private", abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
+<</dd_do>>
+
+
+<<dd_do:nocommands>>
+list fishing_year month mode actual_trips sim_total_trips error yield needed_choice_occs  if mode=="ForHire", abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
+<</dd_do>>
+~~~~
+
+
+
+
+
+~~~~
+<<dd_do:nocommands>>
+use `calib_results0', replace
+
+merge 1:1 fishing_year month using `aggregate'
+
 gen error=(dtrip-sim_total_trips)/dtrip
 gen yield=sim_total_trips/sim_choice_occasions
 egen tco=total(sim_choice_occasions)
@@ -358,62 +385,15 @@ sort fishing_year year month
 format needed_frac  error yield  %05.4fc
 format needed_choice_occs  needed_total_co %9.0fc
 
-
+keep if fishing_year==2023
+list fishing_year month actual_trips sim_total_trips error yield needed_choice_occs, abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
 <</dd_do>>
 ~~~~
 
-The results file you are using is  <<dd_display: "`myfile'">> This table has my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I'm using to calibrate the model. 
-~~~~
-<<dd_do:nocommands>>
-
-list fishing_year month actual_trips sim_total_trips error yield needed_choice_occs  , abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
-<</dd_do>>
-~~~~
-
-The number of trips is accurate, usually to 1-2%.  As expected.
-
-<!---
-
-The following table has the calibration target and the number of simulated trips for 4 calibrations model runs:
-
-1. April open for cod and haddock 
-2. April closed for cod and haddock 
-3. April open for haddock, closed for cod 
-4. April closed for haddock, open for cod
-
-I think #2 and #4 are irrelevant.  I am using an average #1 of #3.
---->
-~~~~
-<<dd_do:quietly>>
-use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${previous}.dta", replace 
 
 
-keep if inlist(month,"11","12")
-replace year=$working_year
-append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_${working_year}.dta"
-
-replace year=$working_year+1 if month=="04"
-cap destring month, replace
-gen fishing_year=$working_year
-sort year month 
-destring month, replace
-sort fishing_year month
-merge 1:1 fishing_year month using `wide'
-format total_trips* %10.0fc
-
-replace year=$working_year+1 if month<=4 & year==.
-replace year=$working_year if month>4 & year==.
-
-sort fishing_year year month 
-rename dtrip actual_trips
-<</dd_do>>
-
-<<dd_do:quietly>>
 
 
-list fishing_year month actual_trips total_trips1 total_trips2 , abbreviate(16)
-<</dd_do>>
-~~~~
 
 
 
@@ -424,16 +404,26 @@ Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibratio
 
 ~~~~
 <<dd_do:quietly>>
-use "${MRIP_dir}/monthly/`my_common1'_landings_${previous}.dta", replace
-keep if inlist(month,11,12) 
+use "${MRIP_dir}/monthly/`my_common1'_landings_${working_year}.dta", clear
+qui summ month
+local max=r(max)
+
+/* fill in the catch stats from the previous year */
+preserve
+use "${MRIP_dir}/monthly/`my_common1'_landings_${previous}.dta", clear
+keep if month> `max' 
 replace year=$working_year
-append using "${MRIP_dir}/monthly/`my_common1'_landings_${working_year}.dta"
+tempfile appender
+save `appender', replace
+restore 
+
+append using `appender' 
 
 replace year=$working_year+1 if month==4
 gen fishing_year=$working_year
 
 sort year month 
-merge 1:1 fishing_year month using `calib_results10'
+merge 1:1 fishing_year month using `calib_results0'
 replace year=$working_year+1 if month<=4 & year==.
 replace year=$working_year if month>4 & year==.
 gen sim_tot_cat_cod =sim_cod_num_kept+sim_cod_num_released
@@ -453,10 +443,11 @@ rename sim_cod_num_kept sim_landings
 rename sim_cod_num_released sim_discard
 
 <</dd_do>>
+~~~~
 
 
+~~~~
 <<dd_do:nocommands>>
-
 list fishing_year month actual_cat sim_catch actual_landings sim_landings  actual_discards  sim_discard  , abbreviate(16) sum(actual_cat sim_catch actual_landings sim_landings  actual_discards  sim_discard ) labvar(month)
 <</dd_do>>
 ~~~~
@@ -466,17 +457,26 @@ Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration
 
 ~~~~
 <<dd_do:quietly>>
+
+use "${MRIP_dir}/monthly/cod_weights_${working_year}.dta", clear
+
+qui summ month
+local max=r(max)
+
+/* fill in the stats from the previous year */
+preserve
 use "${MRIP_dir}/monthly/cod_weights_${previous}.dta", clear
-
-
-keep if inlist(month,11,12)
+keep if month> `max' 
 replace year=$working_year
+tempfile appender
+save `appender', replace
 
-append using "${MRIP_dir}/monthly/cod_weights_${working_year}.dta"
+restore 
+
+append using `appender' 
 
 replace year=$working_year+1 if month==4
 gen fishing_year=$working_year
-
 
 sort year month 
 
@@ -485,10 +485,15 @@ replace ab1weight=ab1weight/$lbs_per_mt
 rename ab1weight ab1mt
 replace b2weight=b2weight/$lbs_per_mt
 rename b2weight b2mt
+
+
+replace b2weight_dead=b2weight_dead/$lbs_per_mt
+
+
 sort year month 
 format ab1mt b2mt %10.2fc
 
-merge 1:1 fishing_year month using `calib_results10'
+merge 1:1 fishing_year month using `calib_results0'
 
 replace year=$working_year+1 if month<=4 & year==.
 replace year=$working_year if month>4 & year==.
@@ -507,7 +512,7 @@ sort fishing_year year month
 
 rename ab1mt actual_landed_mt
 rename b2mt actual_discard_mt
-
+rename b2weight_dead actual_dead_discard_mt
 gen weight_per_kept=actual_landed_mt/ab1_count*$lbs_per_mt
 gen weight_per_release=actual_discard_mt/b2_count*$lbs_per_mt
 
@@ -518,25 +523,26 @@ gen sim_weight_per_release=sim_discard_mt/sim_discard*$lbs_per_mt
 
 format *mt %06.1fc
 format *per* %3.2fc
-
-<</dd_do>>
-
-
-<<dd_do:nocommands>>
-list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
 <</dd_do>>
 ~~~~
 
+~~~~
+<<dd_do:nocommands>>
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt  sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+<</dd_do>>
+~~~~
 
+~~~~
 <<dd_do:quietly>>
 keep if fishing_year==2023
-collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt  sim_discard_mt sim_mortality_mt
-gen actual_mortality=actual_landed_mt+0.15*actual_discard_mt
+gen actual_mortality_mt=actual_landed_mt+actual_dead_discard_mt
 
-global delta_mt=actual_mortality-sim_mortality_mt
+collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt actual_mortality_mt  sim_discard_mt sim_mortality_mt
+
+global delta_mt=actual_mortality_mt-sim_mortality_mt
 
 <</dd_do>>
-
+~~~~
 The actual mortality was <<dd_display: %3.1f actual_mortality[1]>>mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_mt)>>mt 
  
 
@@ -626,18 +632,26 @@ list strat_id psu l_in_bin  wgt wp* if wp_size>0 & wp_size~=. , abbreviate(16)
 Catch Statistics for Haddock  
 ===============================================================
 
-Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  The model matches reasonably well, catch is quite accurate. Landings are low and discards are too high, although this miss due to April of 2023, when MRIP reported zero discards.  
+Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  
 
-Approximately 8% of the A+B1s where 16" or less in 2023.
 
 ~~~~
 <<dd_do:quietly>>
-use "${MRIP_dir}/monthly/`my_common2'_landings_${previous}.dta", replace
+use "${MRIP_dir}/monthly/`my_common2'_landings_${working_year}.dta", clear
 
-keep if inlist(month,11,12)
+qui summ month
+local max=r(max)
+
+/* fill in the stats from the previous year */
+preserve
+use "${MRIP_dir}/monthly/`my_common2'_landings_${previous}.dta", clear
+keep if month> `max' 
 replace year=$working_year
+tempfile appender
+save `appender', replace
+restore 
 
-append using "${MRIP_dir}/monthly/`my_common2'_landings_${working_year}.dta"
+append using `appender' 
 
 replace year=$working_year+1 if month==4
 gen fishing_year=$working_year
@@ -645,8 +659,7 @@ gen fishing_year=$working_year
 sort year month 
 
 
-
-merge 1:1 fishing_year month using `calib_results10'
+merge 1:1 fishing_year month using `calib_results0'
 replace year=$working_year+1 if month<=4 & year==.
 replace year=$working_year if month>4 & year==.
 
@@ -678,30 +691,41 @@ list fishing_year month actual_cat sim_catch landings sim_landings actual_discar
 Here are the haddock weights  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.
 ~~~~
 <<dd_do:quietly>>
-use "${MRIP_dir}/monthly/haddock_weights_${previous}.dta", clear
 
-keep if inlist(month,11,12)
+
+use "${MRIP_dir}/monthly/haddock_weights_${working_year}.dta", clear
+
+qui summ month
+local max=r(max)
+
+/* fill in the stats from the previous year */
+preserve
+use "${MRIP_dir}/monthly/haddock_weights_${previous}.dta", clear
+keep if month> `max' 
 replace year=$working_year
-cap drop fishing_year
-append using "${MRIP_dir}/monthly/haddock_weights_${working_year}.dta"
+tempfile appender
+save `appender', replace
+restore 
+
+append using `appender' 
 
 replace year=$working_year+1 if month==4
-
-cap drop fishing_year
 gen fishing_year=$working_year
 
-
 sort year month 
-
 
 replace ab1weight=ab1weight/$lbs_per_mt
 rename ab1weight ab1mt
 replace b2weight=b2weight/$lbs_per_mt
 rename b2weight b2mt
+
+replace b2weight_dead=b2weight_dead/$lbs_per_mt
+
+
 sort year month 
 format ab1mt b2mt %10.2fc
 
-merge 1:1 fishing_year month using `calib_results10'
+merge 1:1 fishing_year month using `calib_results0'
 
 replace year=$working_year+1 if month<=4 & year==.
 replace year=$working_year if month>4 & year==.
@@ -714,7 +738,7 @@ sort fishing_year year month
 
 rename ab1mt actual_landed_mt
 rename b2mt actual_discard_mt
-
+rename b2weight_dead actual_dead_discard_mt
 
 format *mt %06.1fc
 
@@ -738,7 +762,7 @@ format *per* %3.2fc
 
 
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
 <</dd_do>>
 ~~~~
 
@@ -746,16 +770,17 @@ list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt sim_d
 
 <<dd_do:quietly>>
 keep if fishing_year==2023
-collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt
+gen actual_haddock_mortality_mt=actual_dead_discard_mt+ actual_landed_mt
+collapse (sum) actual_haddock_mortality_mt actual_landed_mt actual_discard_mt actual_dead_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt
 
-global delta_hadd_mt=$haddock_mort2023-sim_mortality_mt[1]
+global delta_hadd_mt=actual_haddock_mortality_mt[1]-sim_mortality_mt[1]
 <</dd_do>>
 
-The actual mortality was <<dd_display: %8.0fc $haddock_mort2023>> mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_hadd_mt)>>mt 
+The actual mortality was <<dd_display: %8.0fc actual_haddock_mortality_mt[1]>> mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_hadd_mt)>>mt 
 
 
 
-Breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) sizes:
+The breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) is a little tricky because the limits vary by mode and I have only computed trips by mode.
 ~~~~
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/haddock_ab1_2023.dta", clear
