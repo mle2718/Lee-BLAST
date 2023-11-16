@@ -331,21 +331,26 @@ global cod_sublegal_hi=.010+$cod_sublegal_low
 foreach scenario of local scenario_list{
 	global ws=`scenario'
 	do "${code_dir}/sim/read_in_regs.do"
+    
 
+local pos = strpos(simname[1], "_") - 1
+local fleet_type = substr(simname[1], 1,`pos')
 
-
-	if scenario[1]==1{
+if inlist("`fleet_type'","FH"){
 		mata:	recreational_trips_months=recreational_trips_months_FH
-	} 
-	else if scenario[1]==2{
+} 
+else if inlist("`fleet_type'","PA"){
 		mata:	recreational_trips_months=recreational_trips_months_P
-	} 
-	else {
-		display as err /*
-       */ "Scenario unknown"
-       exit 198
-
-	}
+} 
+else if inlist("`fleet_type'","ALL"){
+		mata:	recreational_trips_months=recreational_trips_months_P + recreational_trips_months_FH
+} 
+else {
+	display as err /*
+      */ "Scenario unknown"
+      exit 198
+}
+	
 
 mata: st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
 *mata: recreational_effort_monthly = J(10,1,recreational_effort_months) 
@@ -354,9 +359,8 @@ mata: recreational_trips_months = J(10,1,recreational_trips_months)
 
 global tot_trips =scalar(my_num_trips)
 global numtrips=$tot_trips/$scale_factor	
-	
-	
-	
+
+
 	
 *global scenario_num=$scenario_num+500
 

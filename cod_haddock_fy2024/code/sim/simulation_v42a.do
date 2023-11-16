@@ -106,6 +106,13 @@ quietly gen utilExpected=0
 /* THIS IS THE END OF SECTION 0 */
 
 
+/* We can change the way we do this based on the value of the $fleet_type
+fleet_type=="ALL" means we do nothing. 
+fleet_type="FH" -- just the for hire fleet. have to revise the cutpoints. to just include party and charter
+fleet_type="PA" -- just boat and shore (or just boat)
+ */
+
+
 /* TRIP TYPE, costs, length SECTION*/
 /* These proprotions are assigned on the MRFSS data */
 tempvar rand81 rand82 temp1

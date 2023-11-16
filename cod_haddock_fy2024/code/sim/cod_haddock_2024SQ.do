@@ -284,21 +284,13 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 
 mata: 
-recreational_effort_waves = (1,0 \ 2,0.0 \ 3,0.28 \ 4,0.60 \ 5, 0.09 \ 6, 0.00)
-recreational_effort_months = (1,0.0 \ 2, 0.0 \ 3, 0.00 \ 4, 0.4158 \ 5, 0.1160 \ 6, 0.06353\ 7 ,0.0909 \ 8, 0.1237 \ 9 , 0.1635 \10, .0265 \ 11, 0.0  \ 12,0.00)   
-
-recreational_trips_months = (1,0 \ 2, 0 \ 3, 0 \ 4, 260200  \ 5, 81100 \ 6, 64700 \ 7, 75300 \ 8, 89400 \ 9 , 130700 \10, 24900 \ 11, 0  \ 12, 0) 
-st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
-
-
-recreational_effort_waves = J(10,1,recreational_effort_waves)
-recreational_effort_monthly = J(10,1,recreational_effort_months) 
-recreational_trips_months = J(10,1,recreational_trips_months) 
-
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 18400  \ 5, 36130 \ 6, 42600 \ 7, 44300 \ 8, 55900 \ 9 , 27100 \10, 10400 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 174600 \ 5, 34000 \ 6, 53100 \ 7, 57000 \ 8, 71300 \ 9 , 133800 \10, 16100 \ 11, 0  \ 12, 0) 
 end
 
-global tot_trips =scalar(my_num_trips)
-global numtrips=$tot_trips/$scale_factor
+
+
+
 
 /* END of Global macros */
 /**************************************************************/
@@ -340,6 +332,35 @@ qui foreach scenario of local scenario_list{
 	do "${code_dir}/sim/read_in_regs.do"
 
 
+local pos = strpos(simname[1], "_") - 1
+local fleet_type = substr(simname[1], 1,`pos')
+
+if inlist("`fleet_type'","FH"){
+		mata:	recreational_trips_months=recreational_trips_months_FH
+} 
+else if inlist("`fleet_type'","PA"){
+		mata:	recreational_trips_months=recreational_trips_months_P
+} 
+else if inlist("`fleet_type'","ALL"){
+		mata:	recreational_trips_months=recreational_trips_months_P + recreational_trips_months_FH
+} 
+else {
+	display as err /*
+      */ "Scenario unknown"
+      exit 198
+}
+	
+
+mata: st_numscalar("my_num_trips", colsum(recreational_trips_months)[2])  
+*mata: recreational_effort_monthly = J(10,1,recreational_effort_months) 
+mata: recreational_trips_months = J(10,1,recreational_trips_months) 
+
+
+global tot_trips =scalar(my_num_trips)
+global numtrips=$tot_trips/$scale_factor	
+
+
+	
 *global scenario_num=$scenario_num+500
 
 
