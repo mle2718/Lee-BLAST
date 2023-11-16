@@ -532,7 +532,7 @@ format *per* %3.2fc
 
 ~~~~
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt  sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt  sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt )  mean(weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release ) labvar(month)
 <</dd_do>>
 ~~~~
 
@@ -576,7 +576,7 @@ list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(numb
 ~~~~
 
 
-Previous MRIP data in April of 2023 was sparse.  Data update seems to have corrected that.
+Previous MRIP data in April of 2022 was sparse.  Data update seems to have corrected that.
 
 
 ~~~~
@@ -766,7 +766,7 @@ format *per* %3.2fc
 
 
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt actual_dead_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) mean(weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release )  labvar(month)
 <</dd_do>>
 ~~~~
 
@@ -785,8 +785,10 @@ The actual mortality was <<dd_display: %8.0fc actual_haddock_mortality_mt[1]>> m
 
 
 The breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) is a little tricky because the limits vary by mode and I have only computed trips by mode.
+
+
 ~~~~
-<<dd_do:quietly>>
+<<dd_ignore>>
 use "${MRIP_dir}/monthly/haddock_ab1_2023.dta", clear
 gen legal=l_in_bin>=$hmin2022
 collapse (sum) count, by(legal month)
@@ -797,13 +799,6 @@ gen prop_sublegal=number_sublegal/total_landings
 sort month legal
 format number_sublegal total_landings %8.0fc
 format prop_sublegal %03.2fc
-
-<</dd_do>>
-
-
-
-
-<<dd_ignore>>
 list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(number_sublegal total_landings)
 <</dd_ignore>>
 ~~~~
