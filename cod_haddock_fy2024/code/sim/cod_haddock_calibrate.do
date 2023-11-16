@@ -285,8 +285,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 18400  \ 5, 36130 \ 6, 42600 \ 7, 44300 \ 8, 55900 \ 9 , 27100 \10, 10400 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 174600 \ 5, 34000 \ 6, 53100 \ 7, 57000 \ 8, 71300 \ 9 , 133800 \10, 16100 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13500 \ 5, 28400 \ 6, 31800 \ 7, 33900 \ 8, 41700 \ 9 , 20150 \10, 8000 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 276150 \ 5, 46900 \ 6, 73700 \ 7, 82000 \ 8, 105900 \ 9 , 201200 \10, 22900 \ 11, 0  \ 12, 0) 
 end
 
 
