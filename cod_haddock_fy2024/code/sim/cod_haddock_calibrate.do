@@ -333,14 +333,31 @@ foreach scenario of local scenario_list{
 	do "${code_dir}/sim/read_in_regs.do"
     
 
+
+/* reset the shore, boat, party, and charter coefficients. More correct to put this at the end of the scenario loop, but it's nice to have it here */
+
+scalar shore=0.035
+scalar boat=0.74
+scalar party=0.164
+scalar charter=0.061
+
 local pos = strpos(simname[1], "_") - 1
 local fleet_type = substr(simname[1], 1,`pos')
 
 if inlist("`fleet_type'","FH"){
 		mata:	recreational_trips_months=recreational_trips_months_FH
+		scalar shore=0.0
+		scalar boat=0.0
+		scalar party=.728
+		scalar charter=0.272
+
 } 
 else if inlist("`fleet_type'","PA"){
 		mata:	recreational_trips_months=recreational_trips_months_P
+		scalar shore=0.045
+		scalar boat=0.955
+		scalar party=0
+		scalar charter=0
 } 
 else if inlist("`fleet_type'","ALL"){
 		mata:	recreational_trips_months=recreational_trips_months_P + recreational_trips_months_FH
@@ -993,6 +1010,9 @@ post `species2' ("$scenario_name") ($scenario_num) (`this_month') (scalar(haddoc
 		}
 
 }
+
+
+
 }
 dsconcat `hsaver'
 rename prob trips
