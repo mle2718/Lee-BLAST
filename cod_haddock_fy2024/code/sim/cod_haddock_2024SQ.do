@@ -325,13 +325,13 @@ global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
 global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.1
+global haddock_sublegal_hi=0.05
 
 
 /* Cod sub-legals after wave 2 */
 
 global cod_relax_main=2
-global cod_sublegal_low=.005
+global cod_sublegal_low=.002
 global cod_sublegal_hi=.010+$cod_sublegal_low
 
 /* read in regulations and run the model.*/

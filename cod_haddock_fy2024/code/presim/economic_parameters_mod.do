@@ -78,8 +78,8 @@ global rec_month_starter=$periods_per_year*($which_year-$rec_junk)+1
 /* set years for age-length keys */
 
 /* Age-length key years*/
- global lcalibration_start 2017
- global lcalibration_end 2022
+ global lcalibration_start 2021
+ global lcalibration_end 2023
 
 /* set years for historical effort calibration params*/
  global rec_cal_start=2022
@@ -143,7 +143,7 @@ global dl_hadd=0
 /* These 11th and higher fish caught on these trips were responsible for 5.5% of all kept cod (by numbers).*/
 /* In order to address this, i'll set 2 globals which are the probability which an angler will `comply with the bag limit'  */
 
-global pcbag_comply=.90
+global pcbag_comply=.99
 global phbag_comply=.99
 
 

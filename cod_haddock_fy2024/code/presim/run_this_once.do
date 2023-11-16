@@ -56,7 +56,7 @@ global rec_month_starter=$periods_per_year*($which_year-$rec_junk)+1
 /* set calendar years for age-length keys */
 
 /* Age-length key years*/
- global lcalibration_start 2018
+ global lcalibration_start 2021
  global lcalibration_end 2023	
 
 /* set years for historical effort calibration params*/

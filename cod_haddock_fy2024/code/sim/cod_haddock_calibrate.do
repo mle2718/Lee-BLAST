@@ -325,7 +325,7 @@ global haddock_sublegal_hi=0.05
 
 global cod_relax_main=2
 global cod_sublegal_low=.002
-global cod_sublegal_hi=.050+$cod_sublegal_low
+global cod_sublegal_hi=.010+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
 foreach scenario of local scenario_list{
