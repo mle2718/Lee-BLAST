@@ -284,8 +284,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000 \ 5, 28600 \ 6, 32500 \ 7, 34200 \ 8, 42100 \ 9 , 20350 \10, 8000 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262100 \ 5, 46550 \ 6, 74500 \ 7, 80900 \ 8, 103700 \ 9 , 200550 \10, 22500 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 12800 \ 5, 27150  \ 6, 30700 \ 7, 31600 \ 8, 39650 \ 9 , 19800 \10, 7800 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 261900 \ 5, 45600 \ 6, 71700 \ 7, 76300 \ 8, 100000 \ 9 , 197300 \10, 22000 \ 11, 0  \ 12, 0) 
 end
 
 
@@ -316,8 +316,8 @@ This is useful for troubleshooting and debugging  */
 global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
-global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.05
+global haddock_sublegal_low=0.01 
+global haddock_sublegal_hi=0.25
 
 
 /* Cod sub-legals after wave 2 */
