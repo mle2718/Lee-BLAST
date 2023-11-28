@@ -199,7 +199,6 @@ local max_months=($months*$total_years_sim) + 4
 /*Setup model calibration*/
 *global tot_trips 646340
 global scale_factor 10
-*global numtrips=$tot_trips/$scale_factor
 
 global which_year=2023
 

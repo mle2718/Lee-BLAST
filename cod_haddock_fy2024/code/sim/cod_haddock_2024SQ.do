@@ -208,7 +208,6 @@ local max_months=($months*$total_years_sim) + 4
 /*Setup model calibration*/
 *global tot_trips 646340
 global scale_factor 10
-*global numtrips=$tot_trips/$scale_factor
 
 global which_year=2023
 
@@ -278,17 +277,17 @@ restore
 
 
 
-/* Compute the distribution of effort by the recreational fishery in each wave or month
-Right now this distribution is hard coded -- one day it should be set up to look at the data*/
-/* Allocate the commercial cod and haddock mortality to each of the 6 waves.  Allocate the recreational effort to each of the waves*/
-
-
+/* Allocate the recreational effort to the month. This comes directly from the calibration.*/
 mata: 
 recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13500 \ 5, 28400 \ 6, 31800 \ 7, 33900 \ 8, 41700 \ 9 , 20150 \10, 8000 \ 11, 0  \ 12, 0) 
 recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 276150 \ 5, 46900 \ 6, 73700 \ 7, 82000 \ 8, 105900 \ 9 , 201200 \10, 22900 \ 11, 0  \ 12, 0) 
 end
 
-
+/* Adjust the April numbers to account for the fact that I'm calibrating to data from when April is half open, but the status quo has April fully open */
+mata: 
+recreational_trips_months_FH[4,2] = 2*recreational_trips_months_FH[4,2]
+recreational_trips_months_P[4,2] =  2*recreational_trips_months_P[4,2]
+end
 
 
 

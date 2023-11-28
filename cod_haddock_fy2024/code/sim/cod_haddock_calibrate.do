@@ -209,7 +209,6 @@ local max_months=($months*$total_years_sim) + 4
 /*Setup model calibration*/
 *global tot_trips 646340
 global scale_factor 1
-*global numtrips=$tot_trips/$scale_factor
 
 global which_year=2023
 
@@ -285,8 +284,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13500 \ 5, 28400 \ 6, 31800 \ 7, 33900 \ 8, 41700 \ 9 , 20150 \10, 8000 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 276150 \ 5, 46900 \ 6, 73700 \ 7, 82000 \ 8, 105900 \ 9 , 201200 \10, 22900 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000 \ 5, 28600 \ 6, 32500 \ 7, 34200 \ 8, 42100 \ 9 , 20350 \10, 8000 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262100 \ 5, 46550 \ 6, 74500 \ 7, 80900 \ 8, 103700 \ 9 , 200550 \10, 22500 \ 11, 0  \ 12, 0) 
 end
 
 
