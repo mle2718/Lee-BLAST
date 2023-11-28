@@ -208,7 +208,6 @@ local max_months=($months*$total_years_sim) + 4
 /*Setup model calibration*/
 *global tot_trips 646340
 global scale_factor 10
-*global numtrips=$tot_trips/$scale_factor
 
 global which_year=2023
 
@@ -278,17 +277,17 @@ restore
 
 
 
-/* Compute the distribution of effort by the recreational fishery in each wave or month
-Right now this distribution is hard coded -- one day it should be set up to look at the data*/
-/* Allocate the commercial cod and haddock mortality to each of the 6 waves.  Allocate the recreational effort to each of the waves*/
-
-
+/* Allocate the recreational effort to the month. This comes directly from the calibration.*/
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 18400  \ 5, 36130 \ 6, 42600 \ 7, 44300 \ 8, 55900 \ 9 , 27100 \10, 10400 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 174600 \ 5, 34000 \ 6, 53100 \ 7, 57000 \ 8, 71300 \ 9 , 133800 \10, 16100 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13500 \ 5, 28400 \ 6, 31800 \ 7, 33900 \ 8, 41700 \ 9 , 20150 \10, 8000 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 276150 \ 5, 46900 \ 6, 73700 \ 7, 82000 \ 8, 105900 \ 9 , 201200 \10, 22900 \ 11, 0  \ 12, 0) 
 end
 
-
+/* Adjust the April numbers to account for the fact that I'm calibrating to data from when April is half open, but the status quo has April fully open */
+mata: 
+recreational_trips_months_FH[4,2] = 2*recreational_trips_months_FH[4,2]
+recreational_trips_months_P[4,2] =  2*recreational_trips_months_P[4,2]
+end
 
 
 
@@ -332,14 +331,32 @@ qui foreach scenario of local scenario_list{
 	do "${code_dir}/sim/read_in_regs.do"
 
 
+
+/* reset the shore, boat, party, and charter coefficients. More correct to put this at the end of the scenario loop, but it's nice to have it here */
+
+scalar shore=0.035
+scalar boat=0.74
+scalar party=0.164
+scalar charter=0.061
+
 local pos = strpos(simname[1], "_") - 1
 local fleet_type = substr(simname[1], 1,`pos')
 
+
 if inlist("`fleet_type'","FH"){
 		mata:	recreational_trips_months=recreational_trips_months_FH
+		scalar shore=0.0
+		scalar boat=0.0
+		scalar party=.713
+		scalar charter=0.287
+
 } 
 else if inlist("`fleet_type'","PA"){
 		mata:	recreational_trips_months=recreational_trips_months_P
+		scalar shore=0.074
+		scalar boat=0.926
+		scalar party=0
+		scalar charter=0
 } 
 else if inlist("`fleet_type'","ALL"){
 		mata:	recreational_trips_months=recreational_trips_months_P + recreational_trips_months_FH

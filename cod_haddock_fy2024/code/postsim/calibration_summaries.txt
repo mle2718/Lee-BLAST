@@ -94,16 +94,24 @@ Cod:
 
 
 
-
-
 Input data
 ==============================================================
 1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
+1.  Monthly trips by mode (private boat, head, charter, shore)
 1.  **Monthly** catch-per-trip for cod and haddock
 1.  **Monthly** catch at length for cod and haddock
-1.  2023 mean numbers at age for cod and haddock from the AGEPRO projections. See next
-1.  Bottomtrawl survey data from 2018-2023 to form the age-length keys.
+1.  2023 mean numbers at age for cod and haddock from the AGEPRO projections. See next section.
+1.  Bottomtrawl survey data from 2021-2023 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
+
+
+
+Changes from Previous Models
+==============================================================
+1. Length distributions of cod B2s do not use the MRIP survey weights. This is consistent with the stock assessment. 
+1. Numbers-at-Age for cod and haddock use actual removals for cod (2021-2022) and haddock (2022) to inform AGEPRO model runs. This should give us a better estimate of 2024 NAA.
+1. Calibration is done separately for the for-hire and private fleet. 
+
 
 
 Numbers-at-Age for cod and haddock
@@ -131,17 +139,26 @@ I've computed recreational landings, discards, and dead discards from MRIP data.
 *    2022: 3,365.8 = 2625.5mt commercial removals + 663.2mt rec landings +  77.1 mt rec dead discards
 *    2023: 348.2mt rec landings, 110.3mt rec dead discards 
 
+This gives us a more accurate projection of 2024 Numbers-at-Age on Jan 1.
 
 
-Calibration 
+
+Calibration for the for-hire and private fleet
 ===============================================================
 
+
+
+
+The 2022 and 2023 haddock regulations vary by mode.   Instead of calibrating to the total number of trips, we calibrate to each fleet: private (boat + shore) and for-hire (private + shore).  
+
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
-1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 20 fish in 2022 and 10 fish/17" in 2023. 
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. 
+1. I use the regulations in place in the corresponding month. For May to October, this is the 2023 regulations. For November to April this is actually the **2022 regulations**.
+1. Since April of 2023 was open for approximately half of the month for cod, the proper way to calibrate is to run 1 simulation where April is fully open for cod, one where April is fully closed for cod, and then average the two. 
+1. The costs of a trip vary by trip type (shore, private, head, charter).  I use the number of trips by mode, averaged over 2022-2023 to figure this out. Catch per trip and length of caught fish does not vary by trip type.  This is probably okay for everything except shore. There are *very* few shore trips.
 
-2. I need to think a little bit about how to handle the different regs for private and for-hire in the calibration
 
-~~~~
+
 <<dd_do:quietly>>
 /*minyangWin is setup to connect to oracle */
 if strmatch("$user","minyangWin"){
@@ -178,20 +195,9 @@ global lbs_per_mt=2204.62
 global output_dir "${project_dir}/output"
 local stub "recreational_catches_2023_calibrate"
 
-
-<</dd_do>>
-~~~~
-
-
-
-The regulations for Haddock were different based on mode.
-
-~~~~
-<<dd_do>>
-
-use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_mode_${two_years}.dta", clear
-append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_mode_${previous}.dta"
-append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_mode_${working_year}.dta"
+use "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_disagg_mode_${two_years}.dta", clear
+append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_disagg_mode_${previous}.dta"
+append using "${MRIP_dir}/monthly/`my_common1'_`my_common2'_target_disagg_mode_${working_year}.dta"
 destring month, replace
 
 
@@ -203,37 +209,85 @@ if `max'<=8{
 expand 2 if year==${previous} & month>`max', gen(tag)
 replace year=$working_year if tag==1 & month>`max'
 }
-sort year month mode
-
 drop tag
-
-list year month mode dtrip if mode=="Private", abbreviate(16) sepby(year)
-list year month mode dtrip if mode=="ForHire", abbreviate(16) sepby(year)
-
 
 gen fishing_year=year 
 replace fishing_year=year-1 if month<=4 
 
-expand 2 if fishing_year==2022 & month<=4, gen(tag)
-replace fishing_year=2023 if month==4 & tag==1
-replace year=2024 if month==4 & tag==1
+/*fill in April */
+expand 2 if fishing_year==${previous} & month<=4, gen(tag)
+replace fishing_year=${working_year} if month==4 & tag==1
+replace year=${working_year}+1 if month==4 & tag==1
 
-tempfile by_mode
-drop tag my_dom_id dom_id area_s
-save `by_mode', replace
+sort year month mode 
+rename mode mode_disagg
+replace mode="Charter" if mode=="CH"
+replace mode="Head" if mode=="HE"
+replace mode="Private" if mode=="PR"
+replace mode="Shore" if mode=="SH"
+keep if year>=2022
 
-collapse (sum) dtrip, by(fishing_year month)
-tempfile aggregate
-save `aggregate'
+preserve
+drop variance my_dom_id
+rename dtrip trip_
+reshape wide trip_ , i(year month) j(mode) string
+
+renvars trip_*, predrop(5)
+sort year month
 
 
+<</dd_do>>
+
+
+~~~~
+<<dd_do>>
+
+list year month Private Head Charter Shore
 
 <</dd_do>>
 ~~~~
 
 
-~~~~
-<<dd_do>>
+<<dd_do:quietly>>
+restore
+
+
+preserve
+keep if inlist(fishing_year,$working_year, $previous)
+collapse (sum) dtrip, by(mode)
+egen t=total(dtrip)
+gen frac=dtrip/t
+list mode dtrip frac
+restore
+
+
+gen mode="ForHire" if inlist(mode_disagg,"Head","Charter")
+replace mode="Private" if inlist(mode_disagg,"Private","Shore")
+
+collapse (sum) dtrip, by(mode fishing_year year month)
+
+tempfile by_mode
+/* drop tag my_dom_id dom_id area_s */
+save `by_mode', replace
+
+
+
+
+collapse (sum) dtrip, by(fishing_year month)
+tempfile aggregate
+save `aggregate'
+
+<</dd_do>>
+
+
+
+
+
+
+
+
+
+<<dd_do:quietly>>
 
 
 /* use the most recent set of results that matches the stub pattern*/
@@ -270,15 +324,33 @@ gen hadd_mort_mt=hadd_kept_mt+hadd_released_dead_mt
 
 collapse (mean) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(fishing_year year scenario month scenario_num)
 *collapse (sum) cod_tot_cat-hadd_released_dead_mt cod_mort_mt hadd_mort_mt, by(scenario scenario_num)
-order total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released 
 
 gen str60 description=""
-replace description="calibrated to 2023 total trips. For Hire Regs for Haddock" if scenario_num==1
-replace description="calibrated to 2023 total trips. Private Regs for Haddock" if scenario_num==2
-replace description="calibrated to 2023 total trips. Blended regs for haddock" if scenario_num==0
+replace description="calibrated to 2023 total trips. For Hire Regs for Haddock. Cod closed in April" if scenario_num==3
+replace description="calibrated to 2023 total trips. Private Regs for Haddock. Cod Closed in April " if scenario_num==4
+replace description="calibrated to 2023 total trips. For Hire Regs for Haddock. Cod Opened in April" if scenario_num==5
+replace description="calibrated to 2023 total trips. Private Regs for Haddock. Cod Opened in April" if scenario_num==6
 
-gen mode="Private" if scenario_num==2
-replace mode="ForHire" if scenario_num==1
+
+replace description="calibrated to 2023 total trips. Blended regs for haddock. " if scenario_num==0
+
+gen mode="Private" if inlist(scenario_num,4,6)
+replace mode="ForHire" if inlist(scenario_num,3,5)
+
+
+/* average scenarios 4+6 and 3+5 using replace , collapse*/
+
+replace scenario_num= 1 if inlist(scenario_num,3,5)
+replace scenario_num= 2 if inlist(scenario_num,4,6)
+
+replace description="calibrated to 2023 total trips. For Hire Regs for Haddock. Cod partially open in April" if scenario_num==1
+replace description="calibrated to 2023 total trips. Private Regs for Haddock. Cod partially open April " if scenario_num==2
+
+collapse (mean) cod_tot_cat- hadd_mort_mt, by(fishing_year year month scenario_num description)
+
+gen mode="ForHire" if inlist(scenario_num,1)
+replace mode="Private" if inlist(scenario_num,2)
+
 
 /*
 preserve
@@ -302,21 +374,11 @@ collapse (sum) sim*, by(fishing_year year month)
 gen scenario_num=0
 
 gen str60 description=""
-replace description="calibrated to 2023 total trips. For Hire Regs for Haddock" if scenario_num==1
-replace description="calibrated to 2023 total trips. Private Regs for Haddock" if scenario_num==2
 replace description="calibrated to 2023 total trips. Summed Private and For-Hire" if scenario_num==0
 gen str10 scenario="SQ_Blend"
 tempfile calib_results0
 save `calib_results0', replace
 
-<</dd_do>>
-~~~~
-
-
-
-
-~~~~
-<<dd_do>>
 use  `calib_results12', replace
 sort fishing_year month mode
 
@@ -347,29 +409,30 @@ sort fishing_year year month
 format needed_frac  error yield  %05.4fc
 format needed_choice_occs  needed_total_co %9.0fc
 <</dd_do>>
+
+
+
+The results file you are using is  <<dd_display: "`myfile'">>. 
+
+These two tables contain calibration target (dtrip), the simulated trips, and error by mode.  There are also a few other columns that I'm using to calibrate the model. 
+
 ~~~~
-
-
-The results file you are using is  <<dd_display: "`myfile'">> This table has mode, my calibration target (dtrip), the simulated trips, and the error.  There are also a few other columns that I'm using to calibrate the model. 
-
-
-~~~~
-<<dd_do>>
-list fishing_year month mode actual_trips sim_total_trips error yield needed_choice_occs  if mode=="Private", abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
-<</dd_do>>
-
-
 <<dd_do:nocommands>>
 list fishing_year month mode actual_trips sim_total_trips error yield needed_choice_occs  if mode=="ForHire", abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
 <</dd_do>>
-~~~~
 
 
-
-
-
-~~~~
 <<dd_do:nocommands>>
+list fishing_year month mode actual_trips sim_total_trips error yield needed_choice_occs  if mode=="Private", abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
+<</dd_do>>
+~~~~
+
+
+
+
+
+
+<<dd_do:quietly>>
 use `calib_results0', replace
 
 merge 1:1 fishing_year month using `aggregate'
@@ -390,6 +453,14 @@ format needed_frac  error yield  %05.4fc
 format needed_choice_occs  needed_total_co %9.0fc
 
 keep if fishing_year==2023
+<</dd_do>>
+
+
+
+Here is the aggregate calibration.
+
+~~~~
+<<dd_do:nocommands>>
 list fishing_year month actual_trips sim_total_trips error yield needed_choice_occs, abbreviate(16) sum(actual_trips sim_total_trips needed_choice_occs ) labvar(month)
 <</dd_do>>
 ~~~~
@@ -406,7 +477,7 @@ Catch Statistics for Cod
 Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April and, to a lesser extent, June.  In April, although simulated catch matches actual catch numbers, the simulated April landings are too low.  The error here (11,800 fish) is approximately equal to the total error for the year (9,400 fish).  Simulated catch and discards for June (in numbers) is too low.
 
 
-~~~~
+
 <<dd_do:quietly>>
 use "${MRIP_dir}/monthly/`my_common1'_landings_${working_year}.dta", clear
 qui summ month
@@ -447,7 +518,7 @@ rename sim_cod_num_kept sim_landings
 rename sim_cod_num_released sim_discard
 
 <</dd_do>>
-~~~~
+
 
 
 ~~~~
@@ -459,7 +530,7 @@ list fishing_year month actual_cat sim_catch actual_landings sim_landings  actua
 
 Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  April again is the problem month: the error here (26 mt) is larger than the total error for the year (14mt).  The model overestimates weight landed in September and October. This seems to primarily be caused by higher weights of kept fish during this time.  
 
-~~~~
+
 <<dd_do:quietly>>
 
 use "${MRIP_dir}/monthly/cod_weights_${working_year}.dta", clear
@@ -528,15 +599,15 @@ gen sim_weight_per_release=sim_discard_mt/sim_discard*$lbs_per_mt
 format *mt %06.1fc
 format *per* %3.2fc
 <</dd_do>>
-~~~~
+
 
 ~~~~
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt  sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt  sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt )  mean(weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release ) labvar(month)
 <</dd_do>>
 ~~~~
 
-~~~~
+
 <<dd_do:quietly>>
 keep if fishing_year==2023
 gen actual_mortality_mt=actual_landed_mt+actual_dead_discard_mt
@@ -546,10 +617,12 @@ collapse (sum) actual_landed_mt actual_discard_mt sim_landings_mt actual_mortali
 global delta_mt=actual_mortality_mt-sim_mortality_mt
 
 <</dd_do>>
-~~~~
+
 The actual mortality was <<dd_display: %3.1f actual_mortality[1]>>mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_mt)>>mt 
  
 
+ <!---
+ 
 A few helpful MRIP statistics for Cod
 ===============================================================
  
@@ -576,10 +649,10 @@ list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(numb
 ~~~~
 
 
-Previous MRIP data in April of 2023 was sparse.  Data update seems to have corrected that.
+Previous MRIP data in April of 2022 was sparse.  Data update seems to have corrected that.
 
 
-~~~~
+
 <<dd_do:quietly>>
 use "${source_data}/mrip/cod_size_class2023.dta", clear
 keep if month==4
@@ -591,7 +664,7 @@ rename count number_sublegal
 gen pct_sublegal=number_sublegal/total_landings*100
 format pct_sublegal %03.0fc
 <</dd_do>>
-~~~~
+
 
 
 Here is the info from the "catch" MRIP file: April Atlantic cod. 
@@ -627,11 +700,11 @@ local has_svy_wgts=`total'-`no_svy_wgt'
 
 list strat_id psu l_in_bin  wgt wp* if wp_size>0 & wp_size~=. , abbreviate(16)
 <</dd_do>>
-~~~~ 
- There are  <<dd_display: %4.0f `total'>>  rows (fish that were measured) and <<dd_display: %4.0f `no_svy_wgt'>> had survey weights=0 or missing. 
+~~~~
+
+There are  <<dd_display: %4.0f `total'>>  rows (fish that were measured) and <<dd_display: %4.0f `no_svy_wgt'>> had survey weights=0 or missing.  
  
- 
- 
+--->
  
 Catch Statistics for Haddock  
 ===============================================================
@@ -766,7 +839,7 @@ format *per* %3.2fc
 
 
 <<dd_do:nocommands>>
-list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) labvar(month)
+list fishing_year month actual_landed_mt sim_landings_mt actual_discard_mt actual_dead_discard_mt sim_discard_mt sim_mortality_mt weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release, abbreviate(16) sum(actual_landed_mt actual_discard_mt actual_dead_discard_mt sim_landings_mt sim_discard_mt sim_mortality_mt ) mean(weight_per_kept sim_weight_per_kept weight_per_release sim_weight_per_release )  labvar(month)
 <</dd_do>>
 ~~~~
 
@@ -783,10 +856,11 @@ global delta_hadd_mt=actual_haddock_mortality_mt[1]-sim_mortality_mt[1]
 The actual mortality was <<dd_display: %8.0fc actual_haddock_mortality_mt[1]>> mt while model predicts <<dd_display: %3.1f sim_mortality_mt[1]>>mt of mortality.  Therefore, we need to adjust our predictions by <<dd_display: %3.1f abs($delta_hadd_mt)>>mt 
 
 
+The breakdown of MRIP A+B1's into legal and sublegal is a little tricky because the limits vary by mode and I have only computed trips by mode.
 
-The breakdown of MRIP A+B1's into legal (17+ inches) and sublegal (under 17 inches) is a little tricky because the limits vary by mode and I have only computed trips by mode.
+<!---
 ~~~~
-<<dd_do:quietly>>
+<<dd_do>>
 use "${MRIP_dir}/monthly/haddock_ab1_2023.dta", clear
 gen legal=l_in_bin>=$hmin2022
 collapse (sum) count, by(legal month)
@@ -797,17 +871,10 @@ gen prop_sublegal=number_sublegal/total_landings
 sort month legal
 format number_sublegal total_landings %8.0fc
 format prop_sublegal %03.2fc
-
-<</dd_do>>
-
-
-
-
-<<dd_ignore>>
 list month number_sublegal total_landings prop_sublegal, abbreviate(16) sum(number_sublegal total_landings)
-<</dd_ignore>>
+<</dd_do>>
 ~~~~
-
+--->
 
 
 
