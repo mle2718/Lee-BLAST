@@ -3,10 +3,10 @@
 /* We need to change these based on the Holzer and McConnell parameters */
 /* This is the Probability Mass Function of shore, boat, party/head, and charter  See section WTP */
 
-scalar shore=0.035
-scalar boat=0.74
-scalar party=0.164
-scalar charter=0.061
+scalar shore=0.055
+scalar boat=0.69
+scalar party=0.182
+scalar charter=0.073
 
 /* This is the Probability Mass Function of Trip lengthSee section WTP */
 scalar hour4=0.5
