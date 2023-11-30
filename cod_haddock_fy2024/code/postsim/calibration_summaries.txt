@@ -474,7 +474,7 @@ list fishing_year month actual_trips sim_total_trips error yield needed_choice_o
 
 Catch Statistics for Cod  
 ===============================================================
-Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches pretty well, with the exceptions of April and, to a lesser extent, June.  In April, although simulated catch matches actual catch numbers, the simulated April landings are too low.  The error here (11,800 fish) is approximately equal to the total error for the year (9,400 fish).  Simulated catch and discards for June (in numbers) is too low.
+Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches very well.  Simulated Landings are a little high in October and April, but I'm not going to worry about that until the revised data comes out.
 
 
 
@@ -711,7 +711,7 @@ Catch Statistics for Haddock
 
 Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  
 
-The Simulated Catch is always slightly lower than actual catch.  The Simulated landings are much lower than actual.  
+The Simulated Catch is lower than actual catch in all months. The Simulated landings are  lower than actual in May, and slihgtly higher in all other months. August is a bit high, but that is because I have left the entire month in as the FY2022 regulations, this is not exactly right.  
 
 
 ~~~~
