@@ -79,7 +79,7 @@ Cod:
 ==============================================================
 The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations were
 
-
+The 2022 regulations rolled over until August 14, 2023.
 
 Haddock:
 
@@ -528,7 +528,7 @@ list fishing_year month actual_cat sim_catch actual_landings sim_landings  actua
 ~~~~
 
 
-Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  April again is the problem month: the error here (26 mt) is larger than the total error for the year (14mt).  The model overestimates weight landed in September and October. This seems to primarily be caused by higher weights of kept fish during this time.  
+Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  I'm not going to worry much about Sept and October right now because it's carryover data.
 
 
 <<dd_do:quietly>>
@@ -711,6 +711,8 @@ Catch Statistics for Haddock
 
 Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  
 
+The Simulated Catch is always slightly lower than actual catch.  The Simulated landings are much lower than actual.  
+
 
 ~~~~
 <<dd_do:quietly>>
@@ -766,6 +768,11 @@ list fishing_year month actual_cat sim_catch landings sim_landings actual_discar
 
 
 Here are the haddock weights  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.
+
+
+
+The Simulated Landed weights alot lower than actual landed.  The Simulated weights per landed fish are slightly too large and the simulated weight per released fish are also a bit too large.  
+
 ~~~~
 <<dd_do:quietly>>
 
