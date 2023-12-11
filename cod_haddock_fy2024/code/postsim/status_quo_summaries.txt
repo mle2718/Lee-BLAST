@@ -58,6 +58,10 @@ global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
 
 global mrip_vintage "2023_11_08"
 
+global hadd_recACL2024=643
+global cod_recACL2024=192
+
+
 <</dd_do>>
 ~~~~
 
@@ -108,43 +112,59 @@ Cod:
 Input data
 ==============================================================
 1. MRIP data extracted and procesed on <<dd_display: "$mrip_vintage">>. 
-1.  **Monthly** length-frequencies for cod and haddock
+1.  Monthly trips by mode (private boat, head, charter, shore)
 1.  **Monthly** catch-per-trip for cod and haddock
-1.  2023 numbers at age for cod and haddock from the AGEPRO projections.
-1.  Bottomtrawl survey data from 2018-2023 to form the age-length keys.
+1.  **Monthly** catch at length for cod and haddock
+1.  2024 mean numbers at age for cod and haddock from the AGEPRO projections. See next section.
+1.  Bottomtrawl survey data from 2021-2023 to form the age-length keys.
 1.  Updated economic model parameters from Carr-Harris and Steinback (forthcoming in JOCE).
+
 
 
 Numbers-at-Age for cod and haddock
 ==============================================================
-The last stock assessment for cod was in 2021. The first year from this projection was 2020.  The off-the shelf "harvest scenario" specifies
-2020: 409.2 mt removals
-2021: 523 mt removals
-2022 and on: F=0.173
+The last stock assessment for cod was in 2021. The first year from this projection was 2020.  The off-the shelf "harvest scenario" specifies:
 
-I've computed total removals=commercial + recreational landings + dead discards from MRIP data.  The removals that are passed to AGEPRO are
-2021: 348.7mt  = 215.7mt commercial removals + 33mt rec landings +  100 mt rec dead discards
-2022: 548.3mt = 375.6mt commercial removals + 57.7mt rec landings +  115 mt rec dead discards
-2023: 17.62mt rec landings, 109mt rec dead discards
+*    2020: 409.2 mt removals
+*    2021: 523 mt removals
+*    2022 and on: F=0.173
+
+I've computed total removals=commercial + recreational landings + dead discards from MRIP data.  The removals that are passed to AGEPRO are:
+
+*    2021: 348.7mt  = 215.7mt commercial removals + 33mt rec landings +  100 mt rec dead discards
+*    2022: 548.3mt = 375.6mt commercial removals + 57.7mt rec landings +  115 mt rec dead discards
+*    2023: 17.62mt rec landings, 109mt rec dead discards
  
-The last stock assessment for haddock was in 2022. The first year from this projection was 2022.  The off-the shelf "harvest scenario" specifies
-2022: 3912 mt of removals
-2023 and on: F=0.338
+The last stock assessment for haddock was in 2022. The first year from this projection was 2022.  The off-the shelf "harvest scenario" specifies:
+
+*    2022: 3912 mt of removals
+*    2023 and on: F=0.338
 
 
-I've computed recreational landings, discards, and dead discards from MRIP data.  I've extracted commercial landings from CAMS. The haddock removals that are passed to AGEPRO are
-2022: 3,365.8 = 2625.5mt commercial removals + 663.2mt rec landings +  77.1 mt rec dead discards
-2023: 348.2mt rec landings, 110.3mt rec dead discards 
+I've computed recreational landings, discards, and dead discards from MRIP data.  I've extracted commercial landings from CAMS. The haddock removals that are passed to AGEPRO are:
+
+*    2022: 3,365.8 = 2625.5mt commercial removals + 663.2mt rec landings +  77.1 mt rec dead discards
+*    2023: 348.2mt rec landings, 110.3mt rec dead discards 
+
+This gives us a more accurate projection of 2024 Numbers-at-Age on Jan 1.
 
 
 
 
-Calibration 
+Calibration for the for-hire and private fleet
 ===============================================================
 
+
+
+
+The 2022 and 2023 haddock regulations vary by mode.   Instead of calibrating to the total number of trips, we calibrate to each fleet: private (boat + shore) and for-hire (private + shore).  
+
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
-1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5 this allows a very small number of trips to take a few cod. For months when haddock is closed, we set the possession limit to 15 fish in FY2021 and 20 fish in 2022. This does the same thing. 
-1. The partial months are difficult to model.  For April, we run one model where april is open for cod and one where it is closed and then average the two.  October is open for 1 week.  I have been running one model where October is open for cod and one where it is closed and then taking a weighted average (1 part open and 3 parts closed) of the two.
+1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. 
+1. I use the regulations in place in the corresponding month. For May to October, this is the 2023 regulations. For November to April this is actually the **2022 regulations**.
+1. Since April of 2023 was open for approximately half of the month for cod, the proper way to calibrate is to run 1 simulation where April is fully open for cod, one where April is fully closed for cod, and then average the two. 
+1. The costs of a trip vary by trip type (shore, private, head, charter).  I use the number of trips by mode, averaged over 2022-2023 to figure this out. Catch per trip and length of caught fish does not vary by trip type.  This is probably okay for everything except shore. There are *very* few shore trips.
+
 
 # Simulations 
 
@@ -163,45 +183,7 @@ Whole month of April for both Cod and Haddock scenario 1.
 
 | Scenario number| Short Description | Long Description| Status|
 | :-----        |    :---------------   |          :--------------------- |   :-----|
-| 0| Status Quo 2023       | Same regs from 2022.   | Run|
-| 1| April Oct Closed		| Same regs from 2022, except April and October are closed for cod| Run|
-| 2| April Oct Open		| Same regs from 2022, except April and October are open for cod| Run|
-| 3| Haddock15A			| Same regs as 1, except with a 15 haddock cod limit | Run|
-| 4| Haddock15B			| Same regs as 2, except with a  15 haddock cod limit | Run|
-| 5| Haddock15C			| Same regs as 2022, except with a  15 haddock cod limit | Run|
-| 6| Haddock12A			| Same regs as 1, except with a 12 haddock cod limit | Run|
-| 7| Haddock12B			| Same regs as 2, except with a  12 haddock cod limit | Run|
-| 8| Haddock12C			| Same regs as 2022, except with a  12 haddock cod limit | Run|
-| 9| Haddock10A			| Same regs as 1, except with a 10 haddock cod limit | Run|
-| 10| Haddock10B			| Same regs as 2, except with a  10 haddock cod limit | Run|
-| 11| Haddock10C			| Same regs as 2022, except with a  10 haddock cod limit | Run|
-| 101| Scott2 		| Similar to 11, except Sept+October open; April closed | Run|
-| 111| Scott1 		| Same regs as 101, except Sept+October open; April 1-15 | Run|
-| 18| RAP18		| Cod: Sept+Oct. Haddock: May1-Feb 28, April1-30.  18"  | Run|
-| 19| RAP19		| Cod: Sept+Oct. Haddock: May1-Feb 28, April1-30.  19"  | Run|
-| 20| RAP20		| Cod: Sept+Oct. Haddock: May1-Feb 28, April1-30.  20"  | Run|
-| 217| CMTE2_17		| Cod: Sept+Oct. Haddock: April1-Feb 28.  17"  | Run|
-| 218| CMTE2_18		| Cod: Sept+Oct. Haddock: April1-Feb 28.  18"  | Run|
-
-<!---
-| Scenario number| Short Description | Long Description| Status|
-| :-----        |    :---------------   |          :--------------------- |   :-----|
-| 0| Status Quo 2022		| Same regs from 2022.   | Setup|
-| 1| April Oct Closed		| Same regs from 2022, except April and October are closed for cod| Setup|
-| 2| April Oct Open		| Same regs from 2022, except April and October are open for cod| Setup|
-| 3| April Oct Closed		| Same regs as 1, except with a 21" cod limit | Setup|
-| 4| April Oct Open		| Same regs as 2, except with a 21" cod limit | Setup|
-| 5| Status quo with 21" cod		| Same regs as SQ, except with a 21" cod limit | Setup|
-
-101 , I will take the weighted average of 9 and 10.
-	1. I will set the weights for scenario_num==10 & month==4 to zero. Sets the april outcomes to the outcomes from Scenario 9 (April = closed). I will set the weights for
-			Scenario_num=9 and month=10 to zero. This sets the october outcomes to the outcomes from scenario 10 (october open).
-			
-	2.  To get 111 I will take a weighted average of 9 and 10.
-				Scenario_num=9 and month=10 to zero. This sets the october outcomes to the outcomes from scenario 10 (october open).
-				equal weight the april month for both senarios 9 and 10.
-
-
+| 0| Status Quo 2024       | The 2023 Regulations carry over to 2024.   | Not yet |
  ---> 
 
 
@@ -254,7 +236,7 @@ global codalkey "${working_data}/cod_al_key.dta"
 
 
 
-global working_year 2023
+global working_year 2024
 global previous=$working_year-1
 
 
@@ -270,16 +252,18 @@ global output_dir "${project_dir}/output"
 
 
 /* Read in all the Econ model runs that match `stub' */
-local estub "economic_data_2023_SQ_"
-local estub2 "economic_data_2023_haddock"
+local estub "economic_data_2024_SQ_"
+
+/*local estub2 "economic_data_2023_haddock"
 local estub3 "economic_data_2023_RAP_"
-local estub4 "economic_data_2023_CMTE_"
+local estub4 "economic_data_2023_CMTE_" */
 
 local efilelist1: dir "${output_dir}" files "`estub'*.dta"
+/*
 local efilelist2: dir "${output_dir}" files "`estub2'*.dta"
 local efilelist3: dir "${output_dir}" files "`estub3'*.dta"
 local efilelist4: dir "${output_dir}" files "`estub4'*.dta"
-
+*/
 
 local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4' "'
 
@@ -313,14 +297,16 @@ save `econ_data', replace
 
 /* Read in all the model runs that match `stub' */
 local stub "recreational_catches_2023_SQ_"
+/*
 local stub2 "recreational_catches_2023_haddock"
 local stub3 "recreational_catches_2023_RAP_"
-local stub4 "recreational_catches_2023_CMTE_"
+local stub4 "recreational_catches_2023_CMTE_" */
 
 local filelist1: dir "${output_dir}" files "`stub'*.dta"
+/*
 local filelist2: dir "${output_dir}" files "`stub2'*.dta"
 local filelist3: dir "${output_dir}" files "`stub3'*.dta"
-local filelist4: dir "${output_dir}" files "`stub4'*.dta"
+local filelist4: dir "${output_dir}" files "`stub4'*.dta" */
 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
