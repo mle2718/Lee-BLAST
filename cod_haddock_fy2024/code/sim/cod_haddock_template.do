@@ -200,7 +200,7 @@ local max_months=($months*$total_years_sim) + 4
 *global tot_trips 646340
 global scale_factor 10
 
-global which_year=2023
+global which_year=2024
 
 global expectation_reps 10
 
