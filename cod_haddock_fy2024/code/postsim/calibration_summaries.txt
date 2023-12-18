@@ -17,7 +17,7 @@ if strmatch("$user","minyangNix"){
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
-global mrip_vintage "2023_11_08"
+global mrip_vintage "2023_12_18"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -49,9 +49,9 @@ global hadd_recACL2023=610
 global cod_recACL2023=192
 
 
-global mrip_vintage "2023_11_08"
+global mrip_vintage "2023_12_18"
 
-global hadd_recACL2024=643
+global hadd_recACL2024=759
 global cod_recACL2024=192
 <</dd_do>>
 ~~~~
@@ -208,8 +208,9 @@ local max=r(max)
 if `max'<=8{
 expand 2 if year==${previous} & month>`max', gen(tag)
 replace year=$working_year if tag==1 & month>`max'
-}
 drop tag
+
+}
 
 gen fishing_year=year 
 replace fishing_year=year-1 if month<=4 
