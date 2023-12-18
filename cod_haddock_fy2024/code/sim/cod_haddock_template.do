@@ -20,7 +20,8 @@ TABLE OF CONTENTS
 1. Read in cod and haddock stock sizes for a particular year
 2. Perform the projection as defined by the nice people in Population Dynamics with the following modifications:
 	a.  We have Quota (not F-based) catch.  
-	b.  We have 2 fleets -- commercial and recreational.
+	b.  We have 3 fleets -- commercial and recreational.
+			We simulate the For hire and private rec fleets separately.
 	c.  Commercial catch is based directly on the sub-ACL.
 	d.  Recreational catch is determined endogenously by the recreational sub-model
 3.  To do step 2, we need to have 
@@ -79,7 +80,7 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-global mrip_vintage "2023_11_08"
+global mrip_vintage "2023_12_18"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
@@ -268,11 +269,7 @@ restore
 
 
 
-/* Compute the distribution of effort by the recreational fishery in each wave or month
-Right now this distribution is hard coded -- one day it should be set up to look at the data*/
-/* Allocate the commercial cod and haddock mortality to each of the 6 waves.  Allocate the recreational effort to each of the waves*/
-
-
+/* Allocate the recreational effort to the month. This comes directly from the calibration.*/
 mata: 
 recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13500 \ 5, 28400 \ 6, 31800 \ 7, 33900 \ 8, 41700 \ 9 , 20150 \10, 8000 \ 11, 0  \ 12, 0) 
 recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 276150 \ 5, 46900 \ 6, 73700 \ 7, 82000 \ 8, 105900 \ 9 , 201200 \10, 22900 \ 11, 0  \ 12, 0) 
@@ -306,8 +303,8 @@ This is useful for troubleshooting and debugging  */
 global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
-global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.05
+global haddock_sublegal_low=0.02 
+global haddock_sublegal_hi=0.25
 
 
 /* Cod sub-legals after wave 2 */

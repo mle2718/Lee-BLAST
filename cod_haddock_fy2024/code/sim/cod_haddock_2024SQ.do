@@ -3,9 +3,6 @@
 /*************************************************************/
 
 /*
-This .do file was written by Min-Yang.Lee@noaa.gov 
-
-Calibrated to the 3 year average of trips (320,750).  If you want to simulate "opening" one of the partially closed months, you need to adjust the rec_wave matrix
 TABLE OF CONTENTS
 0.  File description, Meta Data, changegoals, and changelog
 1.  Global, scalar, and other setup (parameterization)
@@ -14,14 +11,6 @@ TABLE OF CONTENTS
 4.  Loop?
 */
 
-
-/* changes
-A. Deal with folders a little more intelligently
-	Folders for source data
-	
-
- */
-
 /* BEGIN Section 0: FILE DESCRIPTION */
 
 /* This is a wrapper for my simulation. 
@@ -29,7 +18,8 @@ A. Deal with folders a little more intelligently
 1. Read in cod and haddock stock sizes for a particular year
 2. Perform the projection as defined by the nice people in Population Dynamics with the following modifications:
 	a.  We have Quota (not F-based) catch.  
-	b.  We have 2 fleets -- commercial and recreational.
+	b.  We have 3 fleets -- commercial and recreational.
+			We simulate the For hire and private rec fleets separately.
 	c.  Commercial catch is based directly on the sub-ACL.
 	d.  Recreational catch is determined endogenously by the recreational sub-model
 3.  To do step 2, we need to have 
@@ -88,7 +78,7 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-global mrip_vintage "2023_11_08"
+global mrip_vintage "2023_12_18"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
@@ -315,8 +305,8 @@ This is useful for troubleshooting and debugging  */
 global hadd_relax_main=2
 global hadd_relax_mjj=$hadd_relax_main
 
-global haddock_sublegal_low=0.001 
-global haddock_sublegal_hi=0.05
+global haddock_sublegal_low=0.02 
+global haddock_sublegal_hi=0.25
 
 
 /* Cod sub-legals after wave 2 */

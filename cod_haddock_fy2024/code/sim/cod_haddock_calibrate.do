@@ -3,9 +3,6 @@
 /*************************************************************/
 
 /*
-This .do file was written by Min-Yang.Lee@noaa.gov 
-
-Calibrated to the 3 year average of trips (320,750).  If you want to simulate "opening" one of the partially closed months, you need to adjust the rec_wave matrix
 TABLE OF CONTENTS
 0.  File description, Meta Data, changegoals, and changelog
 1.  Global, scalar, and other setup (parameterization)
@@ -14,14 +11,6 @@ TABLE OF CONTENTS
 4.  Loop?
 */
 
-
-/* changes
-A. Deal with folders a little more intelligently
-	Folders for source data
-	
-
- */
-
 /* BEGIN Section 0: FILE DESCRIPTION */
 
 /* This is a wrapper for my simulation. 
@@ -29,7 +18,8 @@ A. Deal with folders a little more intelligently
 1. Read in cod and haddock stock sizes for a particular year
 2. Perform the projection as defined by the nice people in Population Dynamics with the following modifications:
 	a.  We have Quota (not F-based) catch.  
-	b.  We have 2 fleets -- commercial and recreational.
+	b.  We have 3 fleets -- commercial and recreational.
+			We simulate the For hire and private rec fleets separately.
 	c.  Commercial catch is based directly on the sub-ACL.
 	d.  Recreational catch is determined endogenously by the recreational sub-model
 3.  To do step 2, we need to have 
@@ -88,7 +78,7 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-global mrip_vintage "2023_11_08"
+global mrip_vintage "2023_12_18"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
@@ -120,8 +110,7 @@ local hours=substr("`time'",1,2)
 local mins=substr("`time'",4,2)
 
 /*
-2021calibrate - 4 sets of regs that i'm using to calibrate the 2021 model.
-2022SQ is a copy of the 2021calibrate.
+2023_calibrate are the actual regulations in place during FY 2023. Regulatory changes were implemented in August, 2023
 */
 
 global rec_management "2023_calibrate"
@@ -275,7 +264,7 @@ restore
 
 
 
-
+ 
 
 
 /* Compute the distribution of effort by the recreational fishery in each wave or month
