@@ -154,7 +154,7 @@ The 2022 and 2023 haddock regulations vary by mode.   Instead of calibrating to 
 1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
 1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. 
 1. I use the regulations in place in the corresponding month. For May to October, this is the 2023 regulations. For November to April this is actually the **2022 regulations**.
-1. Since April of 2023 was open for approximately half of the month for cod, the proper way to calibrate is to run 1 simulation where April is fully open for cod, one where April is fully closed for cod, and then average the two. 
+1. Since April of 2023 was open for approximately half of the month for cod, I have run 1 simulation where April is fully open for cod, one where April is fully closed for cod, and then I averaged the two. 
 1. The costs of a trip vary by trip type (shore, private, head, charter).  I use the number of trips by mode, averaged over 2022-2023 to figure this out. Catch per trip and length of caught fish does not vary by trip type.  This is probably okay for everything except shore. There are *very* few shore trips.
 
 
@@ -475,7 +475,7 @@ list fishing_year month actual_trips sim_total_trips error yield needed_choice_o
 
 Catch Statistics for Cod  
 ===============================================================
-Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. The model matches very well.  Simulated Landings are a little high in October and April, but I'm not going to worry about that until the revised data comes out.
+Here are the cod numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. On a numbers basis, the calibration model matches very well.  Simulated Landings are a little higher than the actual numbers in April.  The April 2023 calibration is to a time period when Cod was open for half the month (April from the Fishing Year 2022). 
 
 
 
@@ -529,7 +529,9 @@ list fishing_year month actual_cat sim_catch actual_landings sim_landings  actua
 ~~~~
 
 
-Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  I'm not going to worry much about Sept and October right now because it's carryover data.
+Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. Even though the numbers are quite close, we are underpredicting mortality in metric tons.  This is happening because the Simulated kept fish are smaller, on average, than the actual kept fish.  This particularly obvious in August and September. The September difference is driving the model results, simulated September landings are approximately 32mt less than acutal landings.  The discarded fish are also systematically smaller than the actual discards. 
+
+The "Mean" row at the bottom is a simple average, it does not account for the fact that more cod were caught landed in September in the model. 
 
 
 <<dd_do:quietly>>
@@ -712,7 +714,7 @@ Catch Statistics for Haddock
 
 Here are the haddock numbers  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.  
 
-The Simulated Catch is lower than actual catch in all months. The Simulated landings are  lower than actual in May, and slihgtly higher in all other months. August is a bit high, but that is because I have left the entire month in as the FY2022 regulations, this is not exactly right.  
+The Simulated Catch is slightly lower than actual catch. Both simulated landings and discards as lower than actuals, by approximately the same magnitude.
 
 
 ~~~~
@@ -770,9 +772,7 @@ list fishing_year month actual_cat sim_catch landings sim_landings actual_discar
 
 Here are the haddock weights  (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>.
 
-
-
-The Simulated Landed weights alot lower than actual landed.  The Simulated weights per landed fish are slightly too large and the simulated weight per released fish are also a bit too large.  
+The model underpredicts landings and overpredicts discards.  The simulated weight per kept fish are lower than actuals. And the simulated weight per discarded fish are slightly higher.  
 
 ~~~~
 <<dd_do:quietly>>

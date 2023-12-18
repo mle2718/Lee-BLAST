@@ -273,8 +273,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000  \ 5, 24600 \ 6, 28000 \ 7, 28400 \ 8, 36500 \ 9 , 20000 \10, 7900 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262300  \ 5, 44500 \ 6, 71700 \ 7, 75900 \ 8, 99200 \ 9 , 197000 \10, 22000 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000  \ 5, 24600 \ 6, 27300  \ 7, 25100  \ 8, 30100 \ 9 , 16100  \10, 7800 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 259000 \ 5, 44500 \ 6, 69300 \ 7, 107100 \ 8, 113600 \ 9 , 163100 \10, 27500 \ 11, 0  \ 12, 0) 
 end
 
 
@@ -316,7 +316,7 @@ global cod_sublegal_low=.002
 global cod_sublegal_hi=.010+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
-foreach scenario of local scenario_list{
+qui foreach scenario of local scenario_list{
 	global ws=`scenario'
 	do "${code_dir}/sim/read_in_regs.do"
     

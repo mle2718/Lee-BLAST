@@ -271,11 +271,16 @@ restore
 
 /* Allocate the recreational effort to the month. This comes directly from the calibration.*/
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13500 \ 5, 28400 \ 6, 31800 \ 7, 33900 \ 8, 41700 \ 9 , 20150 \10, 8000 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 276150 \ 5, 46900 \ 6, 73700 \ 7, 82000 \ 8, 105900 \ 9 , 201200 \10, 22900 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000  \ 5, 24600 \ 6, 27300  \ 7, 25100  \ 8, 30100 \ 9 , 16100  \10, 7800 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 259000 \ 5, 44500 \ 6, 69300 \ 7, 107100 \ 8, 113600 \ 9 , 163100 \10, 27500 \ 11, 0  \ 12, 0) 
 end
 
 
+/* Adjust the April numbers to account for the fact that I'm calibrating to data from when April is half open, but the status quo has April fully open */
+mata: 
+recreational_trips_months_FH[4,2] = 2*recreational_trips_months_FH[4,2]
+recreational_trips_months_P[4,2] =  2*recreational_trips_months_P[4,2]
+end
 
 
 
@@ -314,7 +319,7 @@ global cod_sublegal_low=.002
 global cod_sublegal_hi=.010+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
-foreach scenario of local scenario_list{
+qui foreach scenario of local scenario_list{
 	global ws=`scenario'
 	do "${code_dir}/sim/read_in_regs.do"
     
