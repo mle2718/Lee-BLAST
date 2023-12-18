@@ -1048,7 +1048,7 @@ shell chmod 440 `econ_out'
  */
 
 
-di "cod_haddock_2023SQ.do finished."
+di "cod_haddock_2024SQ.do finished."
 
 dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/status_quo_summaries.html) replace
 timer list
