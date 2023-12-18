@@ -50,16 +50,18 @@ global hadd_recACL2022=3634
 global cod_recACL2023=192
 global hadd_recACL2023=610
 
-global cod_calibration_adj=25
-global hadd_calibration_adj=-24.5
-
-global adj_cod_recACL2023=$cod_recACL2023-$cod_calibration_adj
-global adj_hadd_recACL2023=$hadd_recACL2023-$hadd_calibration_adj
 
 global mrip_vintage "2023_12_18"
 
 global hadd_recACL2024=759
 global cod_recACL2024=192
+
+global cod_calibration_adj= 27
+global hadd_calibration_adj= 26.3
+
+
+global adj_cod_recACL2024=$cod_recACL2024-$cod_calibration_adj
+global adj_hadd_recACL2024=$hadd_recACL2024-$hadd_calibration_adj
 
 
 <</dd_do>>
@@ -67,30 +69,9 @@ global cod_recACL2024=192
 
 # Inputs and Background
 
-Previous years Regulations
-==============================================================
-
-2022 Regulations
-==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2022>> mt for FY 2022. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2022>> mt.
-
-Haddock:
-
-*    20 fish, 17"
-*    Open May1-Feb 28 and April 1- April 30
-*    The change from 2021 is to increase the possession limit from 15 to 20 haddock
-
-Cod: 
-
-*   1 fish, 22"
-*   Open Sept 1-October 7 and April 1-April 14 for private anglers
-*   Open Sept 1-October 7 and April 1-April 14 for the for-hire anglers
-
-
-
 Fishing Year 2023 Regulations
 ==============================================================
-The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations were
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2023>> mt for FY 2023. The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2023>> mt.  Regulations were implemented in August of 2023, so part of the year had a haddock limit of 20 fish at 17".
 
 
 
@@ -121,6 +102,13 @@ Input data
 
 
 
+Changes from Previous Models
+==============================================================
+1. Length distributions of cod B2s **do not** use the MRIP survey weights. This is consistent with the stock assessment. 
+1. Numbers-at-Age for cod and haddock use actual removals for cod (2021-2022) and haddock (2022) to inform AGEPRO model runs. This should give us a better estimate of 2024 NAA.
+1. Calibration is done separately for the for-hire and private fleet. 
+
+
 Numbers-at-Age for cod and haddock
 ==============================================================
 The last stock assessment for cod was in 2021. The first year from this projection was 2020.  The off-the shelf "harvest scenario" specifies:
@@ -133,7 +121,6 @@ I've computed total removals=commercial + recreational landings + dead discards 
 
 *    2021: 348.7mt  = 215.7mt commercial removals + 33mt rec landings +  100 mt rec dead discards
 *    2022: 548.3mt = 375.6mt commercial removals + 57.7mt rec landings +  115 mt rec dead discards
-*    2023: 17.62mt rec landings, 109mt rec dead discards
  
 The last stock assessment for haddock was in 2022. The first year from this projection was 2022.  The off-the shelf "harvest scenario" specifies:
 
@@ -144,9 +131,8 @@ The last stock assessment for haddock was in 2022. The first year from this proj
 I've computed recreational landings, discards, and dead discards from MRIP data.  I've extracted commercial landings from CAMS. The haddock removals that are passed to AGEPRO are:
 
 *    2022: 3,365.8 = 2625.5mt commercial removals + 663.2mt rec landings +  77.1 mt rec dead discards
-*    2023: 348.2mt rec landings, 110.3mt rec dead discards 
 
-This gives us a more accurate projection of 2024 Numbers-at-Age on Jan 1.
+This gives us a slightly more accurate projection of 2024 Numbers-at-Age on Jan 1.
 
 
 
@@ -154,15 +140,12 @@ This gives us a more accurate projection of 2024 Numbers-at-Age on Jan 1.
 Calibration for the for-hire and private fleet
 ===============================================================
 
-
-
-
 The 2022 and 2023 haddock regulations vary by mode.   Instead of calibrating to the total number of trips, we calibrate to each fleet: private (boat + shore) and for-hire (private + shore).  
 
-1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual.  
+1. I'm using the number of choice occasions to calibrate the model so the simulated number of trips matches the actual for each fleet
 1. I'm using the "always on" behavior -- if an angler hits their bag limit for a species, they continue to fish but will discard any additional fish of that species, regardless of size.  For months when cod is closed, we set the possession limit to 5  and allow a small fraction of trips to retain fish.  This allows a very small number of trips to take a few cod. 
-1. I use the regulations in place in the corresponding month. For May to October, this is the 2023 regulations. For November to April this is actually the **2022 regulations**.
-1. Since April of 2023 was open for approximately half of the month for cod, the proper way to calibrate is to run 1 simulation where April is fully open for cod, one where April is fully closed for cod, and then average the two. 
+1. I use the regulations in place in the corresponding month. For May to October, this is the 2023 regulations. There are not trips from November to February.  For March and April this is actually the **2022 regulations**.
+1. Since April of 2023 was open for approximately half of the month for cod, I calibrated by running 1 simulation where April is fully open for cod, one where April is fully closed for cod, and then I averaging the two. 
 1. The costs of a trip vary by trip type (shore, private, head, charter).  I use the number of trips by mode, averaged over 2022-2023 to figure this out. Catch per trip and length of caught fish does not vary by trip type.  This is probably okay for everything except shore. There are *very* few shore trips.
 
 
@@ -183,8 +166,9 @@ Whole month of April for both Cod and Haddock scenario 1.
 
 | Scenario number| Short Description | Long Description| Status|
 | :-----        |    :---------------   |          :--------------------- |   :-----|
-| 0| Status Quo 2024       | The 2023 Regulations carry over to 2024.   | Not yet |
- ---> 
+| 0| Status Quo 2024       | The 2023 Regulations carry over to 2024.   | Running|
+| 11| 18"/15 for haddock | These are the For Hire regs applied to the entire fleet   | coded|
+| 12| 17"/10 for haddock      | These are the Private regs applied to the entire fleet| coded|
 
 
 
@@ -205,13 +189,13 @@ Here are some results.  In this section, I first compute the annual totals for e
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
 	global MRIP_root  "V:/READ-SSB-Lee-MRIP-BLAST/"
 	global 	oracle_cxn  " $mysole_conn"
 }
 
 if strmatch("$user","minyangNix"){
-	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2023"
+	global project_dir "${myroot}/BLAST/READ-SSB-Lee-BLAST/cod_haddock_fy2024"
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 /* setup directories */
@@ -255,8 +239,8 @@ global output_dir "${project_dir}/output"
 local estub "economic_data_2024_SQ_"
 
 /*local estub2 "economic_data_2023_haddock"
-local estub3 "economic_data_2023_RAP_"
-local estub4 "economic_data_2023_CMTE_" */
+local estub3 "economic_data_2024_RAP_"
+local estub4 "economic_data_2024_CMTE_" */
 
 local efilelist1: dir "${output_dir}" files "`estub'*.dta"
 /*
@@ -265,9 +249,10 @@ local efilelist3: dir "${output_dir}" files "`estub3'*.dta"
 local efilelist4: dir "${output_dir}" files "`estub4'*.dta"
 */
 
-local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4' "'
+*local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4' "'
 
 
+local ecombinedfiles `" `efilelist1' "'
 
 
 /****************************/
@@ -310,7 +295,7 @@ local filelist4: dir "${output_dir}" files "`stub4'*.dta" */
 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
-local combinedfiles `" `filelist1' `filelist2'  `filelist3' `filelist4' "'
+local combinedfiles `" `filelist1' "'
 
 
 /****************************/
@@ -446,38 +431,27 @@ tempfile raw_results
 save `raw_results'
 
 
-/* scenario names 
+/* scenario names */
 
 sort scenario_num
-
 gen cod_limit=1 
-gen hadd_limit=20 
-
-replace  hadd_limit=15 if inlist(scenario_num,3,4,5,18,19,20,17,217,218)
-replace  hadd_limit=12 if inlist(scenario_num,6,7,8)
-replace  hadd_limit=10 if inlist(scenario_num,9,10,11,101,111)
-gen str10 hadd_size=`"17""'
-
-
-replace  hadd_size=`"18""' if inlist(scenario_num,18,218)
-replace  hadd_size=`"19""' if inlist(scenario_num,19)
-replace  hadd_size=`"20""' if inlist(scenario_num,20)
+gen str60 hadd_limit=`"FH 15, PR 10"' if inlist(scenario_num,0) 
+gen str60 hadd_size=`"FH 18", PR 17""' if inlist(scenario_num,0)
 gen cod_size=`"22""' 
 
-gen str20 mode="All"
+gen str20 mode="Combined"
 /*cod open seasons */
-
-gen str60  cod_open_season="Sept 1 -Oct 7, April 1-14" if inlist(scenario_num,0,5,8,11)
-replace  cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,1,3,6,9)
-replace  cod_open_season="Sept 1 -Oct 31, April 1-April 30" if inlist(scenario_num,2,4,7,10)
-replace  cod_open_season="Sept 1 -Oct 31" if inlist(scenario_num,101,17,18,19,20,217,218)
-replace  cod_open_season="Sept 1 -Oct 31, April 1-15" if inlist(scenario_num,111)
+gen str60  cod_open_season="Sept 1 -Oct 31" if inlist(scenario_num,0,11,12)
 
 /*haddock open seasons */
+gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,11,12)
 
-gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,1,2,3,4,5,6,7,8,9,10,11,101,111,18,19,20,17)
-replace had_open_season=" May-Feb28" if inlist(scenario_num,217,218)
-*/
+
+
+replace hadd_limit=`"15"' if inlist(scenario_num,11)
+replace hadd_limit=`"10"' if inlist(scenario_num,12)
+replace hadd_size=`"18"' if inlist(scenario_num,11)
+replace hadd_size=`"17"' if inlist(scenario_num,12)
 save `raw_results', replace
 
 
@@ -495,21 +469,21 @@ collapse (sum) total_trips cod_num_kept cod_num_released haddock_num_kept haddoc
 /* Flag replicates where mortality less than subacl*/
 
 gen cod_ok=0
-replace cod_ok=1 if cod_mort_mt<=$cod_recACL2023
+replace cod_ok=1 if cod_mort_mt<=$cod_recACL2024
 gen adj_cod_ok=0
 
 gen adj_cod_mort_mt=cod_mort_mt + $cod_calibration_adj
-replace adj_cod_ok=1 if adj_cod_mort_mt<=$cod_recACL2023
+replace adj_cod_ok=1 if adj_cod_mort_mt<=$cod_recACL2024
 
 
 
 
 gen hadd_ok=0 
-replace hadd_ok=1 if hadd_mort_mt<=$hadd_recACL2023
+replace hadd_ok=1 if hadd_mort_mt<=$hadd_recACL2024
 
 gen adj_hadd_ok=0
 gen adj_hadd_mort_mt=hadd_mort_mt+ $hadd_calibration_adj
-replace adj_hadd_ok=1 if adj_hadd_mort_mt<=$hadd_recACL2023
+replace adj_hadd_ok=1 if adj_hadd_mort_mt<=$hadd_recACL2024
 
 format adj_hadd_mort_mt adj_cod_mort_mt %6.1gc
 
@@ -631,7 +605,7 @@ gen cod_catch=cod_num_kept+cod_num_released
 tempfile summed_results
 
 
-local graphlist 0,1,2,3,4,5,6,7,8,9,10,11,101,111,18,19,20,17 ,217,218
+local graphlist 0,11,12
 keep if inlist(scenario_num, `graphlist')
 replace WTP=WTP/1000000
 
@@ -653,14 +627,19 @@ use `summed_results', clear
 format total_trips cod_mort_mt hadd_mort_mt hadd_catch cod_catch total_trips    %10.0fc 
 format adj_hadd_kept_mt adj_hadd_released_dead_mt adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt %6.1fc
 format WTP %6.1gc
-
 qui gen str1 option=""
-list option scenario_num mode cod_limit cod_size cod_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
 
-list option scenario_num mode cod_limit cod_size cod_open_season hadd_limit hadd_size  had_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season  total_trips adj_cod_ok WTP  if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+/*
+list option scenario_num cod_limit cod_size cod_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(160) noobs divider separator(0)
+
+list option scenario_num cod_limit cod_size cod_open_season hadd_limit hadd_size  had_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season  total_trips adj_cod_ok WTP  if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(160) noobs divider separator(0)
 
 
-list option scenario_num mode cod_limit cod_size cod_open_season  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+list option scenario_num cod_limit cod_size cod_open_season  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(160) noobs divider separator(0)
+*/
+
+list option scenario_num total_trips adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt adj_cod_ok adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt adj_hadd_ok WTP if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(160) noobs divider separator(0)
+
 
 export excel option scenario_num mode cod_limit cod_size cod_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP using "${project_dir}/status_quo_summaries.xlsx" if inlist(scenario_num,`graphlist'), firstrow(variables) keepcellfmt replace
 
