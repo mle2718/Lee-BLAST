@@ -166,10 +166,13 @@ Whole month of April for both Cod and Haddock scenario 1.
 
 | Scenario number| Short Description | Long Description| Status|
 | :-----        |    :---------------   |          :--------------------- |   :-----|
-| 0| Status Quo 2024       | The 2023 Regulations carry over to 2024.   | Running|
-| 11| 18"/15 for haddock | These are the For Hire regs applied to the entire fleet   | coded|
-| 12| 17"/10 for haddock      | These are the Private regs applied to the entire fleet| coded|
-
+| 0| Status Quo 2024       | The 2023 Regulations carry over to 2024.   | Run|
+| 101| 18"/15 for haddock | These are the For Hire regs applied to the entire fleet   | Run|
+| 102| 17"/10 for haddock      | These are the Private regs applied to the entire fleet| Run|
+| 103| 18"/15 for haddock, 23" cod | FH plus an increase in cod size   | Run|
+| 104| 17"/10 for haddock, 23" cod     | PR plus an increase in cod size| Run|
+| 105| 18"/15 for haddock, 24" cod | FH plus an increase in cod size   | Run|
+| 106| 17"/10 for haddock, 24" cod     | PR plus an increase in cod size| Run|
 
 
 
@@ -238,21 +241,25 @@ global output_dir "${project_dir}/output"
 /* Read in all the Econ model runs that match `stub' */
 local estub "economic_data_2024_SQ_"
 
-/*local estub2 "economic_data_2023_haddock"
-local estub3 "economic_data_2024_RAP_"
+local estub2 "economic_data_2024_set1"
+local estub3 "economic_data_2024_set2"
+local estub4 "economic_data_2024_set3"
+
+/*local estub3 "economic_data_2024_RAP_"
 local estub4 "economic_data_2024_CMTE_" */
 
 local efilelist1: dir "${output_dir}" files "`estub'*.dta"
-/*
+
 local efilelist2: dir "${output_dir}" files "`estub2'*.dta"
 local efilelist3: dir "${output_dir}" files "`estub3'*.dta"
+
 local efilelist4: dir "${output_dir}" files "`estub4'*.dta"
-*/
+
 
 *local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4' "'
 
 
-local ecombinedfiles `" `efilelist1' "'
+local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4'"'
 
 
 /****************************/
@@ -282,20 +289,23 @@ save `econ_data', replace
 
 /* Read in all the model runs that match `stub' */
 local stub "recreational_catches_2024_SQ_"
+
+local stub2 "recreational_catches_2024_set1"
+local stub3 "recreational_catches_2024_set2"
+local stub4 "recreational_catches_2024_set3"
 /*
-local stub2 "recreational_catches_2024_haddock"
 local stub3 "recreational_catches_2024_RAP_"
 local stub4 "recreational_catches_2024_CMTE_" */
 
 local filelist1: dir "${output_dir}" files "`stub'*.dta"
-/*
+
 local filelist2: dir "${output_dir}" files "`stub2'*.dta"
 local filelist3: dir "${output_dir}" files "`stub3'*.dta"
-local filelist4: dir "${output_dir}" files "`stub4'*.dta" */
+/*local filelist4: dir "${output_dir}" files "`stub4'*.dta" */
 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
-local combinedfiles `" `filelist1' "'
+local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' "'
 
 
 /****************************/
@@ -345,13 +355,15 @@ replace month=month-12 if month>=13
 
 
 replace scenario_num=0 if inlist(scenario_num, 3, 4)
-replace scenario_num=11 if inlist(scenario_num, 5, 6)
-replace scenario_num=12 if inlist(scenario_num, 7, 8)
+replace scenario_num=101 if inlist(scenario_num, 5, 6)
+replace scenario_num=102 if inlist(scenario_num, 7, 8)
+
+replace scenario_num=103 if inlist(scenario_num, 9, 10)
+replace scenario_num=104 if inlist(scenario_num, 11,12)
 
 
 
-
-/* construct mean outcomes of as-run scenarios*/
+/* aggregate the fleet outcomes to the scenario level*/
 collapse (sum) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort WTP ,by(scenario_num fishing_year year month replicate month_of_fy source)
 
 tempfile s_as_run
@@ -373,7 +385,7 @@ use `s_as_run', clear
 
 gen freq=1
 
-
+/*compute averages if necessary*/
 collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort WTP [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
 
 
@@ -438,20 +450,21 @@ gen cod_limit=1
 gen str60 hadd_limit=`"FH 15, PR 10"' if inlist(scenario_num,0) 
 gen str60 hadd_size=`"FH 18", PR 17""' if inlist(scenario_num,0)
 gen cod_size=`"22""' 
-
+replace cod_size=`"23""' if inlist(scenario_num,103,104)
+replace cod_size=`"24""' if inlist(scenario_num,105,106)
 gen str20 mode="Combined"
 /*cod open seasons */
-gen str60  cod_open_season="Sept 1 -Oct 31" if inlist(scenario_num,0,11,12)
+gen str60  cod_open_season="Sept 1 -Oct 31" if inlist(scenario_num,0,101,102,103,104,105,106)
 
 /*haddock open seasons */
-gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,11,12)
+gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,101,102,103,104,105,106)
 
 
 
-replace hadd_limit=`"15"' if inlist(scenario_num,11)
-replace hadd_limit=`"10"' if inlist(scenario_num,12)
-replace hadd_size=`"18"' if inlist(scenario_num,11)
-replace hadd_size=`"17"' if inlist(scenario_num,12)
+replace hadd_limit=`"15"' if inlist(scenario_num,101,103,105)
+replace hadd_limit=`"10"' if inlist(scenario_num,102,104,106)
+replace hadd_size=`"18"' if inlist(scenario_num,101,103,105)
+replace hadd_size=`"17"' if inlist(scenario_num,102,104,106)
 save `raw_results', replace
 
 
@@ -605,7 +618,7 @@ gen cod_catch=cod_num_kept+cod_num_released
 tempfile summed_results
 
 
-local graphlist 0,11,12
+local graphlist 0,101,102,103,104,105,106
 keep if inlist(scenario_num, `graphlist')
 replace WTP=WTP/1000000
 
@@ -646,10 +659,10 @@ export excel option scenario_num mode cod_limit cod_size cod_open_season adj_cod
 <</dd_do>>
 ~~~~
 
+<!---
 Narrative:
 
 * Scenario 0 is the status quo. 
 * Scenario 11 :  15 Haddock at 18" 
 * Scenario 12 : 10 Haddock at 17"
-
-
+--->
