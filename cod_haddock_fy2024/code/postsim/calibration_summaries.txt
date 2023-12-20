@@ -529,7 +529,7 @@ list fishing_year month actual_cat sim_catch actual_landings sim_landings  actua
 ~~~~
 
 
-Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. Even though the numbers are quite close, we are underpredicting mortality in metric tons.  This is happening because the Simulated kept fish are smaller, on average, than the actual kept fish.  This particularly obvious in August and September. The September difference is driving the model results, simulated September landings are approximately 32mt less than acutal landings.  The discarded fish are also systematically smaller than the actual discards. 
+Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. Even though the numbers are quite close, we are underpredicting mortality in metric tons.  This is happening because the Simulated kept fish are smaller, on average, than the actual kept fish.  This particularly obvious in August and September. The September difference is driving the model results, simulated September landings are approximately 24mt less than acutal landings.  The discarded fish are also systematically smaller than the actual discards. 
 
 The "Mean" row at the bottom is a simple average, it does not account for the fact that more cod were caught landed in September in the model. 
 

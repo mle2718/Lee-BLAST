@@ -260,8 +260,6 @@ gen fishing_year=.
 save "${working_data}/cod_discard_saver.dta", replace
 restore
 
-*do "${code_dir}/sim/historical_rec_regulations.do"
-
 
 
  
@@ -273,8 +271,8 @@ Right now this distribution is hard coded -- one day it should be set up to look
 
 
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000  \ 5, 24600 \ 6, 27300  \ 7, 25100  \ 8, 30100 \ 9 , 16100  \10, 7800 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 259000 \ 5, 44500 \ 6, 69300 \ 7, 107100 \ 8, 113600 \ 9 , 163100 \10, 27500 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 12800  \ 5, 25000 \ 6, 27700  \ 7, 25700  \ 8, 30700 \ 9 , 16000  \10, 7900 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262700 \ 5, 45700 \ 6, 70700 \ 7, 110700 \ 8, 116400 \ 9 , 165700 \10, 27800 \ 11, 0  \ 12, 0) 
 end
 
 
@@ -383,7 +381,7 @@ nois _dots 0, title(Loop running: scenario $ws) reps($total_reps)
 set seed 2485768
 
 
-qui forvalues replicate=1/$total_reps{	
+forvalues replicate=1/$total_reps{	
 	nois _dots `replicate' 0     
 /* MODEL SETUP -- CONSTRUCT THE SMOOOTHED AGE-LENGTH KEYS*/
 /*The File cod_al_lowess.do:
