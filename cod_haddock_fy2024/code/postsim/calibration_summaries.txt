@@ -670,11 +670,11 @@ format pct_sublegal %03.0fc
 
 
 
-Here is the info from the "catch" MRIP file: April Atlantic cod. 
+Here is the info from the "catch" MRIP file: September Atlantic cod. 
 ~~~~
 <<dd_do>>
-use "${MRIP_raw}/catch_20232.dta", clear
-keep if common=="ATLANTIC COD" & month=="04"
+use "${MRIP_raw}/catch_20234.dta", clear
+keep if common=="ATLANTIC COD" & month=="09"
 order strat_id psu tot_len*  claim harvest release wp*
 qui count 
 local total=r(N)
@@ -689,8 +689,8 @@ There are  <<dd_display: %4.0f `total'>>  rows here and <<dd_display: %4.0f `no_
 Here is the info from the "size" MRIP file. 
 ~~~~
 <<dd_do>>
-use "${MRIP_raw}/size_20232.dta", clear
-keep if common=="ATLANTIC COD" & month=="04"
+use "${MRIP_raw}/size_20234.dta", clear
+keep if common=="ATLANTIC COD" & month=="09"
 order strat_id psu l_in_bin  wgt wp*
 count if wp_size==0
 
