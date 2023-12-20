@@ -56,8 +56,8 @@ global mrip_vintage "2023_12_18"
 global hadd_recACL2024=759
 global cod_recACL2024=192
 
-global cod_calibration_adj= 27
-global hadd_calibration_adj= 26.3
+global cod_calibration_adj= 21.2
+global hadd_calibration_adj= 46.8
 
 
 global adj_cod_recACL2024=$cod_recACL2024-$cod_calibration_adj
