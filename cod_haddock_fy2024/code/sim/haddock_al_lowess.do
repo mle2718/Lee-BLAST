@@ -50,9 +50,8 @@ foreach var of varlist count*{
 	lowess `var' length, adjust bwidth(.3) gen(s`var') nograph
 	replace s`var'=0 if s`var'<=0
 }
-
+/* use the smoothed counts instead of raw */
 drop count*
-
 forvalues i=1/9{
 	rename scount`i' count`i'
 }
