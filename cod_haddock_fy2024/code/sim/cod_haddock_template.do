@@ -115,7 +115,7 @@ local mins=substr("`time'",4,2)
 csv containing the regulations
 */
 
-global rec_management "2024_CMTE"
+global rec_management "2024_set1"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
@@ -268,9 +268,10 @@ restore
 
 
 
+
 mata: 
-recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 12800  \ 5, 25000 \ 6, 27700  \ 7, 25700  \ 8, 30700 \ 9 , 16000  \10, 7900 \ 11, 0  \ 12, 0) 
-recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262700 \ 5, 45700 \ 6, 70700 \ 7, 110700 \ 8, 116400 \ 9 , 165700 \10, 27800 \ 11, 0  \ 12, 0) 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000  \ 5, 25000 \ 6, 27700  \ 7, 25700  \ 8, 30700 \ 9 , 16000  \10, 7900 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262500 \ 5, 45700 \ 6, 71000 \ 7, 110500 \ 8, 116300 \ 9 , 166450  \10, 27900 \ 11, 0  \ 12, 0) 
 end
 
 
@@ -317,7 +318,7 @@ global cod_sublegal_low=.002
 global cod_sublegal_hi=.010+$cod_sublegal_low
 
 /* read in regulations and run the model.*/
-qui foreach scenario of local scenario_list{
+qui  foreach scenario of local scenario_list{
 	global ws=`scenario'
 	do "${code_dir}/sim/read_in_regs.do"
     
@@ -1052,7 +1053,7 @@ shell chmod 440 `econ_out'
 
 di "cod_haddock_template.do finished."
 
-dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/summaries_CMTE.html) replace
+*dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/status_quo_summaries.html) replace
 timer list
 log close
 
