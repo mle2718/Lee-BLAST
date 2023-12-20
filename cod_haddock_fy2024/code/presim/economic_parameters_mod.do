@@ -60,9 +60,9 @@ global cod_upper_bound 40
 global haddock_upper_bound 40
 
 
-global calibration_end 2022
+global calibration_end 2023
 global this_year=year(date("$S_DATE","DMY"))
-global this_year=2022
+global this_year=2023
 
 
 /* don't change this line .  You are storing a bigger matrix of commercial catch and rec regulations. these couple of lines just exclude the 'old' years, prior to the calibration years */ 
@@ -82,8 +82,8 @@ global rec_month_starter=$periods_per_year*($which_year-$rec_junk)+1
  global lcalibration_end 2023
 
 /* set years for historical effort calibration params*/
- global rec_cal_start=2022
- global rec_cal_end=2022
+ global rec_cal_start=2023
+ global rec_cal_end=2023
  
  /* Commercial grabber years
 The commercial helper is set up to extract earlier FISHING YEARS */
