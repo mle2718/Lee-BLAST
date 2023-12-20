@@ -301,7 +301,7 @@ local filelist1: dir "${output_dir}" files "`stub'*.dta"
 
 local filelist2: dir "${output_dir}" files "`stub2'*.dta"
 local filelist3: dir "${output_dir}" files "`stub3'*.dta"
-/*local filelist4: dir "${output_dir}" files "`stub4'*.dta" */
+local filelist4: dir "${output_dir}" files "`stub4'*.dta" 
 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
@@ -360,6 +360,9 @@ replace scenario_num=102 if inlist(scenario_num, 7, 8)
 
 replace scenario_num=103 if inlist(scenario_num, 9, 10)
 replace scenario_num=104 if inlist(scenario_num, 11,12)
+
+replace scenario_num=105 if inlist(scenario_num, 13, 14)
+replace scenario_num=106 if inlist(scenario_num, 15,16)
 
 
 
