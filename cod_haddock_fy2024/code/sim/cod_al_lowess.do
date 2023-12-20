@@ -57,14 +57,13 @@ foreach var of varlist count*{
 	replace s`var'=0 if s`var'<=0
 }
 
-/*
+/* use the smoothed counts instead of raw */
 drop count*
-
 forvalues i=1/9{
 	rename scount`i' count`i'
 }
 
-*/
+
 
 reshape long count scount, i(length) j(age)
 order age length
@@ -73,10 +72,10 @@ sort age length
 notes: this is the counts which have been 'smoothed'.  Just go ahead and run the normal Age-Length processing on this dataset to get smoothed probabilities.
 notes: count has been smoothed in this dataset.
 
+
 save "${working_data}/cod_al_keysmooth.dta", replace
 
-/* here we calculate the smooth_age_to_length.dta 
-using "count" is unsmoothed, using scount is smoothed*/
+/* here we calculate the smooth_age_to_length.dta */
 egen double tc=total(count), by(age)
 gen double prob=count/tc
 
