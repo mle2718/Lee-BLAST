@@ -75,7 +75,8 @@ notes: count has been smoothed in this dataset.
 
 save "${working_data}/cod_al_keysmooth.dta", replace
 
-/* here we calculate the smooth_age_to_length.dta */
+/* here we calculate the smooth_age_to_length.dta 
+using "count" is unsmoothed, using scount is smoothed*/
 egen double tc=total(count), by(age)
 gen double prob=count/tc
 
