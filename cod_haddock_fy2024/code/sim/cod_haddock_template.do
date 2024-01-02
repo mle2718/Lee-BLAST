@@ -115,7 +115,7 @@ local mins=substr("`time'",4,2)
 csv containing the regulations
 */
 
-global rec_management "2024_set1"
+global rec_management "2024_set3"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir
