@@ -49,7 +49,7 @@ global hadd_recACL2023=610
 global cod_recACL2023=192
 
 
-global mrip_vintage "2023_12_18"
+global mrip_vintage "2024_01_02"
 
 global hadd_recACL2024=759
 global cod_recACL2024=192
@@ -529,21 +529,21 @@ list fishing_year month actual_cat sim_catch actual_landings sim_landings  actua
 ~~~~
 
 
-Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. Even though the numbers are quite close, we are underpredicting mortality in metric tons.  This is happening because the Simulated kept fish are smaller, on average, than the actual kept fish.  This particularly obvious in August and September. The September difference is driving the model results, simulated September landings are approximately 24mt less than acutal landings.  The discarded fish are also systematically smaller than the actual discards. 
+Here are the cod weights (landings=a+b1, discards=b2) for actual and calibration results for Fishing Year <<dd_display: %4.0f $working_year>>. Even though the number of fish are quite close, we are underpredicting mortality in metric tons.  This is happening because the Simulated kept fish are smaller, on average, than the actual kept fish.  This particularly obvious in August and September. The September difference is driving the model results, simulated September landings are approximately 13mt less than acutal landings.  The discarded fish are also systematically smaller than the actual discards. 
 
 The "Mean" row at the bottom is a simple average, it does not account for the fact that more cod were caught landed in September in the model. 
 
 
 <<dd_do:quietly>>
 
-use "${MRIP_dir}/monthly/cod_weights_${working_year}.dta", clear
+use "${MRIP_dir}/annual/atlanticcod_weights_OpenClose_${working_year}.dta", clear
 
 qui summ month
 local max=r(max)
 
-/* fill in the stats from the previous year */
+/* fill in the stats from the previous year 
 preserve
-use "${MRIP_dir}/monthly/cod_weights_${previous}.dta", clear
+use "${MRIP_dir}/monthly/atlanticcod_weights_OpenClose_${previous}.dta", clear
 keep if month> `max' 
 replace year=$working_year
 tempfile appender
@@ -552,21 +552,11 @@ save `appender', replace
 restore 
 
 append using `appender' 
-
+*/
 replace year=$working_year+1 if month==4
 gen fishing_year=$working_year
 
 sort year month 
-
-
-replace ab1weight=ab1weight/$lbs_per_mt
-rename ab1weight ab1mt
-replace b2weight=b2weight/$lbs_per_mt
-rename b2weight b2mt
-
-
-replace b2weight_dead=b2weight_dead/$lbs_per_mt
-
 
 sort year month 
 format ab1mt b2mt %10.2fc
@@ -590,7 +580,7 @@ sort fishing_year year month
 
 rename ab1mt actual_landed_mt
 rename b2mt actual_discard_mt
-rename b2weight_dead actual_dead_discard_mt
+rename b2dead_mt actual_dead_discard_mt
 gen weight_per_kept=actual_landed_mt/ab1_count*$lbs_per_mt
 gen weight_per_release=actual_discard_mt/b2_count*$lbs_per_mt
 

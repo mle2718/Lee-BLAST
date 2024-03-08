@@ -21,7 +21,7 @@ if strmatch("$user","minyangNix"){
 	global MRIP_root "${myroot}/BLAST/READ-SSB-Lee-MRIP-BLAST/" 
 }
 
-global mrip_vintage "2023_12_18"
+global mrip_vintage "2024_01_02"
 
 /* setup directories */
 global code_dir "${project_dir}/code"
@@ -31,7 +31,7 @@ global output_dir "${project_dir}/output"
 global MRIP_dir  "${MRIP_root}/data_folder/main/MRIP_${mrip_vintage}"
 global MRIP_raw  "${MRIP_root}/data_folder/raw"
 
-dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/status_quo_summaries.html) replace
+dyndoc "${code_dir}/postsim/status_quo_summaries.txt", saving(${project_dir}/status_quo_summaries2.html) replace
 
 ---> 
 ~~~~
@@ -51,18 +51,18 @@ global cod_recACL2023=192
 global hadd_recACL2023=610
 
 
-global mrip_vintage "2023_12_18"
+global mrip_vintage "2024_01_02"
 
 global hadd_recACL2024=759
 global cod_recACL2024=192
 
-global cod_calibration_adj= 21.2
-global hadd_calibration_adj= 46.8
+global cod_calibration_adj= 12.7
+global hadd_calibration_adj= 56.6
 
-
+/*
 global adj_cod_recACL2024=$cod_recACL2024-$cod_calibration_adj
 global adj_hadd_recACL2024=$hadd_recACL2024-$hadd_calibration_adj
-
+*/
 
 <</dd_do>>
 ~~~~
@@ -88,6 +88,13 @@ Cod:
 
 
 
+Fishing Year 2024
+==============================================================
+
+
+The recreational sub-ACL for GoM cod is <<dd_display: %8.0fc $cod_recACL2024>> mt.
+
+The recreational sub-ACL for GOM haddock is <<dd_display: %8.0fc $hadd_recACL2024>> mt.
 
 
 Input data
@@ -169,12 +176,32 @@ Whole month of April for both Cod and Haddock scenario 1.
 | 0| Status Quo 2024       | The 2023 Regulations carry over to 2024.   | Run|
 | 101| 18"/15 for haddock | These are the For Hire regs applied to the entire fleet   | Run|
 | 102| 17"/10 for haddock      | These are the Private regs applied to the entire fleet| Run|
-| 103| 18"/15 for haddock, 23" cod | FH plus an increase in cod size   | Run|
+| 103| 18"/15 for haddock, 23" cod | FH plus an increase in cod size   | RAP/CMTE/Council Preferred|
 | 104| 17"/10 for haddock, 23" cod     | PR plus an increase in cod size| Run|
 | 105| 18"/15 for haddock, 24" cod | FH plus an increase in cod size   | Run|
 | 106| 17"/10 for haddock, 24" cod     | PR plus an increase in cod size| Run|
+| 107| SQ October closed | 2023 regulations, but closing October| Run|
+| 108| SQ with 23" cod    | 2023 regulations plus an increase in cod size| Run|
+| 109| SQ, October closed and 23" cod    | 2023 regulations, increase in cod size, and close October| Run|
+| 110|  18"/15 for haddock, October closed     | | Run|
+| 111|  18"/15 for haddock, October closed , 23" cod  | | Run|
+| 112|  18"/10 for haddock, 22"/1  cod  |PDT subgroup 1A | 
+| 113|  18"/10 for haddock, 23"/1  cod  | PDT subgroup 1B | 
+| 114|  18"/10 for Private, 18"/15 FH, 22"/1  cod  |PDT subgroup 2A | 
+| 115|  18"/10 for Private, 18"/15 FH, 23"/1  cod  |PDT subgroup 2B | 
 
 
+Scenario 103 was selected by the RAP, CMTE, and Council
+<!---
+Gulf of Maine Cod:
+ Open season: September 1 - October 31,
+ Minimum size: 23 inches, and
+ Possession limit: 1 fish per day
+Gulf of Maine Haddock:
+ Open season: May 1 - February 28/29 and April 1 – 30,
+ Minimum size: 18 inches, and
+ Possession limit: 15 fish per day
+--->
 
 # Annual Results 
 
@@ -242,8 +269,11 @@ global output_dir "${project_dir}/output"
 local estub "economic_data_2024_SQ_"
 
 local estub2 "economic_data_2024_set1"
-local estub3 "economic_data_2024_set2"
+local estub3 "economic_data_2024_set5"
 local estub4 "economic_data_2024_set3"
+local estub5 "economic_data_2024_set4"
+
+local estub6 "economic_data_2024_set6"
 
 /*local estub3 "economic_data_2024_RAP_"
 local estub4 "economic_data_2024_CMTE_" */
@@ -254,12 +284,13 @@ local efilelist2: dir "${output_dir}" files "`estub2'*.dta"
 local efilelist3: dir "${output_dir}" files "`estub3'*.dta"
 
 local efilelist4: dir "${output_dir}" files "`estub4'*.dta"
-
+local efilelist5: dir "${output_dir}" files "`estub5'*.dta"
+local efilelist6: dir "${output_dir}" files "`estub6'*.dta"
 
 *local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4' "'
 
 
-local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4'"'
+local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4'  `efilelist5'  `efilelist6' "'
 
 
 /****************************/
@@ -291,8 +322,10 @@ save `econ_data', replace
 local stub "recreational_catches_2024_SQ_"
 
 local stub2 "recreational_catches_2024_set1"
-local stub3 "recreational_catches_2024_set2"
+local stub3 "recreational_catches_2024_set5"
 local stub4 "recreational_catches_2024_set3"
+local stub5 "recreational_catches_2024_set4"
+local stub6 "recreational_catches_2024_set6"
 /*
 local stub3 "recreational_catches_2024_RAP_"
 local stub4 "recreational_catches_2024_CMTE_" */
@@ -302,10 +335,11 @@ local filelist1: dir "${output_dir}" files "`stub'*.dta"
 local filelist2: dir "${output_dir}" files "`stub2'*.dta"
 local filelist3: dir "${output_dir}" files "`stub3'*.dta"
 local filelist4: dir "${output_dir}" files "`stub4'*.dta" 
-
+local filelist5: dir "${output_dir}" files "`stub5'*.dta" 
+local filelist6: dir "${output_dir}" files "`stub6'*.dta" 
 *local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' "'
 
-local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' "'
+local combinedfiles `" `filelist1' `filelist2' `filelist3' `filelist4' `filelist5' `filelist6' "'
 
 
 /****************************/
@@ -353,6 +387,30 @@ replace month=month-12 if month>=13
 
 /* need to sum up the FH and PR modes, by "scenario" */
 
+/* create the SQ with 23" cod scenario */
+expand 2 if inlist(scenario_num, 9,12), gen(marker)
+replace scenario_num=108 if inlist(scenario_num, 9,12) & marker==1
+drop marker
+
+/* 
+110 October closed with the FH regulations
+	Combine the FH part of 107 with Scenario 21
+ */
+
+
+expand 2 if inlist(scenario_num, 17), gen(marker)
+replace scenario_num=110 if inlist(scenario_num, 17) & marker==1
+drop marker
+
+
+/*
+111 October closed, FH and 23" cod  
+	Combine the FH part of 108 with scenario 22 */
+
+expand 2 if inlist(scenario_num, 9), gen(marker)
+replace scenario_num=111 if inlist(scenario_num, 9) & marker==1
+drop marker
+
 
 replace scenario_num=0 if inlist(scenario_num, 3, 4)
 replace scenario_num=101 if inlist(scenario_num, 5, 6)
@@ -364,7 +422,23 @@ replace scenario_num=104 if inlist(scenario_num, 11,12)
 replace scenario_num=105 if inlist(scenario_num, 13, 14)
 replace scenario_num=106 if inlist(scenario_num, 15,16)
 
+replace scenario_num=107 if inlist(scenario_num, 17,18)
 
+replace scenario_num=109 if inlist(scenario_num, 19,20)
+
+
+replace scenario_num=110 if inlist(scenario_num, 21,110)
+replace scenario_num=111 if inlist(scenario_num, 22,111)
+
+replace scenario_num=112 if inlist(scenario_num, 27,28)
+
+replace scenario_num=113 if inlist(scenario_num, 29,30)
+replace scenario_num=114 if inlist(scenario_num, 23,24)
+replace scenario_num=115 if inlist(scenario_num, 25,26)
+
+
+/*I sum over source, but I'm not sure what will happen if I remove that. So I'm just relabeling it 'combined' for the simulations that patch together partial scenarios from different runs*/
+replace source="combined" if inlist(scenario_num,110,111)
 
 /* aggregate the fleet outcomes to the scenario level*/
 collapse (sum) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort WTP ,by(scenario_num fishing_year year month replicate month_of_fy source)
@@ -383,6 +457,9 @@ save `s_as_run', replace emptyok
 
 use `s_as_run', clear
 
+foreach var of varlist choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt WTP{
+	replace `var'=`var'/2 if month==4
+}
 
 /* Leaving the machinery to weight different scenarios, if necessary*/
 
@@ -450,24 +527,28 @@ save `raw_results'
 
 sort scenario_num
 gen cod_limit=1 
-gen str60 hadd_limit=`"FH 15, PR 10"' if inlist(scenario_num,0) 
-gen str60 hadd_size=`"FH 18", PR 17""' if inlist(scenario_num,0)
+
+gen str60 hadd_limit=`"FH 15, PR 10"' if inlist(scenario_num,0,107,108,109,114,115) 
+replace hadd_limit=`"15"' if inlist(scenario_num,101,103,105,110,111)
+replace hadd_limit=`"10"' if inlist(scenario_num,102,104,106,112,113)
+
+gen str60 hadd_size=`"FH 18", PR 17""' if inlist(scenario_num,0,107,108,109)
+replace hadd_size=`"18"' if inlist(scenario_num,101,103,105,110,111,112,113,114,115)
+replace hadd_size=`"17"' if inlist(scenario_num,102,104,106)
+
+
 gen cod_size=`"22""' 
-replace cod_size=`"23""' if inlist(scenario_num,103,104)
+replace cod_size=`"23""' if inlist(scenario_num,103,104,108,109,111,113,115)
 replace cod_size=`"24""' if inlist(scenario_num,105,106)
 gen str20 mode="Combined"
+
 /*cod open seasons */
-gen str60  cod_open_season="Sept 1 -Oct 31" if inlist(scenario_num,0,101,102,103,104,105,106)
+gen str60  cod_open_season="Sept 1 -Oct 31" if inlist(scenario_num,0,101,102,103,104,105,106,108,112,113,114,115)
+replace cod_open_season="Sept 1 -Sept 30" if inlist(scenario_num,107,109,110,111)
 
 /*haddock open seasons */
-gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,101,102,103,104,105,106)
+gen str60 had_open_season=" May-Feb28, Apr 1-Apr30" if inlist(scenario_num,0,101,102,103,104,105,106,107,108,109,110,112,113,114,115)
 
-
-
-replace hadd_limit=`"15"' if inlist(scenario_num,101,103,105)
-replace hadd_limit=`"10"' if inlist(scenario_num,102,104,106)
-replace hadd_size=`"18"' if inlist(scenario_num,101,103,105)
-replace hadd_size=`"17"' if inlist(scenario_num,102,104,106)
 save `raw_results', replace
 
 
@@ -621,7 +702,7 @@ gen cod_catch=cod_num_kept+cod_num_released
 tempfile summed_results
 
 
-local graphlist 0,101,102,103,104,105,106
+local graphlist 0,101,102,103,104, 105, 106, 107, 108,109,110,111,112,113,114,115
 keep if inlist(scenario_num, `graphlist')
 replace WTP=WTP/1000000
 
@@ -662,8 +743,31 @@ export excel option scenario_num mode cod_limit cod_size cod_open_season adj_cod
 <</dd_do>>
 ~~~~
 
-<!---
+We estimated recreational mortality at 202mt for Cod and 623mt for haddock. 
+
+
 Narrative:
+
+* Status quo (Scenario 0) is predicted to produce removals of 200mt for cod, basically unchanged compared to 2023. The model predicts 578mt removals for haddock, which is moderately lower than the 623mt of removals in 2023.  This is because the regulations in place until August 14 were less restrictive than the status quo regulations.
+* Scenario 101 is the for-hire regulations applied to the entire fleet.  Compared to status quo, trips and cod mortality are reduced.
+* Scenario 102 is are the private regulations applied to the entire fleet.  Compared to status quo, trips and cod mortality increase slightly.
+* Scenario 103 is the for-hire regulations applied to the entire fleet along with an increase in the cod size limit to 23". This reduces cod mortality below the rec sub-ACL more than 60% of the time. 
+* Scenario 105 is the for-hire regulations applied to the entire fleet along with an increase in the cod size limit to 24".  This reduces cod mortality below the rec sub-ACL 68% of the time. 
+* Scenario 107 is the status quo regulations with October closed.  Trips and cod mortality decrease slightly compared to the status quo. 
+* Scenario 108 is the status quo regulations, but with 23" cod. Trips and cod mortality decrease slightly compared to status quo.  This results in mortality that is very similar to Scenario 107.
+* Scenario 109 implements both of the chances from Scenarios 107 and 108.  October is closed to cod and the size limit is set to 23" for cod. Trips and cod mortality drop slightly compared to 107 and 108. This reduces cod mortality below the rec sub-ACL nearly 60% of the time. 
+* Scenario 110 is for-hire regulations with an October closure.  It is interesting to compare this to 107 (October Closure) and 101 (For hire for all).  
+* Scenario 111 is for-hire regulations, October closure, and an increase in the cod size limit to 23".  Compared to 110, this has a small effect on cod mortality -- likely because most of the cod mortality is coming from discards anyway.
+* Scenario 112 is 18" and 10 haddock with 22" and 1 cod.  These are more restrictive than SQ, 101 and 102. Trips and all mortality are lower than for those scenarios.
+* Scenario 113 is 18" and 10 haddock with 23" and 1 cod.  This is more restrictive than 113. Trips and mortality decreases again. Scenario 103 is also a good comparison.
+* Scenario 114 is 18" for all modes. Private have 10 haddock limit and for-hire has a 15 haddock limit. 22" for cod. This is less restrictive than 112 for the FH fleet. There is a slight increase in trips and haddock mortality. 
+* Scenario 115 is 18" for all modes. Private have 10 haddock limit and for-hire has a 15 haddock limit. 23" for cod.  A good comparision is 113. 
+
+113 and 115 are slightly better at reducing cod discard mortality than 103, 105, 110, and 111. But 113 and 115 are also slightly worse on the WTP metric and have fewer trips.
+
+<!---
+
+# Annual Results 
 
 * Scenario 0 is the status quo. 
 * Scenario 11 :  15 Haddock at 18" 

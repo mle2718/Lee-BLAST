@@ -9,7 +9,7 @@ set seed  4160
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
 	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
-	global MRIP_dir  "V:/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_12_18" 
+	global MRIP_dir  "V:/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2024_01_02" 
 	global 	oracle_cxn  " $mysole_conn"
 }
 

@@ -4,7 +4,7 @@
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
 	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_01_04" 
 	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
 	global 	oracle_cxn  " $mysole_conn"
@@ -117,8 +117,8 @@ rename age count
 replace count=count/100000
 label var count "Fish (000,000s)"
 
-forvalues myy=2022/2023{ 
-	graph box count if year==`myy', over(ageclass) nooutside  title("Haddock Age Structure `myy'") yscale(range(0 100)) ylabel(0(25)100) 
+forvalues myy=2022/2024{ 
+	graph box count if year==`myy', over(ageclass) nooutside  title("Haddock Age Structure `myy'") yscale(range(0 100)) ylabel(0(25)300) 
 
 	graph export "${image_dir}/haddock`myy'age.tif", as(tif) replace
 }
@@ -145,8 +145,8 @@ label var count "Fish (000,000s)"
 
 
 
-forvalues myy=2022/2023{ 
-	graph box count if year==`myy', over(sizeclass) nooutside  title("Haddock Length Structure `myy'") yscale(range(0 20)) ylabel(0(5)20) 
+forvalues myy=2022/2024{ 
+	graph box count if year==`myy', over(sizeclass) nooutside  title("Haddock Length Structure `myy'") yscale(range(0 20)) ylabel(0(5)50) 
 
 	graph export "${image_dir}/haddock`myy'length.tif", as(tif) replace
 }
@@ -165,7 +165,7 @@ rename age count
 replace count=count/100000
 label var count "Fish (000,000s)"
 
-forvalues myy=2022/2023{ 
+forvalues myy=2022/2024{ 
 	graph box count if year==`myy', over(ageclass) nooutside  title("Cod Age Structure `myy'") yscale(range(0 50)) ylabel(0(50)200) 
 
 	graph export "${image_dir}/cod`myy'age.tif", as(tif) replace
@@ -189,7 +189,7 @@ rename clprob count
 label var count "Fish (000,000s)"
 
 
-forvalues myy=2022/2023{ 
+forvalues myy=2022/2024{ 
 	graph box count if year==`myy', over(sizeclass) nooutside  title("Cod Length  Structure `myy'") yscale(range(0 30)) ylabel(0(5)30) 
 
 	graph export "${image_dir}/cod`myy'length.tif", as(tif) replace

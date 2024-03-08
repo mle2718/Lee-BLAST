@@ -63,10 +63,10 @@ global haddock_catch_class "${mrip_source_data}/haddock_catch_classANNUAL2023.dt
 ******************************/
 
 
-/*global for the OPEN and CLOSED split for cod catch-at-length distributions (MRIP)
+/*global for the OPEN and CLOSED split for cod catch-at-length distributions (MRIP
 
- global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_OPEN_SPLIT2023.dta"   */
- 
+ global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_OPEN_SPLIT2023.dta"  
+  */
  /* If you want to use ANNUAL length-frequency data uncomment this 
  *global cod_historical_sizeclass "${mrip_source_data}/cod_size_class_ANNUAL2023.dta"  
  global haddock_historical_sizeclass "${mrip_source_data}/haddock_size_class_ANNUAL2023.dta" 

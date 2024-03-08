@@ -4,11 +4,12 @@
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
-	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2023" 
-	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2023_01_04" 
+	global project_dir  "C:/Users/Min-Yang.Lee/Documents/BLAST/cod_haddock_fy2024" 
+	global MRIP_dir  "C:/Users/Min-Yang.Lee/Documents/READ-SSB-Lee-MRIP-BLAST/data_folder/main/MRIP_2024_01_02" 
 	quietly do "C:/Users/Min-Yang.Lee/Documents/common/odbc_setup_macros.do"
 	global 	oracle_cxn  " $mysole_conn"
 }
+
 
 
  
@@ -64,6 +65,11 @@ replace prob=0 if prob<=9e-11
 replace prob=0 if prob==.
 keep age length prob
 
+
+xtline prob 
+	graph export "${image_dir}/cod_al_key.tif", as(tif) replace
+
+
 reshape wide prob, i(age) j(length)
 
 tempfile codkey
@@ -88,6 +94,10 @@ keep age length prob
 replace prob=0 if prob<=9e-11
 replace prob=0 if prob==.
 keep age length prob
+
+xtline prob   
+graph export "${image_dir}/haddock_al_key.tif", as(tif) replace
+
 
 reshape wide prob, i(age) j(length)
 
@@ -145,8 +155,8 @@ label var count "Fish (000s)"
 
 
 
-forvalues myy=2022/2024{ 
-	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") yscale(range(0 50))  xtitle("Length, inches") xline(17) ylabel(0(1000)6000)
+forvalues myy=2021/2024{ 
+	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") yscale(range(0 50))  xtitle("Length, inches") xline(17) ylabel(0(1000)8000)  xmtick(##5)
 
 	graph export "${image_dir}/haddock_med_`myy'length.tif", as(tif) replace
 }
@@ -159,7 +169,7 @@ forvalues myy=2022/2024{
 
 use "${hadd_naa}", clear
 
-collapse (median) age*, by(year)
+collapse (mean) age*, by(year)
 reshape long age, i(year) j(ageclass)
 rename age count
 replace count=count/1000
@@ -187,8 +197,8 @@ label var count "Fish (000s)"
 
 
 
-forvalues myy=2018/2022{ 
-	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") xtitle("Length, inches")  xline(17) ylabel(0(1000)6000)
+forvalues myy=2021/2024{ 
+	line count sizeclass if year==`myy',  title("Haddock Length Structure `myy'") xtitle("Length, inches")  xline(17) ylabel(0(1000)8000)  xmtick(##5)
 
 	graph export "${image_dir}/haddock_means_`myy'length.tif", as(tif) replace
 }
@@ -251,7 +261,7 @@ label var count "Fish (000s)"
 
 
 forvalues myy=2021/2024{ 
-	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches")  xline(22) ylabel(0(200)1200)
+	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches")  xline(22) ylabel(0(200)1500)  xmtick(##5)
 	graph export "${image_dir}/cod_med_`myy'length.tif", as(tif) replace
 }
 
@@ -261,7 +271,7 @@ forvalues myy=2021/2024{
 
 use "${cod_naa}", clear
 
-collapse (median) age*, by(year)
+collapse (mean) age*, by(year)
 reshape long age, i(year) j(ageclass)
 rename age count
 replace count=count/1000
@@ -288,8 +298,8 @@ label var count "Fish (000s)"
 
 
 
-forvalues myy=2018/2022{ 
-	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches") xline(22) ylabel(0(200)1200)
+forvalues myy=2021/2024{ 
+	line count sizeclass if year==`myy',  title("Cod Length Structure `myy'") xtitle("Length, inches") xline(22) ylabel(0(200)1500)  xmtick(##5)
 
 	graph export "${image_dir}/cod_means_`myy'length.tif", as(tif) replace
 }

@@ -80,7 +80,7 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-global mrip_vintage "2023_12_18"
+global mrip_vintage "2024_01_02"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
@@ -115,7 +115,7 @@ local mins=substr("`time'",4,2)
 csv containing the regulations
 */
 
-global rec_management "2024_set3"
+global rec_management "2024_set6"
 
 local poststub="$rec_management"+"_"+"`date'"+"_"+"`hours'"
 cd $project_dir

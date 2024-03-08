@@ -78,7 +78,7 @@ clear
 mata:mata clear
 scalar drop _all
 matrix drop _all
-global mrip_vintage "2023_12_18"
+global mrip_vintage "2024_01_02"
 
 /*minyangWin is setup to connect to oracle yet */
 if strmatch("$user","minyangWin"){
@@ -275,6 +275,11 @@ recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000  \ 5, 25000 \ 6, 27
 recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262500 \ 5, 45700 \ 6, 71000 \ 7, 110500 \ 8, 116300 \ 9 , 166450  \10, 27900 \ 11, 0  \ 12, 0) 
 end
 
+/* Open Split trips */
+mata: 
+recreational_trips_months_FH = (1,0 \ 2, 0 \ 3, 0 \ 4, 13000  \ 5, 25000 \ 6, 27700  \ 7, 25700  \ 8, 30700 \ 9 , 16000  \10, 7900 \ 11, 0  \ 12, 0) 
+recreational_trips_months_P = (1,0 \ 2, 0 \ 3, 0 \ 4, 262500 \ 5, 45700 \ 6, 71000 \ 7, 110500 \ 8, 116300 \ 9 , 166450  \10, 27900 \ 11, 0  \ 12, 0) 
+end
 
 
 
