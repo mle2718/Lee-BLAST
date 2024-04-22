@@ -247,6 +247,50 @@ global output_dir "${project_dir}/output"
 /****************************/
 
 
+
+
+/* Read in all the Econ model runs that match `stub' */
+local estub "economic_data_2023_SQ_"
+local estub2 "economic_data_2023_haddock"
+local estub3 "economic_data_2023_RAP_"
+local estub4 "economic_data_2023_CMTE_"
+
+local efilelist1: dir "${output_dir}" files "`estub'*.dta"
+local efilelist2: dir "${output_dir}" files "`estub2'*.dta"
+local efilelist3: dir "${output_dir}" files "`estub3'*.dta"
+local efilelist4: dir "${output_dir}" files "`estub4'*.dta"
+
+
+local ecombinedfiles `" `efilelist1' `efilelist2'  `efilelist3' `efilelist4' "'
+
+
+
+
+/****************************/
+/****************************/
+/* Read in results and parse the source  */
+/****************************/
+/****************************/
+clear
+gen str40 source=""
+foreach file of local ecombinedfiles{
+capture append using ${output_dir}/`file'
+replace source="`file'"  if source==""
+}
+keep scenario scenario_num month replicate WTP
+
+
+tempfile econ_data
+save `econ_data', replace
+
+
+
+
+
+
+
+
+
 /* Read in all the model runs that match `stub' */
 local stub "recreational_catches_2023_SQ_"
 local stub2 "recreational_catches_2023_haddock"
@@ -275,6 +319,7 @@ capture append using ${output_dir}/`file'
 replace source="`file'"  if source==""
 }
 
+merge 1:1 scenario scenario_num month replicate using `econ_data'
 
 split source, parse("/") gen(ss)
 scalar rnvars=r(nvars)
@@ -306,7 +351,7 @@ replace month=month-12 if month>=13
 
 
 /* construct mean outcomes of as-run scenarios*/
-collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort ,by(scenario_num fishing_year year month replicate month_of_fy source)
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort WTP ,by(scenario_num fishing_year year month replicate month_of_fy source)
 
 tempfile s_as_run
 save `s_as_run', replace emptyok
@@ -337,7 +382,7 @@ replace scenario_num=11 if inlist(scenario_num,9,10)
 keep if inlist(scenario_num,0,5,8,11)
 
 
-collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort WTP [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
 
 
 tempfile smodified
@@ -365,7 +410,7 @@ replace freq=0 if month==10 & inlist(scenario_num,9)
 replace freq=0 if month==4 & inlist(scenario_num,10)
 
 replace scenario_num=101
-collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort WTP [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
 append using `smodified'
 save `smodified', replace emptyok
 
@@ -386,15 +431,13 @@ gen freq=1
 replace freq=0 if month==10 & inlist(scenario_num,9)
 
 replace scenario_num=111
-collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
+collapse (mean) choice_occasions total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_kept_mt cod_released_mt cod_released_dead_mt hadd_kept_mt hadd_released_mt hadd_released_dead_mt crep hrep codbag_comply cod_sublegal_keep cod_release_mort hadd_release_mort WTP [fweight=freq] ,by(scenario_num fishing_year year month replicate month_of_fy source)
 
 append using `smodified'
 save `smodified', replace emptyok
 
 
 append using `s_as_run'
-
-
 
 
 
@@ -448,6 +491,7 @@ label var cod_num_kept "Cod kept (#)"
 label var cod_num_released "Cod released (#)"
 label var haddock_num_kept "Haddock kept (#)"
 label var haddock_num_released "Haddock relased (#)"
+label var WTP "Willingness-to-Pay"
 
 tempfile raw_results
 save `raw_results'
@@ -497,7 +541,7 @@ save `raw_results', replace
 /* Contract to annual  */
 /****************************/
 /****************************/
-collapse (sum) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  (first) cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season, by(scenario source scenario_num replicate )
+collapse (sum) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  hadd_released_dead_mt cod_released_dead_mt WTP (first) cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season, by(scenario source scenario_num replicate )
 
 /* Flag replicates where mortality less than subacl*/
 
@@ -509,7 +553,6 @@ gen adj_cod_mort_mt=cod_mort_mt + $cod_calibration_adj
 replace adj_cod_ok=1 if adj_cod_mort_mt<=$cod_recACL2023
 
 
-global hadd_calibration_adj=-24
 
 
 gen hadd_ok=0 
@@ -520,6 +563,16 @@ gen adj_hadd_mort_mt=hadd_mort_mt+ $hadd_calibration_adj
 replace adj_hadd_ok=1 if adj_hadd_mort_mt<=$hadd_recACL2023
 
 format adj_hadd_mort_mt adj_cod_mort_mt %6.1gc
+
+/*Adjust cod mortality and haddock mortality components. 
+I've added amount of motality to the cod and haddock components. I need to allocate that to 
+*/
+
+gen adj_cod_kept_mt=cod_kept_mt + cod_kept_mt/(cod_kept_mt+cod_released_dead_mt)*$cod_calibration_adj
+gen adj_cod_released_dead_mt=cod_released_dead_mt+ cod_released_dead_mt/(cod_kept_mt+cod_released_dead_mt)*$cod_calibration_adj
+
+gen adj_hadd_kept_mt=hadd_kept_mt + hadd_kept_mt/(hadd_kept_mt+hadd_released_dead_mt)*$hadd_calibration_adj
+gen adj_hadd_released_dead_mt=hadd_released_dead_mt+ hadd_released_dead_mt/(hadd_kept_mt+hadd_released_dead_mt)*$hadd_calibration_adj
 
 
 
@@ -555,6 +608,16 @@ label var cod_num_released "Cod released (#)"
 label var haddock_num_kept "Haddock kept (#)"
 label var haddock_num_released "Haddock relased (#)"
 
+
+
+
+label var adj_cod_kept_mt "Adjusted Cod Kept (mt)"
+label var adj_cod_released_dead_mt  "Adjusted Cod Released Dead (mt)"
+
+label var adj_hadd_kept_mt "Adjusted Haddock Kept (mt)"
+label var adj_hadd_released_dead_mt "Adjusted Haddock Released Dead (mt)"
+
+
 tempfile annual_results
 save `annual_results', replace
 <</dd_do>>
@@ -570,7 +633,7 @@ save `annual_results', replace
 use  `annual_results', replace
 
 
-collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  adj_cod_mort_mt adj_hadd_mort_mt (sum) cod_ok hadd_ok adj_cod_ok adj_hadd_ok (count) N=replicate, by(scenario source scenario_num cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season)
+collapse (p50) total_trips cod_num_kept cod_num_released haddock_num_kept haddock_num_released cod_mort_mt hadd_mort_mt cod_kept_mt cod_released_mt hadd_kept_mt hadd_released_mt cod_avg_weight haddock_relptrip haddock_landptrip cod_landptrip cod_relptrip  adj_cod_mort_mt adj_hadd_mort_mt hadd_released_dead_mt cod_released_dead_mt  adj_cod_kept_mt adj_cod_released_dead_mt adj_hadd_kept_mt adj_hadd_released_dead_mt WTP (sum) cod_ok hadd_ok adj_cod_ok adj_hadd_ok (count) N=replicate, by(scenario source scenario_num cod_limit cod_size hadd_limit hadd_size mode cod_open_season had_open_season)
 replace cod_ok=cod_ok/N*100
 replace hadd_ok=hadd_ok/N*100
 replace adj_cod_ok=adj_cod_ok/N*100
@@ -591,6 +654,10 @@ label var cod_kept_mt "Cod Kept (mt)"
 label var cod_released_mt "Cod Released (mt)"
 label var hadd_kept_mt "Haddock Kept (mt)"
 label var hadd_released_mt "Haddock Released(mt)"
+label var cod_released_dead_mt "Cod Released Dead (mt)"
+label var hadd_released_dead_mt "Haddock Released Dead(mt)"
+
+
 label var cod_ok "% Under Cod subACL"
 
 label var hadd_ok "% Under Haddock subACL"
@@ -617,24 +684,37 @@ tempfile summed_results
 
 local graphlist 0,1,2,3,4,5,6,7,8,9,10,11,101,111,18,19,20,17 ,217,218
 keep if inlist(scenario_num, `graphlist')
+replace WTP=WTP/1000000
 
+label var WTP "WTP millions"
 /*reorder */
 
 save `summed_results', replace
 
 <</dd_do>>
 
-
  
+
 ## Summary Outputs
 
-~~~~
+~~~~ 
 <<dd_do:nocommands>>
 
 use `summed_results', clear
-format total_trips cod_mort_mt hadd_mort_mt hadd_catch cod_catch total_trips %10.0fc 
+format total_trips cod_mort_mt hadd_mort_mt hadd_catch cod_catch total_trips    %10.0fc 
+format adj_hadd_kept_mt adj_hadd_released_dead_mt adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt %6.1fc
+format WTP %6.1gc
+
 qui gen str1 option=""
-list option scenario_num mode cod_limit cod_size cod_open_season adj_cod_mort_mt  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt total_trips adj_cod_ok adj_hadd_ok  if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+list option scenario_num mode cod_limit cod_size cod_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+
+list option scenario_num mode cod_limit cod_size cod_open_season hadd_limit hadd_size  had_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season  total_trips adj_cod_ok WTP  if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+
+
+list option scenario_num mode cod_limit cod_size cod_open_season  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP if inlist(scenario_num,`graphlist'), abbreviate(16) table linesize(150) noobs divider separator(0)
+
+export excel option scenario_num mode cod_limit cod_size cod_open_season adj_cod_mort_mt adj_cod_kept_mt adj_cod_released_dead_mt  hadd_limit hadd_size  had_open_season adj_hadd_mort_mt adj_hadd_kept_mt adj_hadd_released_dead_mt total_trips adj_cod_ok adj_hadd_ok WTP using "${project_dir}/status_quo_summaries.xlsx" if inlist(scenario_num,`graphlist'), firstrow(variables) keepcellfmt replace
+
 <</dd_do>>
 ~~~~
 
